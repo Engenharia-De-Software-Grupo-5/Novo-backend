@@ -1,0 +1,37 @@
+model Users {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String    @unique
+  cpf       String    @unique
+  name      String
+  password  String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  Access    Access[]
+
+  @@map("users")
+}
+
+model Permissions {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String    @unique
+  functionalities String[]
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+  Access          Access[]
+
+  @@map("permissions")
+}
+
+model Access {
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String      @db.Uuid
+  user            Users       @relation(fields: [userId], references: [id])
+  permissionId    String      @db.Uuid
+  permission      Permissions @relation(fields: [permissionId], references: [id])
+  dashboardAccess Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  deletedAt       DateTime?
+
+  @@index([userId])
+  @@map("access")
+}
