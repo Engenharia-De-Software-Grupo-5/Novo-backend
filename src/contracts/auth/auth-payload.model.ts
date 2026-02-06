@@ -52,42 +52,6 @@ export class AuthPayload {
   permission?: string;
 
   @IsOptional()
-  @IsString()
-  @SkipUppercase()
-  @ApiProperty({
-    description: 'Tipo de ambiente logado',
-    example: 'schoolUnit',
-    enum: ['schoolUnit', 'supportUnit', 'managementOrgan'],
-  })
-  environmentType?: 'schoolUnit' | 'supportUnit' | 'managementOrgan';
-
-  @IsOptional()
-  @IsUUID()
-  @ApiProperty({
-    description: 'ID da unidade/órgão logado',
-    example: 'b4d8a9a4-7cd2-4fa0-94e3-705643e1ef9a',
-  })
-  environmentId?: string;
-
-  @IsOptional()
-  @IsUUID()
-  @ApiProperty({
-    description: 'ID do órgão gestor responsável pelo ambiente logado',
-    example: 'b4d8a9a4-7cd2-4fa0-94e3-705643e1ef9a',
-  })
-  managementOrganId?: string;
-
-  @IsNumber()
-  @Type(() => Number)
-  @Min(1500)
-  @Max(9999)
-  @ApiProperty({
-    description: 'ano do sistema em uso',
-    example: 2025,
-  })
-  year: number;
-
-  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   @ApiPropertyOptional({
