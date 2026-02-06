@@ -1,12 +1,14 @@
 model Users {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String    @unique
-  cpf       String    @unique
-  name      String
-  password  String
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  Access    Access[]
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String      @unique
+  cpf           String      @unique
+  name          String
+  password      String
+  permission    Permissions @relation(fields: [permissionsId], references: [id])
+  permissionsId String      @db.Uuid
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
 
   @@map("users")
 }
@@ -16,22 +18,9 @@ model Permissions {
   name            String    @unique
   functionalities String[]
   createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
-  Access          Access[]
+  users           Users[]
 
   @@map("permissions")
-}
-
-model Access {
-  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId          String      @db.Uuid
-  user            Users       @relation(fields: [userId], references: [id])
-  permissionId    String      @db.Uuid
-  permission      Permissions @relation(fields: [permissionId], references: [id])
-  dashboardAccess Boolean     @default(false)
-  createdAt       DateTime    @default(now())
-  deletedAt       DateTime?
-
-  @@index([userId])
-  @@map("access")
 }
