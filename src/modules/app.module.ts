@@ -6,14 +6,17 @@ import { JwtAuthGuard, RolesGuard } from 'src/common/guards';
 import { PrismaDatabaseModule } from './database/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { MinioClientModule } from './tools/minio-client.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     PrismaDatabaseModule,
     AuthModule,
+    MinioClientModule,
   ],
   controllers: [AppController],
   providers: [

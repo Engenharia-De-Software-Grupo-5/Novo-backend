@@ -18,7 +18,7 @@ export class AuthDataModel {
     description: 'User password (hashed or raw, depending on context)',
     example: '12340',
   })
-  password?: string;
+  password: string;
 
   @ApiProperty({
     description: 'User email',
