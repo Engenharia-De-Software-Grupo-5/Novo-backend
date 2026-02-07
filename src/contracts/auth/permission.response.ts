@@ -1,0 +1,22 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { ArrayNotEmpty, IsArray, IsString, IsUUID } from 'class-validator';
+
+export class PermissionResponse {
+  @ApiProperty({
+    description: 'Permission ID (UUID)',
+    example: 'ad2d0c94-27d0-4562-8a2f-4c7e674d8b9d',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Permission name',
+    example: 'admin',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'List of screen identifiers this permission grants access to',
+    example: ['contractsGET', 'contractsPOST'],
+  })
+  functionalities: string[];
+}

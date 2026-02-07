@@ -46,8 +46,8 @@ export class AuthPayload {
   @IsString()
   @SkipUppercase()
   @ApiProperty({
-    description: 'Permission name',
-    example: 'ADMIN',
+    description: 'Permission id',
+    example: 'c376f0d2-8eaa-4f88-9f2f-52f8dff8794a',
   })
   permission?: string;
 
