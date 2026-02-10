@@ -53,6 +53,29 @@ export class CondominioRepository {
     });
   }
 
+  getByName(nome: string): Promise<CondominioResponse> {
+    return this.prisma.condominios.findUnique({
+      where: { nome },
+      select: {
+        id: true,
+        nome: true,
+        descricao: true,
+        endereco: {
+          select: {
+            id: true,
+            cep: true,
+            bairro: true,
+            cidade: true,
+            complemento: true,
+            numero: true,
+            rua: true,
+            uf: true,
+          },
+        },
+      },
+    });
+  }
+
   create(dto: CondominioDto): Promise<CondominioResponse> {
     return this.prisma.condominios.create({
       data: { ...dto, endereco: { create: dto.endereco } },

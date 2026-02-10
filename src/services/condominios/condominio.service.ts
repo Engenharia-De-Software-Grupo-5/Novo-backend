@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CondominioDto } from 'src/contracts/condominios/condominio.dto';
 import { CondominioResponse } from 'src/contracts/condominios/condominio.response';
 import { CondominioRepository } from 'src/repositories/condominios/condominio.repository';
@@ -13,7 +13,15 @@ export class CondominioService {
     return this.condominioRepository.getById(condominioId);
   }
 
-  create(dto: CondominioDto): Promise<CondominioResponse> {
+  async create(dto: CondominioDto): Promise<CondominioResponse> {
+    const condominioExistente = await this.condominioRepository.getByName(
+      dto.nome,
+    );
+
+    if (!!condominioExistente) {
+      throw new BadRequestException('Esse nome já existe no banco');
+    }
+
     return this.condominioRepository.create(dto);
   }
   update(id: string, dto: CondominioDto): Promise<CondominioResponse> {
