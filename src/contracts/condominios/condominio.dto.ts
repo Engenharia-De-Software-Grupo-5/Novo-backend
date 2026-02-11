@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -6,8 +7,8 @@ import {
 } from 'class-validator';
 import { EnderecoDto } from './endereco.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Example2Dto } from '../examples/example2.dto';
 import { Type } from 'class-transformer';
+import { ImovelDto} from './imovel.dto';
 
 export class CondominioDto {
   @IsString()
@@ -33,4 +34,15 @@ export class CondominioDto {
     type: () => EnderecoDto,
   })
   endereco: EnderecoDto;
-}
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImovelDto)
+  @ApiProperty({
+    description: 'Lista de imóveis do condomínio',
+    type: () => ImovelDto,
+    isArray: true,
+  })
+  campoObjetoArray: ImovelDto[];
+  }
+

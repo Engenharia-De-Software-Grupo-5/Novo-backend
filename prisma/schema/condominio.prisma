@@ -4,6 +4,7 @@ model Condominios {
   descricao   String?
   endereco    Enderecos @relation(fields: [enderecosId], references: [id])
   enderecosId String    @db.Uuid
+  imovel Imoveis[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
@@ -26,4 +27,37 @@ model Enderecos {
   condominios Condominios[]
 
   @@map("enderecos")
+}
+
+model Imoveis {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identificador String
+  endereco      String
+  numeroUnidade String
+  tipoUnidade   TipoUnidade @default(APARTAMENTO)
+  bloco         String?
+  andar         Int?
+  areaTotal     Float?
+  situacao      SituacaoImovel   @default(ATIVO)
+  observacoes      String?
+  condominioId   String @db.Uuid
+  condominio     Condominios @relation(fields: [condominioId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  @@map("imoveis")
+}
+
+enum TipoUnidade {
+  CASA
+  APARTAMENTO
+  SALA_COMERCIAL
+}
+
+enum SituacaoImovel {
+  ATIVO
+  INATIVO
+  INDISPONIVEL
+  MANUTENCAO
 }
