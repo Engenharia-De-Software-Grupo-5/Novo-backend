@@ -1,11 +1,10 @@
 import {
-  IsArray,
   IsNotEmpty,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { AdressDto } from './adress.dto';
+import { AddressDto } from './adress.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PropertyDto} from './property.dto';
@@ -28,12 +27,11 @@ export class CondominiumDto {
   description: string;
 
   @ValidateNested()
-  @Type(() => AdressDto)
+  @Type(() => AddressDto)
   @ApiProperty({
     description: 'Todo conteudo de endereço do condominio',
-    type: () => AdressDto,
+    type: () => AddressDto,
   })
-  adress: AdressDto;
-
+  address: AddressDto;
   }
 

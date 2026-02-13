@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UnityType" AS ENUM ('HOUSE', 'APARTMENT', 'COMERCIAL_ROOM');
+CREATE TYPE "UnityType" AS ENUM ('HOUSE', 'APARTMENT', 'CONMERCIAL_ROOM');
 
 -- CreateEnum
 CREATE TYPE "PropertySituation" AS ENUM ('ACTIVE', 'INACTIVE', 'UNAVAILABLE', 'MAINTENANCE');
@@ -9,7 +9,7 @@ CREATE TABLE "condominiums" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "adressId" UUID NOT NULL,
+    "addressId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -18,7 +18,7 @@ CREATE TABLE "condominiums" (
 );
 
 -- CreateTable
-CREATE TABLE "adresses" (
+CREATE TABLE "addresses" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "zip" TEXT NOT NULL,
     "street" TEXT NOT NULL,
@@ -31,14 +31,14 @@ CREATE TABLE "adresses" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
 
-    CONSTRAINT "adresses_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "addresses_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "properties" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "identifier" TEXT NOT NULL,
-    "adress" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
     "unityNumber" TEXT NOT NULL,
     "unityType" "UnityType" NOT NULL DEFAULT 'APARTMENT',
     "block" TEXT,
@@ -61,7 +61,7 @@ CREATE UNIQUE INDEX "condominiums_name_key" ON "condominiums"("name");
 CREATE UNIQUE INDEX "properties_identifier_key" ON "properties"("identifier");
 
 -- AddForeignKey
-ALTER TABLE "condominiums" ADD CONSTRAINT "condominiums_adressId_fkey" FOREIGN KEY ("adressId") REFERENCES "adresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "condominiums" ADD CONSTRAINT "condominiums_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "properties" ADD CONSTRAINT "properties_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;

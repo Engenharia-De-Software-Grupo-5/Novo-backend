@@ -2,8 +2,8 @@ model Condominiums {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String       @unique
   description String?
-  adress      Adresses     @relation(fields: [adressId], references: [id])
-  adressId    String       @db.Uuid
+  address     Adresses     @relation(fields: [addressId], references: [id])
+  addressId   String       @db.Uuid
   properties  Properties[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -26,13 +26,13 @@ model Adresses {
   deletedAt    DateTime?
   condominiums Condominiums[]
 
-  @@map("adresses")
+  @@map("addresses")
 }
 
 model Properties {
   id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   identifier        String            @unique
-  adress            String
+  address           String
   unityNumber       String
   unityType         UnityType         @default(APARTMENT)
   block             String?
@@ -52,7 +52,7 @@ model Properties {
 enum UnityType {
   HOUSE
   APARTMENT
-  COMERCIAL_ROOM
+  CONMERCIAL_ROOM
 }
 
 enum PropertySituation {

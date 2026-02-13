@@ -1,10 +1,10 @@
-import { AdressResponse } from './adress.response';
+import { AddressResponse } from './adress.response';
 import { PropertyResponse } from './property.dto.response';
 
 export class CondominiumResponse {
   id: string;
   name: string;
   description?: string;
-  adress: AdressResponse;
+  address: AddressResponse;
   properties: PropertyResponse[];
 }

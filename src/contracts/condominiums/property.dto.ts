@@ -13,24 +13,24 @@ export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Descrição de exemplo para campo obrigatório',
-    example: 'conteúdo de exemplo',
+    description: 'Identificador único para a unidade, como número do apartamento ou sala comercial',
+    example: '101',
   })
     identifier: string;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Descrição de exemplo para campo obrigatório',
-    example: 'conteúdo de exemplo',
+    description: 'Informações adicionais acerca do endereço',
+    example: 'Próximo à casa X, Rua Y, etc.',
   })
-    adress: string;
+    address: string;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description: 'Número ou nome da unidade (ex: apartamento 101, sala comercial 202)',
-    example: 'conteúdo de exemplo',
+    example: '101',
   })
     unityNumber: string;
   
@@ -46,7 +46,7 @@ export class PropertyDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Descrição de exemplo para campo obrigatório',
+    description: 'Descrição do bloco da unidade',
     example: 'bloco 1',
   })
     block?: string;
@@ -55,22 +55,20 @@ export class PropertyDto {
   @IsNumber()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Descrição de exemplo para campo obrigatório',
+    description: 'Campo numérico para o andar da unidade, se aplicável',
     example: 3,
   })
     floor?: number;
 
-   @Type(() => Number)
-   @IsNumber()
-   @IsOptional()
-   @ApiPropertyOptional({
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  @ApiPropertyOptional({
     description: 'Campo numérico (m^2)',
     example: 10,
-    })
-
-    totalArea?: number;
-
-  @IsNotEmpty()
+  })
+  totalArea?: number;
+  
   @IsEnum(PropertySituation)
   @ApiProperty({
     enum: PropertySituation,

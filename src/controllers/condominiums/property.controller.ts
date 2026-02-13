@@ -25,7 +25,7 @@ import { PropertyService } from 'src/services/condominiums/property.service';
 @ApiBearerAuth('access-token')
 @Controller('condominiums/:condominiumId/properties')
 export class PropertyController {
-  constructor(private readonly imovelService: PropertyService) {}
+  constructor(private readonly propertyService: PropertyService) {}
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -37,7 +37,7 @@ export class PropertyController {
     type: [PropertyResponse],
   })
   getAll(@Param('condominiumId') condominiumId: string) {
-    return this.imovelService.getAll(condominiumId);
+    return this.propertyService.getAll(condominiumId);
   }
 
   @Get(':propertyId')
@@ -51,7 +51,7 @@ export class PropertyController {
     type: PropertyResponse,
   })
   getById(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
-    return this.imovelService.getById(condominiumId, propertyId);
+    return this.propertyService.getById(condominiumId, propertyId);
   }
 
   @Post()
@@ -66,7 +66,7 @@ export class PropertyController {
     type: PropertyResponse,
   })
   create(@Param('condominiumId') condominiumId: string, @Body() dto: PropertyDto) {
-    return this.imovelService.create(condominiumId, dto);
+    return this.propertyService.create(condominiumId, dto);
   }
 
   @Put(':propertyId')
@@ -81,7 +81,7 @@ export class PropertyController {
     type: PropertyResponse,
   })
   update(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string, @Body() dto: PropertyDto) {
-    return this.imovelService.update(condominiumId, propertyId, dto);
+    return this.propertyService.update(condominiumId, propertyId, dto);
   }
 
   @Delete(':propertyId')
@@ -95,6 +95,6 @@ export class PropertyController {
     type: PropertyResponse, 
   })
   delete(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
-    return this.imovelService.delete(condominiumId, propertyId);
+    return this.propertyService.delete(condominiumId, propertyId);
   }
 }

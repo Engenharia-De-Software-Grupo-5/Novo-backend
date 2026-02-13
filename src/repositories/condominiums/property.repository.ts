@@ -6,15 +6,10 @@ import { PropertyResponse } from "src/contracts/condominiums/property.dto.respon
 @Injectable()
 export class PropertyRepository {
   constructor(private prisma: PrismaService) {}
-
-  // getAll, getById, create, update, delete
-  getAll(condominiumId: string): Promise<PropertyResponse[]> {
-    return this.prisma.properties.findMany({
-      where: { deletedAt: null, condominiumId},
-      select: {
+    private readonly propertySelect = {
         id: true,
         identifier: true,
-        adress: true,
+        address: true,
         unityNumber: true,
         unityType: true,
         block: true,
@@ -22,6 +17,14 @@ export class PropertyRepository {
         totalArea: true,
         propertySituation: true,
         observations: true,
+    }
+
+  // getAll, getById, create, update, delete
+  getAll(condominiumId: string): Promise<PropertyResponse[]> {
+    return this.prisma.properties.findMany({
+      where: { deletedAt: null, condominiumId},
+      select: {
+        ...this.propertySelect
       },
     });
   }
@@ -29,33 +32,15 @@ export class PropertyRepository {
     return this.prisma.properties.findFirst({
       where: { id: propertyId, deletedAt: null, condominiumId},
       select: {
-        id: true,
-        identifier: true,
-        adress: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
+        ...this.propertySelect
       },
     });
   }
   getByIdentificador(condominiumId: string, identifier: string): Promise<PropertyResponse> {
     return this.prisma.properties.findUnique({
-      where: { identifier, condominiumId},
+      where: { identifier, condominiumId, deletedAt: null },
       select: {
-        id: true,
-        identifier: true,
-        adress: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
+        ...this.propertySelect
       },
     });
   }
@@ -63,34 +48,16 @@ export class PropertyRepository {
     return this.prisma.properties.create({
       data: { ...dto, condominiumId},
       select: {
-        id: true,
-        identifier: true,
-        adress: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
+       ...this.propertySelect
       },
     });
   }
   update(condominiumId: string, propertyId: string, dto: PropertyDto): Promise<PropertyResponse> {
     return this.prisma.properties.update({
-      where: { id: propertyId, condominiumId},
+      where: { id: propertyId, condominiumId, deletedAt: null },
       data: { ...dto },
       select: {
-        id: true,
-        identifier: true,
-        adress: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
+       ...this.propertySelect
       },
     });
   }
@@ -99,16 +66,7 @@ export class PropertyRepository {
       where: { id: propertyId, condominiumId},
       data: { deletedAt: new Date() },
       select: {
-        id: true,
-        identifier: true,
-        adress: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
+       ...this.propertySelect
       },
     });
   }

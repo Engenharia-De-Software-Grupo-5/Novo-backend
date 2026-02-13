@@ -1,4 +1,4 @@
-export class AdressResponse {
+export class AddressResponse {
   id: string;
   zip: string;
   street: string;
