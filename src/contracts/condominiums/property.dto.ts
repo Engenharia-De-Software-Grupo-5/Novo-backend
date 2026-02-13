@@ -7,16 +7,16 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { SituacaoImovel, TipoUnidade } from '@prisma/client';
+import { PropertySituation, UnityType } from '@prisma/client';
 
-export class ImovelDto {
+export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'conteúdo de exemplo',
   })
-    identificador: string;
+    identifier: string;
 
   @IsString()
   @IsNotEmpty()
@@ -24,7 +24,7 @@ export class ImovelDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'conteúdo de exemplo',
   })
-    endereco: string;
+    adress: string;
 
   @IsString()
   @IsNotEmpty()
@@ -32,16 +32,16 @@ export class ImovelDto {
     description: 'Número ou nome da unidade (ex: apartamento 101, sala comercial 202)',
     example: 'conteúdo de exemplo',
   })
-    numeroUnidade: string;
+    unityNumber: string;
   
   @IsNotEmpty()
-  @IsEnum(TipoUnidade)
+  @IsEnum(UnityType)
   @ApiProperty({
-    enum: TipoUnidade,
-    enumName: 'TipoUnidade',
-    example: TipoUnidade.APARTAMENTO,
+    enum: UnityType,
+    enumName: 'UnityType',
+    example: UnityType.APARTMENT,
   })
-    tipoUnidade: TipoUnidade;
+    unityType: UnityType;
 
   @IsString()
   @IsOptional()
@@ -49,7 +49,7 @@ export class ImovelDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'bloco 1',
   })
-    bloco?: string;
+    block?: string;
 
   @Type(() => Number)
   @IsNumber()
@@ -58,7 +58,7 @@ export class ImovelDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 3,
   })
-    andar?: number;
+    floor?: number;
 
    @Type(() => Number)
    @IsNumber()
@@ -68,16 +68,16 @@ export class ImovelDto {
     example: 10,
     })
 
-    areaTotal?: number;
+    totalArea?: number;
 
   @IsNotEmpty()
-  @IsEnum(SituacaoImovel)
+  @IsEnum(PropertySituation)
   @ApiProperty({
-    enum: SituacaoImovel,
-    enumName: 'SituacaoImovel',
-    example: SituacaoImovel.ATIVO,
+    enum: PropertySituation,
+    enumName: 'PropertySituation',
+    example: PropertySituation.ACTIVE,
   })
-  situacaoImovel: SituacaoImovel;
+  propertySituation: PropertySituation;
 
   @IsString()
   @IsOptional()
@@ -85,5 +85,5 @@ export class ImovelDto {
     description: 'Dados opcionais para observações adicionais sobre o imóvel, como por exemplo: "Apartamento com vista para o mar" ou "Unidade comercial no térreo", número de vagas de garagem, etc.',
     example: 'bloco 1',
   })
-    observacoes?: string;
+    observations?: string;
 }

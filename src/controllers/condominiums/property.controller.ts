@@ -17,15 +17,15 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ImovelDto } from 'src/contracts/condominios/imovel.dto';
-import { ImovelResponse } from 'src/contracts/condominios/imovel.dto.response';
-import { ImovelService } from 'src/services/condominios/imovel.service';
+import { PropertyDto } from 'src/contracts/condominiums/property.dto';
+import { PropertyResponse } from 'src/contracts/condominiums/property.dto.response';
+import { PropertyService } from 'src/services/condominiums/property.service';
 
-@ApiTags('imoveis')
+@ApiTags('properties')
 @ApiBearerAuth('access-token')
-@Controller('condominios/:condominioId/imoveis')
-export class ImovelController {
-  constructor(private readonly imovelService: ImovelService) {}
+@Controller('condominiums/:condominiumId/properties')
+export class PropertyController {
+  constructor(private readonly imovelService: PropertyService) {}
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -34,13 +34,13 @@ export class ImovelController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved all properties',
-    type: [ImovelResponse],
+    type: [PropertyResponse],
   })
-  getAll(@Param('condominioId') condominioId: string) {
-    return this.imovelService.getAll(condominioId);
+  getAll(@Param('condominiumId') condominiumId: string) {
+    return this.imovelService.getAll(condominiumId);
   }
 
-  @Get(':imovelId')
+  @Get(':propertyId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get property by ID',
@@ -48,10 +48,10 @@ export class ImovelController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved the property',
-    type: ImovelResponse,
+    type: PropertyResponse,
   })
-  getById(@Param('condominioId') condominioId: string, @Param('imovelId') imovelId: string) {
-    return this.imovelService.getById(condominioId, imovelId);
+  getById(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
+    return this.imovelService.getById(condominiumId, propertyId);
   }
 
   @Post()
@@ -60,31 +60,31 @@ export class ImovelController {
     summary: 'Create a new property',
     description: 'Create a new property in the system.',
   })
-  @ApiBody({ type: ImovelDto })
+  @ApiBody({ type: PropertyDto })
   @ApiCreatedResponse({
     description: 'Successfully created the property',
-    type: ImovelResponse,
+    type: PropertyResponse,
   })
-  create(@Param('condominioId') condominioId: string, @Body() dto: ImovelDto) {
-    return this.imovelService.create(condominioId, dto);
+  create(@Param('condominiumId') condominiumId: string, @Body() dto: PropertyDto) {
+    return this.imovelService.create(condominiumId, dto);
   }
 
-  @Put(':imovelId')
+  @Put(':propertyId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update a property',
     description: 'Update an existing property in the system.',
   })
-  @ApiBody({ type: ImovelDto })
+  @ApiBody({ type: PropertyDto })
   @ApiOkResponse({
     description: 'Successfully updated the property', 
-    type: ImovelResponse,
+    type: PropertyResponse,
   })
-  update(@Param('condominioId') condominioId: string, @Param('imovelId') imovelId: string, @Body() dto: ImovelDto) {
-    return this.imovelService.update(condominioId, imovelId, dto);
+  update(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string, @Body() dto: PropertyDto) {
+    return this.imovelService.update(condominiumId, propertyId, dto);
   }
-  
-  @Delete(':imovelId')
+
+  @Delete(':propertyId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a property',
@@ -92,9 +92,9 @@ export class ImovelController {
   })
   @ApiOkResponse({
     description: 'Successfully deleted the property',
-    type: ImovelResponse, 
+    type: PropertyResponse, 
   })
-  delete(@Param('condominioId') condominioId: string, @Param('imovelId') imovelId: string) {
-    return this.imovelService.delete(condominioId, imovelId);
+  delete(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
+    return this.imovelService.delete(condominiumId, propertyId);
   }
 }

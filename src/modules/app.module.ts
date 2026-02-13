@@ -7,8 +7,8 @@ import { PrismaDatabaseModule } from './database/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MinioClientModule } from './tools/minio-client.module';
-import { CondominioModule } from './condominio/condominio.module';
-import { ImovelModule } from './condominio/imovel.module';
+import { CondominiumModule } from './condominium/condominium.module';
+import { PropertyModule } from './condominium/property.module';
 
 @Module({
   imports: [
@@ -19,8 +19,8 @@ import { ImovelModule } from './condominio/imovel.module';
     PrismaDatabaseModule,
     AuthModule,
     MinioClientModule,
-    CondominioModule,
-    ImovelModule,
+    CondominiumModule,
+    PropertyModule,
   ],
   controllers: [AppController],
   providers: [
