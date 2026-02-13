@@ -27,9 +27,21 @@ export class CondominioRepository {
             uf: true,
           },
         },
-      },
-    });
-  }
+        imoveis: { where: { deletedAt: null },
+          select: {
+            id: true, 
+            identificador: true,
+            endereco: true,
+            numeroUnidade: true,
+            tipoUnidade: true,
+            bloco: true,
+            andar: true,
+            situacaoImovel: true,
+          },
+        },
+          },
+      });
+    }
   getById(condominioId: string): Promise<CondominioResponse> {
     return this.prisma.condominios.findUnique({
       where: { id: condominioId, deletedAt: null },
@@ -49,9 +61,22 @@ export class CondominioRepository {
             uf: true,
           },
         },
-      },
-    });
-  }
+        imoveis: { where: { deletedAt: null },
+          select: {
+            id: true,
+            identificador: true,
+            endereco: true,
+            numeroUnidade: true,
+            tipoUnidade: true,
+            bloco: true,
+            andar: true,
+            situacaoImovel: true,
+         },
+        },
+          },
+      });
+    }
+
 
   getByName(nome: string): Promise<CondominioResponse> {
     return this.prisma.condominios.findUnique({
@@ -72,13 +97,25 @@ export class CondominioRepository {
             uf: true,
           },
         },
-      },
-    });
-  }
+        imoveis: { where: { deletedAt: null },
+          select: { 
+            id: true,
+            identificador: true,
+            endereco: true,
+            numeroUnidade: true,
+            tipoUnidade: true,
+            bloco: true,
+            andar: true,
+            situacaoImovel: true,
+         },
+        },
+          },
+      });
+    }
 
   create(dto: CondominioDto): Promise<CondominioResponse> {
     return this.prisma.condominios.create({
-      data: { ...dto, endereco: { create: dto.endereco } },
+      data: { ...dto, endereco: { create: dto.endereco }},
       select: {
         id: true,
         nome: true,
@@ -95,13 +132,25 @@ export class CondominioRepository {
             uf: true,
           },
         },
-      },
-    });
-  }
+        imoveis: { where: { deletedAt: null },
+          select: {
+            id: true,
+            identificador: true,
+            endereco: true,
+            numeroUnidade: true,
+            tipoUnidade: true,
+            bloco: true,
+            andar: true,
+            situacaoImovel: true,
+         },
+        },
+          },
+      });
+    }
   update(id: string, dto: CondominioDto): Promise<CondominioResponse> {
     return this.prisma.condominios.update({
       where: { id: id },
-      data: { ...dto, endereco: { update: { ...dto.endereco } } },
+      data: { ...dto, endereco: { update: { ...dto.endereco } }},
       select: {
         id: true,
         nome: true,
@@ -118,9 +167,21 @@ export class CondominioRepository {
             uf: true,
           },
         },
-      },
-    });
-  }
+        imoveis: { where: { deletedAt: null },
+          select: {
+            id: true,
+            identificador: true,
+            endereco: true,
+            numeroUnidade: true,
+            tipoUnidade: true,
+            bloco: true,
+            andar: true,
+            situacaoImovel: true,
+         },
+        },
+          },
+      });
+    }
 
   delete(condominioId: string): Promise<CondominioResponse> {
     return this.prisma.condominios.update({
@@ -142,7 +203,19 @@ export class CondominioRepository {
             uf: true,
           },
         },
-      },
-    });
+        imoveis: { where: { deletedAt: null },
+          select: {
+            id: true,
+            identificador: true,
+            endereco: true,
+            numeroUnidade: true,
+            tipoUnidade: true,
+            bloco: true,
+            andar: true,
+            situacaoImovel: true,
+         },
+        },
+          },
+      });
+    }
   }
-}

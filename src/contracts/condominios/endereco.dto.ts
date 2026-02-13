@@ -47,7 +47,7 @@ export class EnderecoDto {
   @IsNumber()
   @ApiProperty({
     description: 'Descrição de exemplo para campo obrigatório',
-    example: 'Bemvenuto',
+    example: 10,
   })
   numero: number;
 

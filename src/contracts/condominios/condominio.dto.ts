@@ -35,14 +35,5 @@ export class CondominioDto {
   })
   endereco: EnderecoDto;
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ImovelDto)
-  @ApiProperty({
-    description: 'Lista de imóveis do condomínio',
-    type: () => ImovelDto,
-    isArray: true,
-  })
-  campoObjetoArray: ImovelDto[];
   }
 

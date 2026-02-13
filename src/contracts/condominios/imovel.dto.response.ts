@@ -1,6 +1,7 @@
 import { SituacaoImovel, TipoUnidade } from "@prisma/client";
 
 export class ImovelResponse {
+    id: string
     identificador: string;
     endereco: string;
     numeroUnidade: string;

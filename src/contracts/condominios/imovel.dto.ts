@@ -4,10 +4,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Example2Dto } from '../examples/example2.dto';
 import { Type } from 'class-transformer';
 import { SituacaoImovel, TipoUnidade } from '@prisma/client';
 
@@ -31,7 +29,7 @@ export class ImovelDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Descrição de exemplo para campo obrigatório',
+    description: 'Número ou nome da unidade (ex: apartamento 101, sala comercial 202)',
     example: 'conteúdo de exemplo',
   })
     numeroUnidade: string;
@@ -53,11 +51,12 @@ export class ImovelDto {
   })
     bloco?: string;
 
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Descrição de exemplo para campo obrigatório',
-    example: '3 andar',
+    example: 3,
   })
     andar?: number;
 
@@ -65,7 +64,7 @@ export class ImovelDto {
    @IsNumber()
    @IsOptional()
    @ApiPropertyOptional({
-    description: 'Campo numérico',
+    description: 'Campo numérico (m^2)',
     example: 10,
     })
 
@@ -78,12 +77,12 @@ export class ImovelDto {
     enumName: 'SituacaoImovel',
     example: SituacaoImovel.ATIVO,
   })
-  situacao: SituacaoImovel;
+  situacaoImovel: SituacaoImovel;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Descrição de exemplo para campo obrigatório',
+    description: 'Dados opcionais para observações adicionais sobre o imóvel, como por exemplo: "Apartamento com vista para o mar" ou "Unidade comercial no térreo", número de vagas de garagem, etc.',
     example: 'bloco 1',
   })
     observacoes?: string;
