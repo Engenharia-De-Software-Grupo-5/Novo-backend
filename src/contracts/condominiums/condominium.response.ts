@@ -1,4 +1,4 @@
-import { AddressResponse } from './adress.response';
+import { AddressResponse } from './address.response';
 import { PropertyResponse } from './property.dto.response';
 
 export class CondominiumResponse {

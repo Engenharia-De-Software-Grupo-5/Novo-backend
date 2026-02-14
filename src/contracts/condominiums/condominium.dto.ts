@@ -4,7 +4,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { AddressDto } from './adress.dto';
+import { AddressDto } from './address.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PropertyDto} from './property.dto';
