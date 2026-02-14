@@ -7,6 +7,7 @@ import { PrismaDatabaseModule } from './database/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MinioClientModule } from './tools/minio-client.module';
+import { ContractTemplateModule } from './contract.templates/contract.template.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MinioClientModule } from './tools/minio-client.module';
     PrismaDatabaseModule,
     AuthModule,
     MinioClientModule,
+    ContractTemplateModule,
   ],
   controllers: [AppController],
   providers: [
@@ -31,4 +33,4 @@ import { MinioClientModule } from './tools/minio-client.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
