@@ -1,0 +1,63 @@
+model Condominiums {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String       @unique
+  description String?
+  address     Addresses    @relation(fields: [addressId], references: [id])
+  addressId   String       @db.Uuid
+  properties  Properties[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@map("condominiums")
+}
+
+model Addresses {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  zip          String
+  street       String
+  neighborhood String
+  city         String
+  uf           String
+  number       Int
+  complement   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  condominiums Condominiums[]
+
+  @@map("addresses")
+}
+
+model Properties {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier        String            @unique
+  address           String
+  unityNumber       String
+  unityType         UnityType         @default(APARTMENT)
+  block             String?
+  floor             Int?
+  totalArea         Float?
+  propertySituation PropertySituation @default(ACTIVE)
+  observations      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+  condominium       Condominiums?     @relation(fields: [condominiumId], references: [id])
+  condominiumId     String?           @db.Uuid
+
+  @@map("properties")
+}
+
+enum UnityType {
+  HOUSE
+  APARTMENT
+  CONMERCIAL_ROOM
+}
+
+enum PropertySituation {
+  ACTIVE
+  INACTIVE
+  UNAVAILABLE
+  MAINTENANCE
+}
