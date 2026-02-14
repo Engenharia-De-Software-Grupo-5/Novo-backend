@@ -2,7 +2,7 @@ model Condominiums {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String       @unique
   description String?
-  address     Adresses     @relation(fields: [addressId], references: [id])
+  address     Addresses    @relation(fields: [addressId], references: [id])
   addressId   String       @db.Uuid
   properties  Properties[]
   createdAt   DateTime     @default(now())
@@ -12,7 +12,7 @@ model Condominiums {
   @@map("condominiums")
 }
 
-model Adresses {
+model Addresses {
   id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   zip          String
   street       String
