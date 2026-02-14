@@ -19,7 +19,7 @@ export class CondominiumService {
     );
 
     if (!!condominioExistente) {
-      throw new BadRequestException('Esse nome já existe no banco');
+      throw new BadRequestException('This condominium name already exists in the database.');
     }
 
     return this.condominiumRepository.create(dto);

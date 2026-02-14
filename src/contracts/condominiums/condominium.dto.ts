@@ -13,7 +13,7 @@ export class CondominiumDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Descrição de exemplo para campo obrigatório',
+    description: 'Obrigatory field for the name of the condominium',
     example: 'Bemvenuto',
   })
   name: string;
@@ -21,7 +21,7 @@ export class CondominiumDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Descrição de exemplo para campo obrigatório',
+    description: 'Obrigatory field for the description of the condominium',
     example: 'condominio classe A',
   })
   description: string;
@@ -29,7 +29,7 @@ export class CondominiumDto {
   @ValidateNested()
   @Type(() => AddressDto)
   @ApiProperty({
-    description: 'Todo conteudo de endereço do condominio',
+    description: 'Obrigatory field for the address of the condominium',
     type: () => AddressDto,
   })
   address: AddressDto;

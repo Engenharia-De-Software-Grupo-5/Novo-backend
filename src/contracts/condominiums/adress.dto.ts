@@ -6,7 +6,7 @@ export class AddressDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Campo obrigatório para o CEP do endereço',
+    description: 'Obrigatory field for the zip code of the address',
     example: '123123',
   })
   zip: string;
@@ -14,7 +14,7 @@ export class AddressDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Campo obrigatório para a rua do endereço',
+    description: 'Obrigatory field for the street of the address',
     example: 'Bemvenuto',
   })
   street: string;
@@ -22,7 +22,7 @@ export class AddressDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Campo obrigatório para o bairro do endereço',
+    description: 'Obrigatory field for the neighborhood of the address',
     example: 'Bemvenuto',
   })
   neighborhood: string;
@@ -30,7 +30,7 @@ export class AddressDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Campo obrigatório para a cidade do endereço',
+    description: 'Obrigatory field for the city of the address',
     example: 'Bemvenuto',
   })
   city: string;
@@ -38,7 +38,7 @@ export class AddressDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Campo obrigatório para o estado do endereço',
+    description: 'Obrigatory field for the state of the address',
     example: 'SP',
   })
   uf: string;
@@ -46,7 +46,7 @@ export class AddressDto {
   @Type(() => Number)
   @IsNumber()
   @ApiProperty({
-    description: 'Campo obrigatório para o número do endereço',
+    description: 'Obrigatory field for the number of the address',
     example: 10,
   })
   number: number;
@@ -54,7 +54,7 @@ export class AddressDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Campo opcional para o complemento do endereço',
+    description: 'Opcional field for the complement of the address',
     example: 'Bemvenuto',
   })
   complement: string;

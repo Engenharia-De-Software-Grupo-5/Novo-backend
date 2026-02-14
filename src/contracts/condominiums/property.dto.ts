@@ -13,7 +13,7 @@ export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Identificador único para a unidade, como número do apartamento ou sala comercial',
+    description: 'Unique identifier for the property, such as a unit number or name (e.g., apartment 101, commercial room 202)',
     example: '101',
   })
     identifier: string;
@@ -21,7 +21,7 @@ export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Informações adicionais acerca do endereço',
+    description: 'Additional address information for the property, such as proximity to landmarks or specific location details within the condominium',
     example: 'Próximo à casa X, Rua Y, etc.',
   })
     address: string;
@@ -29,7 +29,7 @@ export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Número ou nome da unidade (ex: apartamento 101, sala comercial 202)',
+    description: 'Number or name of the property unit (e.g., apartment 101, commercial room 202)',
     example: '101',
   })
     unityNumber: string;
@@ -46,7 +46,7 @@ export class PropertyDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Descrição do bloco da unidade',
+    description: 'Obrigatory field for the block of the property, if applicable',
     example: 'bloco 1',
   })
     block?: string;
@@ -55,7 +55,7 @@ export class PropertyDto {
   @IsNumber()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Campo numérico para o andar da unidade, se aplicável',
+    description: 'Obrigatory field for the floor of the property, if applicable',
     example: 3,
   })
     floor?: number;
@@ -64,7 +64,7 @@ export class PropertyDto {
   @IsNumber()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Campo numérico (m^2)',
+    description: 'Numerical field for the total area of the property in square meters',
     example: 10,
   })
   totalArea?: number;
@@ -80,7 +80,7 @@ export class PropertyDto {
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Dados opcionais para observações adicionais sobre o imóvel, como por exemplo: "Apartamento com vista para o mar" ou "Unidade comercial no térreo", número de vagas de garagem, etc.',
+    description: 'Optional field for any additional observations about the property',
     example: 'bloco 1',
   })
     observations?: string;

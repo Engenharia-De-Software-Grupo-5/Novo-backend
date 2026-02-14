@@ -24,7 +24,7 @@ export class PropertyService {
       dto.identifier,
     );
     if (propertyExistente) {
-      throw new ConflictException('Property with this identifier already exists in this condominium.');
+      throw new ConflictException('Property with this identifier already exists in this condominium in the database.');
     }
     return this.propertyRepository.create(condominiumId, dto);
   }
