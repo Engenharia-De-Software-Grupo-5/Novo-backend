@@ -1,0 +1,45 @@
+enum ContractType {
+  CLT
+  PJ
+  TEMPORARY
+  INTERNSHIP
+  OUTSOURCED
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  TERMINATED
+  ON_LEAVE
+  VACATION
+}
+
+model Employees {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cpf              String          @unique
+  name             String   
+  bankData         BanksData       @relation(fields: [bankDataId], references: [id])
+  bankDataId       String    @db.Uuid
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+  role             String
+  contractType     ContractType
+  hireDate         DateTime
+  terminationDate  DateTime?
+  baseSalary       Float   
+  workload         Int
+  status           EmployeeStatus  @default(ACTIVE)
+
+  @@map("employees")
+}
+
+model BanksData {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  employees    Employees[]
+
+  @@map("banksdata")
+}
