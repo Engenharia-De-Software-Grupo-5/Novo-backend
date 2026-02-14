@@ -1,3 +1,4 @@
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CondominiumController } from 'src/controllers/condominiums/condominium.controller';
 import { CondominiumService } from 'src/services/condominiums/condominium.service';
@@ -48,5 +49,22 @@ describe('CondominiumController', () => {
     mockService.delete.mockResolvedValue({ id: '1' });
     const result = await controller.delete('1');
     expect(result).toEqual({ id: '1' });
+  });
+
+  it('propagates NotFound from service', async () => {
+    mockService.getById.mockRejectedValue(new NotFoundException('not found'));
+    await expect(controller.getById('id-404')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('propagates BadRequest from service', async () => {
+    mockService.create.mockRejectedValue(new BadRequestException('dup'));
+    await expect(controller.create({} as any)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('passes correct params on update', async () => {
+    mockService.update.mockResolvedValue({ ok: true });
+    await controller.update('id-1', { description: 'x' } as any);
+
+    expect(mockService.update).toHaveBeenCalledWith('id-1', { description: 'x' });
   });
 });
