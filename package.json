@@ -24,7 +24,7 @@
     "prisma:migrate:reset": "npx prisma migrate reset",
     "prisma:generate": "prisma generate",
     "prisma:studio": "npx prisma studio",
-    "minio:start": "set MINIO_ROOT_USER=admin&& set MINIO_ROOT_PASSWORD=teste1234&& .\\minio.exe server minio-data --console-address \":9001\""
+    "minio:start": "set MINIO_ROOT_USER=minioadmin&& set MINIO_ROOT_PASSWORD=minioadmin&& .\\minio.exe server minio-data --console-address \":9001\""
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
