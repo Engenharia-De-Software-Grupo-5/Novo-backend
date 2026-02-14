@@ -1,0 +1,12 @@
+model Contratos {
+    id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    cpfDono   String
+    imovel    String
+    descricao String?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    @@unique([cpfDono, imovel])
+    @@map("contratos")
+}
