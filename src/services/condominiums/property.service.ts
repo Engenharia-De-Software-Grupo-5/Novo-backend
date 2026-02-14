@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 import { PropertyDto } from "src/contracts/condominiums/property.dto";
 import { PropertyResponse } from "src/contracts/condominiums/property.dto.response";
 import { PropertyRepository } from "src/repositories/condominiums/property.repository";
@@ -24,7 +24,7 @@ export class PropertyService {
       dto.identifier,
     );
     if (propertyExistente) {
-      throw new Error("Imóvel já cadastrado");
+      throw new ConflictException('Property with this identifier already exists in this condominium.');
     }
     return this.propertyRepository.create(condominiumId, dto);
   }
