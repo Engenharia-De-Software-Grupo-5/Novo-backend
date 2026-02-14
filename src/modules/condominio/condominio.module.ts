@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { CondominioController } from 'src/controllers/condominios/condominio.controller';
-import { CondominioRepository } from 'src/repositories/condominios/condominio.repository';
-import { CondominioService } from 'src/services/condominios/condominio.service';
+import { CondominiumController } from 'src/controllers/condominiums/condominium.controller';
+import { CondominiumRepository } from 'src/repositories/condominiums/condominium.repository';
+import { CondominiumService } from 'src/services/condominiums/condominium.service';
 
 @Module({
   imports: [],
-  controllers: [CondominioController],
-  providers: [CondominioService, CondominioRepository],
+  controllers: [CondominiumController],
+  providers: [CondominiumService, CondominiumRepository],
 })
-export class CondominioModule {}
+export class CondominiumModule {}

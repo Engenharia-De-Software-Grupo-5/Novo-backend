@@ -1,0 +1,32 @@
+@Get()
+
+getAll-vazio
+getAll-1 elemento
+getAll-2 elementos
+
+@Get(':id')
+
+get-idinexistente
+get-employeedeletado
+get-employerecontratado
+get-id correto
+
+@Post()
+
+post-normal
+post-cpfexistentedeletado
+post-cpfexistenteativo
+post- campo obrigatorio faltando(testar tudo)
+
+@Put(':id')
+
+put-idinexistente
+put-employyedeletado
+put-normal 
+put- campo obrigatorio faltando(testar tudo)
+
+@Delete(':id')
+
+delete-idinexistente
+delete-employeedeletado
+delete-normal

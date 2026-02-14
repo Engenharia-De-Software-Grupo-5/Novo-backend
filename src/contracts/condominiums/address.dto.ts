@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class EnderecoDto {
+export class AddressDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -17,7 +17,7 @@ export class EnderecoDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  rua: string;
+  street: string;
 
   @IsString()
   @IsNotEmpty()
@@ -25,7 +25,7 @@ export class EnderecoDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  bairro: string;
+  neighborhood: string;
 
   @IsString()
   @IsNotEmpty()
@@ -33,7 +33,7 @@ export class EnderecoDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  cidade: string;
+  city: string;
 
   @IsString()
   @IsNotEmpty()
@@ -41,7 +41,7 @@ export class EnderecoDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  uf: string;
+  state: string;
 
   @Type(() => Number)
   @IsNumber()
@@ -49,7 +49,7 @@ export class EnderecoDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  numero: number;
+  number: number;
 
   @IsString()
   @IsOptional()
@@ -57,5 +57,5 @@ export class EnderecoDto {
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  complemento?: string;
+  complement?: string;
 }

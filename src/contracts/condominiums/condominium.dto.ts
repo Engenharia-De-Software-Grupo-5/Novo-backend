@@ -4,33 +4,33 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { EnderecoDto } from './endereco.dto';
+import { AddressDto } from './address.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Example2Dto } from '../examples/example2.dto';
 import { Type } from 'class-transformer';
 
-export class CondominioDto {
+export class CondominiumDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description: 'Descrição de exemplo para campo obrigatório',
     example: 'Bemvenuto',
   })
-  nome: string;
+  name: string;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
     description: 'Descrição de exemplo para campo obrigatório',
-    example: 'condominio classe A',
+    example: 'A class condominium',
   })
-  descricao?: string;
+  description?: string;
 
   @ValidateNested()
-  @Type(() => EnderecoDto)
+  @Type(() => AddressDto)
   @ApiProperty({
     description: 'Todo conteudo de endereço do condominio',
-    type: () => EnderecoDto,
+    type: () => AddressDto,
   })
-  endereco: EnderecoDto;
+  address: AddressDto;
 }

@@ -17,15 +17,15 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CondominioDto } from 'src/contracts/condominios/condominio.dto';
-import { CondominioResponse } from 'src/contracts/condominios/condominio.response';
-import { CondominioService } from 'src/services/condominios/condominio.service';
+import { CondominiumDto } from 'src/contracts/condominiums/condominium.dto';
+import { CondominiumResponse } from 'src/contracts/condominiums/condominium.response';
+import { CondominiumService } from 'src/services/condominiums/condominium.service';
 
-@ApiTags('Condominios')
+@ApiTags('Condominiums')
 @ApiBearerAuth('access-token')
-@Controller('condominios')
-export class CondominioController {
-  constructor(private readonly condominioService: CondominioService) {}
+@Controller('condominiums')
+export class CondominiumController {
+  constructor(private readonly condominiumService: CondominiumService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -35,10 +35,10 @@ export class CondominioController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved all condominiums',
-    type: [CondominioResponse],
+    type: [CondominiumResponse],
   })
-  getAll(): Promise<CondominioResponse[]> {
-    return this.condominioService.getAll();
+  getAll(): Promise<CondominiumResponse[]> {
+    return this.condominiumService.getAll();
   }
 
   @Get(':id')
@@ -50,10 +50,10 @@ export class CondominioController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved condominium details',
-    type: CondominioResponse,
+    type: CondominiumResponse,
   })
-  getById(@Param('id') condominioId: string): Promise<CondominioResponse> {
-    return this.condominioService.getById(condominioId);
+  getById(@Param('id') condominiumId: string): Promise<CondominiumResponse> {
+    return this.condominiumService.getById(condominiumId);
   }
 
   @Post()
@@ -64,14 +64,14 @@ export class CondominioController {
   })
   @ApiBody({
     description: 'Condominium data to be registered',
-    type: CondominioDto,
+    type: CondominiumDto,
   })
   @ApiCreatedResponse({
     description: 'Condominium successfully created',
-    type: CondominioResponse,
+    type: CondominiumResponse,
   })
-  create(@Body() dto: CondominioDto): Promise<CondominioResponse> {
-    return this.condominioService.create(dto);
+  create(@Body() dto: CondominiumDto): Promise<CondominiumResponse> {
+    return this.condominiumService.create(dto);
   }
 
   @Put(':id')
@@ -83,17 +83,17 @@ export class CondominioController {
   })
   @ApiBody({
     description: 'Updated condominium data',
-    type: CondominioDto,
+    type: CondominiumDto,
   })
   @ApiOkResponse({
     description: 'Condominium successfully updated',
-    type: CondominioResponse,
+    type: CondominiumResponse,
   })
   update(
     @Param('id') id: string,
-    @Body() dto: CondominioDto,
-  ): Promise<CondominioResponse> {
-    return this.condominioService.update(id, dto);
+    @Body() dto: CondominiumDto,
+  ): Promise<CondominiumResponse> {
+    return this.condominiumService.update(id, dto);
   }
 
   @Delete(':id')
@@ -104,9 +104,9 @@ export class CondominioController {
   })
   @ApiOkResponse({
     description: 'Condominium successfully deleted',
-    type: CondominioResponse,
+    type: CondominiumResponse,
   })
-  delete(@Param('id') condominioId: string): Promise<CondominioResponse> {
-    return this.condominioService.delete(condominioId);
+  delete(@Param('id') condominiumId: string): Promise<CondominiumResponse> {
+    return this.condominiumService.delete(condominiumId);
   }
 }
