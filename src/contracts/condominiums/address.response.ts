@@ -1,10 +1,10 @@
 export class AddressResponse {
   id: string;
-  cep: string;
+  zip: string;
   street: string;
   neighborhood: string;
   city: string;
-  state: string;
+  uf: string;
   number: number;
   complement?: string;
 }

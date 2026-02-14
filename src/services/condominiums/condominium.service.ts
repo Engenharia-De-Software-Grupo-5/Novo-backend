@@ -14,12 +14,12 @@ export class CondominiumService {
   }
 
   async create(dto: CondominiumDto): Promise<CondominiumResponse> {
-    const condominiumExistente = await this.condominiumRepository.getByName(
+    const condominioExistente = await this.condominiumRepository.getByName(
       dto.name,
     );
 
-    if (!!condominiumExistente) {
-      throw new BadRequestException('Esse nome já existe no banco');
+    if (!!condominioExistente) {
+      throw new BadRequestException('This condominium name already exists in the database.');
     }
 
     return this.condominiumRepository.create(dto);

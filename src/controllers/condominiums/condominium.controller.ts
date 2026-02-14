@@ -52,8 +52,8 @@ export class CondominiumController {
     description: 'Successfully retrieved condominium details',
     type: CondominiumResponse,
   })
-  getById(@Param('id') condominiumId: string): Promise<CondominiumResponse> {
-    return this.condominiumService.getById(condominiumId);
+  getById(@Param('id') condominioId: string): Promise<CondominiumResponse> {
+    return this.condominiumService.getById(condominioId);
   }
 
   @Post()
