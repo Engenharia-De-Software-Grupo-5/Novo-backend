@@ -18,7 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PropertyDto } from 'src/contracts/condominiums/property.dto';
-import { PropertyResponse } from 'src/contracts/condominiums/property.dto.response';
+import { PropertyResponse } from 'src/contracts/condominiums/property.response';
 import { PropertyService } from 'src/services/condominiums/property.service';
 
 @ApiTags('properties')
