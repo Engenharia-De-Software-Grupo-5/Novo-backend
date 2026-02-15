@@ -6,7 +6,7 @@ export class PropertyResponse {
         description: 'Property ID',
         example: '123e4567-e89b-12d3-a456-426614174000',
       })
-    id: string
+    id: string;
         @ApiProperty({
         description: 'Property identifier',
         example: '123456789',

@@ -52,7 +52,7 @@ model Properties {
 enum UnityType {
   HOUSE
   APARTMENT
-  CONMERCIAL_ROOM
+  COMMERCIAL_ROOM
 }
 
 enum PropertySituation {
