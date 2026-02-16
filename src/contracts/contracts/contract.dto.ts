@@ -27,5 +27,5 @@ export class ContractDto {
   @ApiProperty({
     description: 'a property ',
   })
-  propertyId: string;
+  propertieId: string;
 }

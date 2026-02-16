@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
-import { ContratoRepository } from 'src/repositories/contratos/contrato.repository';
+import { ContratoRepository } from 'src/repositories/contracts/contract.repository';
 
 @Injectable()
 export class ContratoService {
