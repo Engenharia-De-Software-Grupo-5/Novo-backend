@@ -45,6 +45,7 @@ model Properties {
   deletedAt         DateTime?
   condominium       Condominiums?     @relation(fields: [condominiumId], references: [id])
   condominiumId     String?           @db.Uuid
+  contracts Contracts[]
 
   @@map("properties")
 }
