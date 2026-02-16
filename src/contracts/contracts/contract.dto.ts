@@ -23,9 +23,10 @@ export class ContractDto {
   })
   descricao?: string;
 
-  @ValidateNested()
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty({
-    description: 'a property ',
+    description: 'Unique identifier for the property',
   })
   propertyId: string;
 }

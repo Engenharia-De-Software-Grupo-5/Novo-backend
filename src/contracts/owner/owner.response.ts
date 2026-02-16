@@ -16,7 +16,7 @@ export class OwnerResponse {
 
    @ApiPropertyOptional({
       description: 'owner contracts',
-      example: '123',
+      example: [ContractResponse],
   })
   contracts?: ContractResponse[];
 }

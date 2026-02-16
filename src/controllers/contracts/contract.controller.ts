@@ -19,13 +19,13 @@ import {
 } from '@nestjs/swagger';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
-import { ContratoService } from 'src/services/contracts/contrato.service';
+import { ContractService } from 'src/services/contracts/contract.service';
 
 @ApiTags('Contracts')
 @ApiBearerAuth('access-token')
 @Controller('contracts')
 export class ContratoController {
-  constructor(private readonly ContratoService: ContratoService) {}
+  constructor(private readonly contractService: ContractService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -38,7 +38,7 @@ export class ContratoController {
     type: [ContractResponse],
   })
   getAll(): Promise<ContractResponse[]> {
-    return this.ContratoService.getAll();
+    return this.contractService.getAll();
   }
 
   @Get(':id')
@@ -53,7 +53,7 @@ export class ContratoController {
     type: ContractResponse,
   })
   getById(@Param('id') ContratoId: string): Promise<ContractResponse> {
-    return this.ContratoService.getById(ContratoId);
+    return this.contractService.getById(ContratoId);
   }
 
   @Post()
@@ -71,7 +71,7 @@ export class ContratoController {
     type: ContractResponse,
   })
   create(@Body() dto: ContractDto): Promise<ContractResponse> {
-    return this.ContratoService.create(dto);
+    return this.contractService.create(dto);
   }
 
   @Put(':id')
@@ -93,7 +93,7 @@ export class ContratoController {
     @Param('id') id: string,
     @Body() dto: ContractDto,
   ): Promise<ContractResponse> {
-    return this.ContratoService.update(id, dto);
+    return this.contractService.update(id, dto);
   }
 
   @Delete(':id')
@@ -106,7 +106,7 @@ export class ContratoController {
     description: 'contract successfully deleted',
     type: ContractResponse,
   })
-  delete(@Param('id') ContratoId: string): Promise<ContractResponse> {
-    return this.ContratoService.delete(ContratoId);
+  delete(@Param('id') ContractId: string): Promise<ContractResponse> {
+    return this.contractService.delete(ContractId);
   }
 }

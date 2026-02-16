@@ -11,19 +11,19 @@ export class ContractResponse {
 
   @ApiProperty({
       description: 'Owner object who detains a property ',
-      example: 'Owner{id: 1, identifier: 012345678910}',
+      example: OwnerResponse,
     }) 
   owner: OwnerResponse;
 
   @ApiProperty({
       description: 'additional description about this contract',
-      example: 'conteúdo de exemplo',
+      example: 'Sample content',
     })
   descricao?: string;
 
   @ApiProperty({
       description: 'property associated with this contract',
-      example: 'conteúdo de exemplo',
+      example: PropertyResponse,
     })
   property: PropertyResponse 
 }

@@ -1,15 +1,14 @@
 model Contracts {
     id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     owner       Owners     @relation(fields: [ownerId], references: [id])
-    property   Properties @relation(fields: [propertyId], references: [id])
+    property    Properties @relation(fields: [propertyId], references: [id])
     ownerId     String     @db.Uuid
-    propertyId String     @db.Uuid
-    descricao   String?
+    propertyId  String     @db.Uuid
+    description String?
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
     deletedAt   DateTime?
 
     @@unique([ownerId, propertyId])
-
-    @@map("contract")
+    @@map("contracts")
 }

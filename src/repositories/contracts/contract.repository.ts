@@ -4,7 +4,7 @@ import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 
 @Injectable()
-export class ContratoRepository {
+export class ContractRepository {
 
   private readonly selectFields = {
     id: true,
