@@ -1,0 +1,10 @@
+model Owners {
+    id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    owner     String      @unique
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+    deletedAt DateTime?
+    contracts Contracts[]
+
+    @@map("owners")
+}
