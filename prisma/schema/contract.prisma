@@ -9,5 +9,7 @@ model Contracts {
     updatedAt   DateTime   @updatedAt
     deletedAt   DateTime?
 
+    @@unique([ownerId, propertieId])
+
     @@map("contract")
 }
