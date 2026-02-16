@@ -6,26 +6,26 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class ContratoDto {
+export class ContractDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'Descrição de exemplo para campo obrigatório',
-    example: 'Bemvenuto',
+    description: 'Unique identifier for the owner',
+    example: '123',
   })
-  cpfDono: string;
+  ownerId: string;
 
   @IsString()
   @IsOptional()
   @ApiPropertyOptional({
-    description: 'Descrição de exemplo para campo obrigatório',
-    example: 'condominio classe A',
+    description: 'Describe an aditional info about the contract',
+    example: 'Clausulas do contrato',
   })
   descricao?: string;
 
   @ValidateNested()
   @ApiProperty({
-    description: 'conteúdo de imovel ',
+    description: 'a property ',
   })
-  imovel: string;
+  propertyId: string;
 }

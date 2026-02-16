@@ -17,13 +17,13 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ContratoDto } from 'src/contracts/contratos/contrato.dto';
-import { ContratoResponse } from 'src/contracts/contratos/contrato.response';
-import { ContratoService } from 'src/services/contratos/contrato.service';
+import { ContractDto } from 'src/contracts/contracts/contract.dto';
+import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { ContratoService } from 'src/services/contracts/contrato.service';
 
 @ApiTags('Contratos')
 @ApiBearerAuth('access-token')
-@Controller('Contratos')
+@Controller('contratos')
 export class ContratoController {
   constructor(private readonly ContratoService: ContratoService) {}
 
@@ -35,9 +35,9 @@ export class ContratoController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved all contracts',
-    type: [ContratoResponse],
+    type: [ContractResponse],
   })
-  getAll(): Promise<ContratoResponse[]> {
+  getAll(): Promise<ContractResponse[]> {
     return this.ContratoService.getAll();
   }
 
@@ -50,9 +50,9 @@ export class ContratoController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved contract details',
-    type: ContratoResponse,
+    type: ContractResponse,
   })
-  getById(@Param('id') ContratoId: string): Promise<ContratoResponse> {
+  getById(@Param('id') ContratoId: string): Promise<ContractResponse> {
     return this.ContratoService.getById(ContratoId);
   }
 
@@ -64,13 +64,13 @@ export class ContratoController {
   })
   @ApiBody({
     description: 'contract data to be registered',
-    type: ContratoDto,
+    type: ContractDto,
   })
   @ApiCreatedResponse({
     description: 'contract successfully created',
-    type: ContratoResponse,
+    type: ContractResponse,
   })
-  create(@Body() dto: ContratoDto): Promise<ContratoResponse> {
+  create(@Body() dto: ContractDto): Promise<ContractResponse> {
     return this.ContratoService.create(dto);
   }
 
@@ -83,16 +83,16 @@ export class ContratoController {
   })
   @ApiBody({
     description: 'Updated contract data',
-    type: ContratoDto,
+    type: ContractDto,
   })
   @ApiOkResponse({
     description: 'contract successfully updated',
-    type: ContratoResponse,
+    type: ContractResponse,
   })
   update(
     @Param('id') id: string,
-    @Body() dto: ContratoDto,
-  ): Promise<ContratoResponse> {
+    @Body() dto: ContractDto,
+  ): Promise<ContractResponse> {
     return this.ContratoService.update(id, dto);
   }
 
@@ -104,9 +104,9 @@ export class ContratoController {
   })
   @ApiOkResponse({
     description: 'contract successfully deleted',
-    type: ContratoResponse,
+    type: ContractResponse,
   })
-  delete(@Param('id') ContratoId: string): Promise<ContratoResponse> {
+  delete(@Param('id') ContratoId: string): Promise<ContractResponse> {
     return this.ContratoService.delete(ContratoId);
   }
 }

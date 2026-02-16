@@ -42,13 +42,13 @@ export class CondominiumRepository {
 
   // getAll, getById, create, update, delete
   getAll(): Promise<CondominiumResponse[]> {
-    return this.prisma.condominiums.findMany({
+    return this.prisma.condominios.findMany({
       where: { deletedAt: null },
       select: this.condominiumSelect,
     });
   }
   getById(condominiumId: string): Promise<CondominiumResponse> {
-    return this.prisma.condominiums.findFirst({
+    return this.prisma.condominios.findFirst({
       where: { id: condominiumId, deletedAt: null },
       select: this.condominiumSelect,
     });
@@ -56,20 +56,20 @@ export class CondominiumRepository {
 
 
   getByName(name: string): Promise<CondominiumResponse> {
-    return this.prisma.condominiums.findFirst({
+    return this.prisma.condominios.findFirst({
       where: { name, deletedAt: null },
       select: this.condominiumSelect,
     });
   }
 
   create(dto: CondominiumDto): Promise<CondominiumResponse> {
-    return this.prisma.condominiums.create({
+    return this.prisma.condominios.create({
       data: { ...dto, address: { create: dto.address }},
       select: this.condominiumSelect,
     });
   }
   update(id: string, dto: CondominiumDto): Promise<CondominiumResponse> {
-    return this.prisma.condominiums.update({
+    return this.prisma.condominios.update({
       where: { id: id },
       data: { ...dto, address: { update: { ...dto.address } }},
       select: this.condominiumSelect,
@@ -77,7 +77,7 @@ export class CondominiumRepository {
   }
 
     delete(condominiumId: string): Promise<CondominiumResponse> {
-      return this.prisma.condominiums.update({
+      return this.prisma.condominios.update({
         where: { id: condominiumId },
         data: { deletedAt: new Date() },
         select: this.condominiumSelect,

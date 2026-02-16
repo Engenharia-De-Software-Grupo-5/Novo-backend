@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { MinioClientModule } from './tools/minio-client.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
+import { ContractModule } from './contrato/contrato.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PropertyModule } from './condominium/property.module';
     MinioClientModule,
     CondominiumModule,
     PropertyModule,
+    ContractModule,
   ],
   controllers: [AppController],
   providers: [
