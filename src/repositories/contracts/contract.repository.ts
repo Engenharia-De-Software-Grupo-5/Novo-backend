@@ -15,7 +15,7 @@ export class ContratoRepository {
             identifier: true,
           }
         },
-        propertie: {
+        property: {
           select: {
             id: true,
             identifier: true,
@@ -51,9 +51,9 @@ export class ContratoRepository {
   checkIfHas(dto: ContractDto): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
       where: {
-        ownerId_propertieId: {
+        ownerId_propertyId: {
           ownerId: dto.ownerId,
-          propertieId: dto.propertieId
+          propertyId: dto.propertyId
         }
       },
       select: this.selectFields,

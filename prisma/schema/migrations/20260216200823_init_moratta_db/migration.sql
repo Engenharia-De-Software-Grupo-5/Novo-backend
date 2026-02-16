@@ -88,7 +88,7 @@ CREATE TABLE "properties" (
 CREATE TABLE "contract" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "ownerId" UUID NOT NULL,
-    "propertieId" UUID NOT NULL,
+    "propertyId" UUID NOT NULL,
     "descricao" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -124,7 +124,7 @@ CREATE UNIQUE INDEX "condominiums_name_key" ON "condominiums"("name");
 CREATE UNIQUE INDEX "properties_identifier_key" ON "properties"("identifier");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "contract_ownerId_propertieId_key" ON "contract"("ownerId", "propertieId");
+CREATE UNIQUE INDEX "contract_ownerId_propertyId_key" ON "contract"("ownerId", "propertyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "owners_identifier_key" ON "owners"("identifier");
@@ -142,4 +142,4 @@ ALTER TABLE "properties" ADD CONSTRAINT "properties_condominiumId_fkey" FOREIGN 
 ALTER TABLE "contract" ADD CONSTRAINT "contract_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "owners"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "contract" ADD CONSTRAINT "contract_propertieId_fkey" FOREIGN KEY ("propertieId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "contract" ADD CONSTRAINT "contract_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
