@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/database/prisma.service";
 import { PropertyDto } from "src/contracts/condominiums/property.dto";
-import { PropertyResponse } from "src/contracts/condominiums/property.dto.response";
+import { PropertyResponse } from "src/contracts/condominiums/property.response";
 
 @Injectable()
 export class PropertyRepository {
