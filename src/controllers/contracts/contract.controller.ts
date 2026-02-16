@@ -21,9 +21,9 @@ import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { ContratoService } from 'src/services/contracts/contrato.service';
 
-@ApiTags('Contratos')
+@ApiTags('Contracts')
 @ApiBearerAuth('access-token')
-@Controller('contratos')
+@Controller('contracts')
 export class ContratoController {
   constructor(private readonly ContratoService: ContratoService) {}
 
