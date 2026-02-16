@@ -19,7 +19,7 @@ export class EmployeeService {
     );
 
     if (!!employeeExistente) {
-      throw new BadRequestException('Esse cpf já existe no banco');
+      throw new BadRequestException('Duplicated CPF');
     }
 
     return this.employeeRepository.create(dto);

@@ -38,22 +38,26 @@ export class EmployeeRepository {
 
   getByCpf(cpf: string): Promise<EmployeeResponse> {
     return this.prisma.employees.findUnique({
-      where: { cpf },
+      where: { cpf, deletedAt: null},
       select: this.employeeSelect,
     });
   }
 
   create(dto: EmployeeDto): Promise<EmployeeResponse> {
+    const { bankData, ...rest } = dto;
     return this.prisma.employees.upsert({
       where: {
         cpf: dto.cpf,
       },
       update: {
-        ...dto,
+        ...rest,
         deletedAt: null,
       },
       create: {
-        ...dto
+        ...rest,
+        bankData: {
+          create: {} 
+        }
       },
       select: this.employeeSelect,
     });
@@ -62,14 +66,14 @@ export class EmployeeRepository {
   update(id: string, dto: EmployeeDto): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
       where: { id: id },
-      data: { ...dto},
+      data: { ...dto, deletedAt: null},
       select: this.employeeSelect,
     });
   }
 
   delete(employeeId: string): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
-      where: { id: employeeId },
+      where: { id: employeeId, deletedAt: null },
       data: { deletedAt: new Date() },
       select: this.employeeSelect,
     });

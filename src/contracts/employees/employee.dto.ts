@@ -8,17 +8,16 @@ import { IsCPF } from 'class-validator-cpf';
 
 export class EmployeeDto {
     @IsCPF()
-    @IsNotEmpty()
     @ApiProperty({
-        description: "Employee's cpf (just numbers)",
-        example: '12312312312',
+        description: "Obrigatory field for employee's cpf (just numbers)",
+        example: '17508074084',
     })
     cpf: string; 
     
     @IsString()
     @IsNotEmpty()
     @ApiProperty({
-        description: "Employee's name",
+        description: "Obrigatory field for employee's name",
         example: 'Oswaldo Fernades',
     })
     name: string;
@@ -34,14 +33,14 @@ export class EmployeeDto {
     @IsString()
     @IsNotEmpty()
     @ApiProperty({
-        description: "Employee's role",
+        description: "Obrigatory field for employee's role",
         example: 'doorman',
     })
     role: string;
     
     @IsEnum(ContractType)
     @ApiProperty({
-        description: 'Employee contract type',
+        description: 'Obtigatory field for employee contract type',
         enum: ContractType,
         example: ContractType.CLT,
     })
@@ -50,23 +49,23 @@ export class EmployeeDto {
     @Type(() => Date)
     @IsDate()
     @ApiProperty({
-        description: "Employee's hiring date",
-        example: '2025-02-03T00:00:00.000Z',
+        description: "Obrigatory field for employee's hiring date",
+        example: '2013-01-27T04:59:32.000Z',
     })
     hireDate: Date;
 
     @Type(() => Number)
     @IsNumber()
     @ApiProperty({
-        description: "Employee's base salary",
-        example: 10,
+        description: "Obrigatory field for employee's base salary",
+        example: 1621,
     })
     baseSalary: number; 
         
     @Type(() => Number)
     @IsNumber()
     @ApiProperty({
-        description: "Employee's workload",
+        description: "Obrigatory field for employee's workload in hours",
         example: 10,
     })
     workload: number;      
@@ -74,7 +73,7 @@ export class EmployeeDto {
     @IsOptional()
     @IsEnum(EmployeeStatus)
     @ApiProperty({
-        description: "Employee's current state",
+        description: "Optional field for employee's current state (ACTIVE is the dafault option)",
         enum: EmployeeStatus,
         example: EmployeeStatus.ACTIVE,
     })
