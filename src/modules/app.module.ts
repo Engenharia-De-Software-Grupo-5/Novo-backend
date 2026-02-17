@@ -10,6 +10,7 @@ import { MinioClientModule } from './tools/minio-client.module';
 import { EmployeeModule } from './employee/employee.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
+import { TenantModule } from './tenant/tenant.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PropertyModule } from './condominium/property.module';
     CondominiumModule,
     EmployeeModule,
     PropertyModule,
+    TenantModule,
   ],
   controllers: [AppController],
   providers: [
