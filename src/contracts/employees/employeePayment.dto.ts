@@ -14,7 +14,7 @@ export class EmployeePaymentDto {
   paymentDate: string;
 
   @ApiProperty({ description: 'Payment type', enum: PaymentType, example: PaymentType.SALARY })
-  @IsNotEmpty()
+   @IsNotEmpty()
   @IsEnum(PaymentType)
   type: PaymentType;
 }
