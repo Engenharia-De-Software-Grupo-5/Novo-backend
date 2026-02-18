@@ -1,5 +1,17 @@
+enum InvoiceTargetType {
+    CONDOMINIUM
+    PROPERTY
+}
+
 model Invoices {
     id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    targetType    InvoiceTargetType
+    condominiumId String?           @db.Uuid
+    propertyId    String?           @db.Uuid
+
+    condominium Condominiums? @relation(fields: [condominiumId], references: [id])
+    property    Properties?   @relation(fields: [propertyId], references: [id])
 
     objectName   String @unique
     originalName String

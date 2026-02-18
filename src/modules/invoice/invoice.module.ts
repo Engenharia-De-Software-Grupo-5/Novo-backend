@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
-import { InvoiceController } from 'src/controllers/invoices/invoice.controller';
-
+import { CondominiumInvoiceController } from 'src/controllers/invoices/condominium.invoice.controller';
+import { PropertyInvoiceController } from 'src/controllers/invoices/property.invoice.controller';
 import { MinioClientModule } from 'src/modules/tools/minio-client.module';
 import { InvoiceRepository } from 'src/repositories/invoices/invoice.repository';
-import { InvoiceService } from 'src/services/invoices/invoice.service';
+import { CondominiumInvoiceService } from 'src/services/invoices/condominium.invoice.service';
+import { PropertyInvoiceService } from 'src/services/invoices/property.invoice.service';
 
 @Module({
   imports: [MinioClientModule],
-  controllers: [InvoiceController],
-  providers: [InvoiceService, InvoiceRepository],
+  controllers: [CondominiumInvoiceController, PropertyInvoiceController],
+  providers: [CondominiumInvoiceService, PropertyInvoiceService, InvoiceRepository],
 })
 export class InvoiceModule {}

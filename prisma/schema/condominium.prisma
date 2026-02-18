@@ -10,6 +10,7 @@ model Condominiums {
   deletedAt   DateTime?
 
   @@map("condominiums")
+  invoices Invoices[]
 }
 
 model Addresses {
@@ -47,6 +48,7 @@ model Properties {
   condominiumId     String?           @db.Uuid
 
   @@map("properties")
+  invoices Invoices[]
 }
 
 enum UnityType {

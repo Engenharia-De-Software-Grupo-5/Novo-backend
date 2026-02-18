@@ -10,6 +10,9 @@ CREATE TYPE "ContractType" AS ENUM ('CLT', 'PJ', 'TEMPORARY', 'INTERNSHIP', 'OUT
 -- CreateEnum
 CREATE TYPE "EmployeeStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'TERMINATED', 'ON_LEAVE', 'VACATION');
 
+-- CreateEnum
+CREATE TYPE "InvoiceTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
+
 -- CreateTable
 CREATE TABLE "condominiums" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -93,6 +96,9 @@ CREATE TABLE "banksdata" (
 -- CreateTable
 CREATE TABLE "invoices" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "targetType" "InvoiceTargetType" NOT NULL,
+    "condominiumId" UUID,
+    "propertyId" UUID,
     "objectName" TEXT NOT NULL,
     "originalName" TEXT NOT NULL,
     "mimeType" TEXT NOT NULL,
@@ -125,3 +131,9 @@ ALTER TABLE "properties" ADD CONSTRAINT "properties_condominiumId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE SET NULL ON UPDATE CASCADE;
