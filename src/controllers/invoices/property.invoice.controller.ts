@@ -93,11 +93,12 @@ export class PropertyInvoiceController {
   }
 
   @Delete(':invoiceId')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete property invoice',
     description: 'Soft delete a property invoice by its ID.',
   })
-  @HttpCode(HttpStatus.NO_CONTENT)
+  
   async remove(
     @Param('propertyId') propertyId: string,
     @Param('invoiceId') invoiceId: string,
