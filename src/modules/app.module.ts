@@ -11,6 +11,7 @@ import { EmployeeModule } from './employee/employee.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
 import { InvoiceModule} from './invoice/invoice.module';
+import { EmployeeContractsModule } from './employee/employee-contracts.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { InvoiceModule} from './invoice/invoice.module';
     EmployeeModule,
     PropertyModule,
     InvoiceModule,
+    EmployeeContractsModule,
   ],
   controllers: [AppController],
   providers: [

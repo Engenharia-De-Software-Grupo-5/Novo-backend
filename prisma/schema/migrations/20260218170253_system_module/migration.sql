@@ -94,6 +94,22 @@ CREATE TABLE "banksdata" (
 );
 
 -- CreateTable
+CREATE TABLE "employee_contracts" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "employeeId" UUID NOT NULL,
+    "objectName" TEXT NOT NULL,
+    "originalName" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "extension" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "employee_contracts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "invoices" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "targetType" "InvoiceTargetType" NOT NULL,
@@ -121,6 +137,9 @@ CREATE UNIQUE INDEX "properties_identifier_key" ON "properties"("identifier");
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "employee_contracts_objectName_key" ON "employee_contracts"("objectName");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "invoices_objectName_key" ON "invoices"("objectName");
 
 -- AddForeignKey
@@ -131,6 +150,9 @@ ALTER TABLE "properties" ADD CONSTRAINT "properties_condominiumId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "employee_contracts" ADD CONSTRAINT "employee_contracts_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
