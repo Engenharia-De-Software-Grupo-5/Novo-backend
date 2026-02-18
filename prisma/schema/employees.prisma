@@ -31,6 +31,8 @@ model Employees {
   workload          Int
   status            EmployeeStatus      @default(ACTIVE)
   employeeContracts EmployeeContracts[]
+  employeePayments  EmployeePayments[]
+  employeeBenefits  EmployeeBenefits[]
 
   @@map("employees")
 }
@@ -62,4 +64,50 @@ model EmployeeContracts {
   deletedAt DateTime?
 
   @@map("employee_contracts")
+}
+
+enum PaymentType {
+  SALARY
+  BONUS
+  ADVANCE
+  OTHER
+}
+
+model EmployeePayments {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  employeeId String    @db.Uuid
+  employee   Employees @relation(fields: [employeeId], references: [id])
+
+  value       Float
+  paymentDate DateTime
+  type        PaymentType
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("employee_payments")
+}
+
+enum BenefitType {
+  VACATION
+  THIRTEENTH
+}
+
+model EmployeeBenefits {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  employeeId String    @db.Uuid
+  employee   Employees @relation(fields: [employeeId], references: [id])
+
+  type          BenefitType
+  referenceYear Int
+  value         Float
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("employee_benefits")
 }

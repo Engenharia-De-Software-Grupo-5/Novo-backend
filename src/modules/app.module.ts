@@ -12,6 +12,8 @@ import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
 import { InvoiceModule} from './invoice/invoice.module';
 import { EmployeeContractsModule } from './employee/employee-contracts.module';
+import { EmployeePaymentsModule } from './employee/employee-payments.module';
+import { EmployeeBenefitsModule } from './employee/employee-benefits.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { EmployeeContractsModule } from './employee/employee-contracts.module';
     PropertyModule,
     InvoiceModule,
     EmployeeContractsModule,
+    EmployeePaymentsModule,
+    EmployeeBenefitsModule,
   ],
   controllers: [AppController],
   providers: [

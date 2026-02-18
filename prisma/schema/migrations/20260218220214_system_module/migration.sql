@@ -11,6 +11,12 @@ CREATE TYPE "ContractType" AS ENUM ('CLT', 'PJ', 'TEMPORARY', 'INTERNSHIP', 'OUT
 CREATE TYPE "EmployeeStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'TERMINATED', 'ON_LEAVE', 'VACATION');
 
 -- CreateEnum
+CREATE TYPE "PaymentType" AS ENUM ('SALARY', 'BONUS', 'ADVANCE', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "BenefitType" AS ENUM ('VACATION', 'THIRTEENTH');
+
+-- CreateEnum
 CREATE TYPE "InvoiceTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
 
 -- CreateTable
@@ -110,6 +116,34 @@ CREATE TABLE "employee_contracts" (
 );
 
 -- CreateTable
+CREATE TABLE "employee_payments" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "employeeId" UUID NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+    "paymentDate" TIMESTAMP(3) NOT NULL,
+    "type" "PaymentType" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "employee_payments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "employee_benefits" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "employeeId" UUID NOT NULL,
+    "type" "BenefitType" NOT NULL,
+    "referenceYear" INTEGER NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "employee_benefits_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "invoices" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "targetType" "InvoiceTargetType" NOT NULL,
@@ -153,6 +187,12 @@ ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "employee_contracts" ADD CONSTRAINT "employee_contracts_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "employee_payments" ADD CONSTRAINT "employee_payments_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "employee_benefits" ADD CONSTRAINT "employee_benefits_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
