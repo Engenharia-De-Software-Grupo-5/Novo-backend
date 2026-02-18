@@ -90,6 +90,21 @@ CREATE TABLE "banksdata" (
     CONSTRAINT "banksdata_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "invoices" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "objectName" TEXT NOT NULL,
+    "originalName" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "extension" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "invoices_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "condominiums_name_key" ON "condominiums"("name");
 
@@ -98,6 +113,9 @@ CREATE UNIQUE INDEX "properties_identifier_key" ON "properties"("identifier");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "invoices_objectName_key" ON "invoices"("objectName");
 
 -- AddForeignKey
 ALTER TABLE "condominiums" ADD CONSTRAINT "condominiums_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
