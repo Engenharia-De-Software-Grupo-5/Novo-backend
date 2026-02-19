@@ -41,6 +41,20 @@ export class EmployeeController {
     return this.employeeService.getAll();
   }
 
+  @Get(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List employee by CPF',
+    description: 'Retrieve employee registered in the system by CPF.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieved employee',
+    type: EmployeeResponse,
+  })
+  getByCpf(@Param('cpf') cpf: string): Promise<EmployeeResponse> {
+    return this.employeeService.getByCpf(cpf);
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -96,6 +110,28 @@ export class EmployeeController {
     return this.employeeService.update(id, dto);
   }
 
+  @Put(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Update an existing employee',
+    description:
+      'Update the data of an existing employee identified by its ID.',
+  })
+  @ApiBody({
+    description: 'Updated employee data',
+    type: EmployeeDto,
+  })
+  @ApiOkResponse({
+    description: 'Employee successfully updated',
+    type: EmployeeResponse,
+  })
+  updateByCpf(
+    @Param('cpf') cpf: string,
+    @Body() dto: EmployeeDto,
+  ): Promise<EmployeeResponse> {
+    return this.employeeService.updateByCpf(cpf, dto);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -108,5 +144,19 @@ export class EmployeeController {
   })
   delete(@Param('id') employeeId: string): Promise<EmployeeResponse> {
     return this.employeeService.delete(employeeId);
+  }
+
+  @Delete(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete a employee by CPF',
+    description: 'Perform a soft delete of a employee identified by its CPF.',
+  })
+  @ApiOkResponse({
+    description: 'Employee successfully deleted',
+    type: EmployeeResponse,
+  })
+  deleteByCpf(@Param('cpf') cpf: string): Promise<EmployeeResponse> {
+    return this.employeeService.deleteByCpf(cpf);
   }
 }

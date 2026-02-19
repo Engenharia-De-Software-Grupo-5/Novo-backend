@@ -10,6 +10,8 @@ describe('EmployeeService', () => {
     getAll: jest.fn(),
     getById: jest.fn(),
     getByCpf: jest.fn(),
+    updateByCpf: jest.fn(),
+    deleteByCpf: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -57,10 +59,24 @@ describe('EmployeeService', () => {
     expect(result.id).toBe('uuid-1');
   });
 
+  it('getByCpf → employee exists', async () => {
+    mockRepository.getByCpf.mockResolvedValue(mockEmployee);
+
+    const result = await service.getByCpf('12345678901');
+
+    expect(result.cpf).toBe('12345678901');
+  });
+
   it("getById → employee doesn't exist", async () => {
     mockRepository.getById.mockResolvedValue(null);
 
     await expect(service.getById('404')).resolves.toBeNull();
+  });
+
+  it("getByCpf → employee doesn't exist", async () => {
+    mockRepository.getByCpf.mockResolvedValue(null);
+
+    await expect(service.getByCpf('404')).resolves.toBeNull();
   });
 
   it('create → new CPF', async () => {
@@ -89,10 +105,26 @@ describe('EmployeeService', () => {
     expect(mockRepository.update).toHaveBeenCalledWith('uuid-1', mockEmployee);
   });
 
+  it('updateByCpf → updates  employee', async () => {
+    mockRepository.updateByCpf.mockResolvedValue(mockEmployee);
+
+    const result = await service.updateByCpf('12345678901', mockEmployee as any);
+
+    expect(result.cpf).toBe('12345678901');
+    expect(mockRepository.updateByCpf).toHaveBeenCalledWith('12345678901', mockEmployee);
+  });
+
   it("update → employee doesn't exist", async () => {
     mockRepository.update.mockResolvedValue(null);
 
     await expect(service.update('404', mockEmployee as any))
+      .resolves.toBeNull();
+  });
+
+  it("updateByCpf → employee doesn't exist", async () => {
+    mockRepository.updateByCpf.mockResolvedValue(null);
+
+    await expect(service.updateByCpf('404', mockEmployee as any))
       .resolves.toBeNull();
   });
 
@@ -104,9 +136,23 @@ describe('EmployeeService', () => {
     expect(result.id).toBe('uuid-1');
   });
 
+  it('deleteByCpf → removes employee', async () => {
+    mockRepository.deleteByCpf.mockResolvedValue(mockEmployee);
+
+    const result = await service.deleteByCpf('12345678901');
+
+    expect(result.cpf).toBe('12345678901');
+  });
+
   it("delete → employee doesn't exist", async () => {
     mockRepository.delete.mockResolvedValue(null);
 
     await expect(service.delete('404')).resolves.toBeNull();
+  });
+
+it("deleteByCpf → employee doesn't exist", async () => {
+    mockRepository.deleteByCpf.mockResolvedValue(null);
+
+    await expect(service.deleteByCpf('404')).resolves.toBeNull();
   });
 });

@@ -13,6 +13,10 @@ export class EmployeeService {
     return this.employeeRepository.getById(employeeId);
   }
 
+  getByCpf(cpf: string): Promise<EmployeeResponse> {
+    return this.employeeRepository.getByCpf(cpf);
+  }
+
   async create(dto: EmployeeDto): Promise<EmployeeResponse> {
     const employeeExistente = await this.employeeRepository.getByCpf(
       dto.cpf,
@@ -29,7 +33,15 @@ export class EmployeeService {
     return this.employeeRepository.update(id, dto);
   }
 
+  updateByCpf(cpf: string, dto: EmployeeDto): Promise<EmployeeResponse> {
+    return this.employeeRepository.updateByCpf(cpf, dto);
+  }
+
   delete(employeeId: string): Promise<EmployeeResponse> {
     return this.employeeRepository.delete(employeeId);
+  }
+
+  deleteByCpf(cpf: string): Promise<EmployeeResponse> {
+    return this.employeeRepository.deleteByCpf(cpf);
   }
 }
