@@ -10,10 +10,7 @@ import { MinioClientModule } from './tools/minio-client.module';
 import { EmployeeModule } from './employee/employee.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
-import { InvoiceModule} from './invoice/invoice.module';
-import { EmployeeContractsModule } from './employee/employee-contracts.module';
-import { EmployeePaymentsModule } from './employee/employee-payments.module';
-import { EmployeeBenefitsModule } from './employee/employee-benefits.module';
+import { ExpenseModule } from './expense/expense.module';
 
 @Module({
   imports: [
@@ -27,10 +24,7 @@ import { EmployeeBenefitsModule } from './employee/employee-benefits.module';
     CondominiumModule,
     EmployeeModule,
     PropertyModule,
-    InvoiceModule,
-    EmployeeContractsModule,
-    EmployeePaymentsModule,
-    EmployeeBenefitsModule,
+    ExpenseModule,
   ],
   controllers: [AppController],
   providers: [

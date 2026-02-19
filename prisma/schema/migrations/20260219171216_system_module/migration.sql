@@ -17,7 +17,10 @@ CREATE TYPE "PaymentType" AS ENUM ('SALARY', 'BONUS', 'ADVANCE', 'OTHER');
 CREATE TYPE "BenefitType" AS ENUM ('VACATION', 'THIRTEENTH');
 
 -- CreateEnum
-CREATE TYPE "InvoiceTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
+CREATE TYPE "ExpenseTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
+
+-- CreateEnum
+CREATE TYPE "ExpensePaymentMethod" AS ENUM ('CASH', 'PIX', 'BOLETO', 'CREDIT_CARD', 'DEBIT_CARD', 'TRANSFER', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "condominiums" (
@@ -144,11 +147,26 @@ CREATE TABLE "employee_benefits" (
 );
 
 -- CreateTable
-CREATE TABLE "invoices" (
+CREATE TABLE "expenses" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "targetType" "InvoiceTargetType" NOT NULL,
+    "targetType" "ExpenseTargetType" NOT NULL,
     "condominiumId" UUID,
     "propertyId" UUID,
+    "expenseType" TEXT NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+    "expenseDate" TIMESTAMP(3) NOT NULL,
+    "paymentMethod" "ExpensePaymentMethod" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "expenses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "invoices" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "expenseId" UUID NOT NULL,
     "objectName" TEXT NOT NULL,
     "originalName" TEXT NOT NULL,
     "mimeType" TEXT NOT NULL,
@@ -195,7 +213,10 @@ ALTER TABLE "employee_payments" ADD CONSTRAINT "employee_payments_employeeId_fke
 ALTER TABLE "employee_benefits" ADD CONSTRAINT "employee_benefits_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_expenseId_fkey" FOREIGN KEY ("expenseId") REFERENCES "expenses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

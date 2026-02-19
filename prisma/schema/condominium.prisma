@@ -8,9 +8,9 @@ model Condominiums {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
+  expenses    Expenses[]
 
   @@map("condominiums")
-  invoices Invoices[]
 }
 
 model Addresses {
@@ -46,9 +46,9 @@ model Properties {
   deletedAt         DateTime?
   condominium       Condominiums?     @relation(fields: [condominiumId], references: [id])
   condominiumId     String?           @db.Uuid
+  expenses          Expenses[]
 
   @@map("properties")
-  invoices Invoices[]
 }
 
 enum UnityType {
