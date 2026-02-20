@@ -7,6 +7,7 @@ import { PrismaDatabaseModule } from './database/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MinioClientModule } from './tools/minio-client.module';
+import { ContractTemplateModule } from './contract.templates/contract.template.module';
 import { EmployeeModule } from './employee/employee.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
@@ -24,6 +25,7 @@ import { ChargesModule } from './charge/charge.module';
     PrismaDatabaseModule,
     AuthModule,
     MinioClientModule,
+    ContractTemplateModule,
     CondominiumModule,
     EmployeeModule,
     PropertyModule,
@@ -45,4 +47,4 @@ import { ChargesModule } from './charge/charge.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

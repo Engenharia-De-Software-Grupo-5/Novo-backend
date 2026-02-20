@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { seedUsers } from './functions/auth/user.seed';
 import { seedPermissions } from './functions/auth/permission.seed';
+import { seedContractTemplates } from './functions/auth/contract.template.seed';
 import { seedCondominiums } from './functions/condominiums/condominium.seed';
 import { seedProperties } from './functions/condominiums/property.seed';
 import { seedEmployees } from './functions/employees/employee.seed';
@@ -16,6 +17,7 @@ async function main() {
     permissionAdmin.id,
     permissionContractManager.id,
   );
+  const { contractTemplate1, contractTemplate2 } = await seedContractTemplates(prisma)
   const { condominiumA, condominiumB } = await seedCondominiums(
     prisma
   );
@@ -25,6 +27,7 @@ async function main() {
   );
 
   const { employee1, employee2 } = await seedEmployees(prisma);
+}
 
 
   const { tenantA, tenantB } = await seedTenants(prisma);
