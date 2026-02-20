@@ -73,6 +73,38 @@ CREATE TABLE "properties" (
 );
 
 -- CreateTable
+CREATE TABLE "property_inspections" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "propertyId" UUID NOT NULL,
+    "objectName" TEXT NOT NULL,
+    "originalName" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "extension" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "property_inspections_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "property_documents" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "propertyId" UUID NOT NULL,
+    "objectName" TEXT NOT NULL,
+    "originalName" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "extension" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "property_documents_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "employees" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "cpf" TEXT NOT NULL,
@@ -186,6 +218,12 @@ CREATE UNIQUE INDEX "condominiums_name_key" ON "condominiums"("name");
 CREATE UNIQUE INDEX "properties_identifier_key" ON "properties"("identifier");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "property_inspections_objectName_key" ON "property_inspections"("objectName");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "property_documents_objectName_key" ON "property_documents"("objectName");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
 
 -- CreateIndex
@@ -199,6 +237,12 @@ ALTER TABLE "condominiums" ADD CONSTRAINT "condominiums_addressId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "properties" ADD CONSTRAINT "properties_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "property_inspections" ADD CONSTRAINT "property_inspections_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "property_documents" ADD CONSTRAINT "property_documents_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
