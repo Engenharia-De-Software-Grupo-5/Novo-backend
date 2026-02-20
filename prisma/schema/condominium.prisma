@@ -1,14 +1,15 @@
 model Condominiums {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String       @unique
-  description String?
-  address     Addresses    @relation(fields: [addressId], references: [id])
-  addressId   String       @db.Uuid
-  properties  Properties[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
-  expenses    Expenses[]
+  id                       String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String                     @unique
+  description              String?
+  address                  Addresses                  @relation(fields: [addressId], references: [id])
+  addressId                String                     @db.Uuid
+  properties               Properties[]
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  deletedAt                DateTime?
+  expenses                 Expenses[]
+  condominiumContractLinks CondominiumContractLinks[]
 
   @@map("condominiums")
 }
@@ -31,24 +32,25 @@ model Addresses {
 }
 
 model Properties {
-  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  identifier        String                @unique
-  address           String
-  unityNumber       String
-  unityType         UnityType             @default(APARTMENT)
-  block             String?
-  floor             Int?
-  totalArea         Float?
-  propertySituation PropertySituation     @default(ACTIVE)
-  observations      String?
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
-  deletedAt         DateTime?
-  condominium       Condominiums?         @relation(fields: [condominiumId], references: [id])
-  condominiumId     String?               @db.Uuid
-  expenses          Expenses[]
-  inspections       PropertyInspections[]
-  documents         PropertyDocuments[]
+  id                    String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier            String                  @unique
+  address               String
+  unityNumber           String
+  unityType             UnityType               @default(APARTMENT)
+  block                 String?
+  floor                 Int?
+  totalArea             Float?
+  propertySituation     PropertySituation       @default(ACTIVE)
+  observations          String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  deletedAt             DateTime?
+  condominium           Condominiums?           @relation(fields: [condominiumId], references: [id])
+  condominiumId         String?                 @db.Uuid
+  expenses              Expenses[]
+  inspections           PropertyInspections[]
+  documents             PropertyDocuments[]
+  propertyContractLinks PropertyContractLinks[]
 
   @@map("properties")
 }

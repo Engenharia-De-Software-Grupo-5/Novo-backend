@@ -4,6 +4,7 @@ import { seedPermissions } from './functions/auth/permission.seed';
 import { seedCondominiums } from './functions/condominiums/condominium.seed';
 import { seedProperties } from './functions/condominiums/property.seed';
 import { seedEmployees } from './functions/employees/employee.seed';
+import { seedTenants } from './functions/tenants/tenant.seed';
 
 const prisma = new PrismaClient();
 
@@ -24,8 +25,10 @@ async function main() {
   );
 
   const { employee1, employee2 } = await seedEmployees(prisma);
-}
 
+
+  const { tenantA, tenantB } = await seedTenants(prisma);
+}
 main()
   .then(() => {
     console.log('Seed concluído com sucesso.');

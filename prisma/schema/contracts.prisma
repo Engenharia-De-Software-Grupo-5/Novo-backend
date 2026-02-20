@@ -1,0 +1,67 @@
+model Contracts {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    objectName   String @unique
+    originalName String
+    mimeType     String
+    extension    String
+    size         Int
+
+    ownerCpf String?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    employeesLinks    EmployeeContractLinks[]
+    condominiumsLinks CondominiumContractLinks[]
+    propertiesLinks   PropertyContractLinks[]
+
+    @@index([ownerCpf])
+    @@map("contracts")
+}
+
+model EmployeeContractLinks {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    contractId String    @db.Uuid
+    contract   Contracts @relation(fields: [contractId], references: [id])
+
+    employeeId String    @db.Uuid
+    employee   Employees @relation(fields: [employeeId], references: [id])
+
+    createdAt DateTime @default(now())
+
+    @@unique([contractId, employeeId])
+    @@map("employee_contract_links")
+}
+
+model CondominiumContractLinks {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    contractId String    @db.Uuid
+    contract   Contracts @relation(fields: [contractId], references: [id])
+
+    condominiumId String       @db.Uuid
+    condominium   Condominiums @relation(fields: [condominiumId], references: [id])
+
+    createdAt DateTime @default(now())
+
+    @@unique([contractId, condominiumId])
+    @@map("condominium_contract_links")
+}
+
+model PropertyContractLinks {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    contractId String    @db.Uuid
+    contract   Contracts @relation(fields: [contractId], references: [id])
+
+    propertyId String     @db.Uuid
+    property   Properties @relation(fields: [propertyId], references: [id])
+
+    createdAt DateTime @default(now())
+
+    @@unique([contractId, propertyId])
+    @@map("property_contract_links")
+}
