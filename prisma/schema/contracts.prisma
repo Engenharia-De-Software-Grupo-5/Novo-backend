@@ -1,0 +1,38 @@
+model Contracts {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    objectName   String @unique
+    originalName String
+    mimeType     String
+    extension    String
+    size         Int
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    leases PropertyTenantContractLinks[]
+
+    @@map("contracts")
+}
+
+model PropertyTenantContractLinks {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    contractId String    @db.Uuid
+    contract   Contracts @relation(fields: [contractId], references: [id])
+
+    propertyId String     @db.Uuid
+    property   Properties @relation(fields: [propertyId], references: [id])
+
+    tenantId String  @db.Uuid
+    tenant   Tenants @relation(fields: [tenantId], references: [id])
+
+    createdAt DateTime @default(now())
+
+    @@unique([contractId, propertyId, tenantId])
+    @@index([tenantId])
+    @@index([propertyId])
+    @@index([contractId])
+    @@map("property_tenant_contract_links")
+}

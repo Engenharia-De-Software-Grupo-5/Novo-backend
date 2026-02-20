@@ -1,0 +1,58 @@
+enum ExpenseTargetType {
+  CONDOMINIUM
+  PROPERTY
+}
+
+enum ExpensePaymentMethod {
+  CASH
+  PIX
+  BOLETO
+  CREDIT_CARD
+  DEBIT_CARD
+  TRANSFER
+  OTHER
+}
+
+model Expenses {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  targetType ExpenseTargetType
+
+  condominiumId String? @db.Uuid
+  propertyId    String? @db.Uuid
+
+  condominium Condominiums? @relation(fields: [condominiumId], references: [id])
+  property    Properties?   @relation(fields: [propertyId], references: [id])
+
+  expenseType   String
+  value         Float
+  expenseDate   DateTime
+  paymentMethod ExpensePaymentMethod
+
+  invoices Invoices[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("expenses")
+}
+
+model Invoices {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  expenseId String   @db.Uuid
+  expense   Expenses @relation(fields: [expenseId], references: [id])
+
+  objectName   String @unique
+  originalName String
+  mimeType     String
+  extension    String
+  size         Int
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("invoices")
+}

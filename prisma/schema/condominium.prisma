@@ -8,6 +8,7 @@ model Condominiums {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
+  expenses    Expenses[]
 
   @@map("condominiums")
 }
@@ -30,21 +31,26 @@ model Addresses {
 }
 
 model Properties {
-  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  identifier        String            @unique
-  address           String
-  unityNumber       String
-  unityType         UnityType         @default(APARTMENT)
-  block             String?
-  floor             Int?
-  totalArea         Float?
-  propertySituation PropertySituation @default(ACTIVE)
-  observations      String?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  deletedAt         DateTime?
-  condominium       Condominiums?     @relation(fields: [condominiumId], references: [id])
-  condominiumId     String?           @db.Uuid
+  id                          String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier                  String                        @unique
+  address                     String
+  unityNumber                 String
+  unityType                   UnityType                     @default(APARTMENT)
+  block                       String?
+  floor                       Int?
+  totalArea                   Float?
+  propertySituation           PropertySituation             @default(ACTIVE)
+  observations                String?
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  deletedAt                   DateTime?
+  condominium                 Condominiums?                 @relation(fields: [condominiumId], references: [id])
+  condominiumId               String?                       @db.Uuid
+  expenses                    Expenses[]
+  inspections                 PropertyInspections[]
+  documents                   PropertyDocuments[]
+  propertyTenantContractLinks PropertyTenantContractLinks[]
+  charges                     Charges[]
 
   @@map("properties")
 }
@@ -60,4 +66,42 @@ enum PropertySituation {
   INACTIVE
   UNAVAILABLE
   MAINTENANCE
+}
+
+model PropertyInspections {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  propertyId String     @db.Uuid
+  property   Properties @relation(fields: [propertyId], references: [id])
+
+  objectName   String @unique
+  originalName String
+  mimeType     String
+  extension    String
+  size         Int
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("property_inspections")
+}
+
+model PropertyDocuments {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  propertyId String     @db.Uuid
+  property   Properties @relation(fields: [propertyId], references: [id])
+
+  objectName   String @unique
+  originalName String
+  mimeType     String
+  extension    String
+  size         Int
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("property_documents")
 }

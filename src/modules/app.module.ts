@@ -11,6 +11,10 @@ import { ContractTemplateModule } from './contract.templates/contract.template.m
 import { EmployeeModule } from './employee/employee.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
+import { ExpenseModule } from './expense/expense.module';
+import { ContractModule } from './contract/contract.module';
+import { TenantModule } from './tenant/tenant.module';
+import { ChargesModule } from './charge/charge.module';
 
 @Module({
   imports: [
@@ -25,6 +29,10 @@ import { PropertyModule } from './condominium/property.module';
     CondominiumModule,
     EmployeeModule,
     PropertyModule,
+    ExpenseModule,
+    ContractModule,
+    TenantModule,
+    ChargesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -9,6 +9,9 @@ describe('EmployeeController', () => {
   const mockService = {
     getAll: jest.fn(),
     getById: jest.fn(),
+    getByCpf: jest.fn(),
+    updateByCpf: jest.fn(),
+    deleteByCpf: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -54,10 +57,25 @@ describe('EmployeeController', () => {
     expect(result.id).toBe('uuid-1');
   });
 
+  it('getByCpf → returns employee', async () => {
+    mockService.getByCpf.mockResolvedValue(mockEmployee);
+
+    const result = await controller.getByCpf('12345678901');
+
+    expect(result.cpf).toBe('12345678901');
+  });
+
   it('getById → propagates NotFound', async () => {
     mockService.getById.mockRejectedValue(new NotFoundException());
 
     await expect(controller.getById('404'))
+      .rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('getByCpf → propagates NotFound', async () => {
+    mockService.getByCpf.mockRejectedValue(new NotFoundException());
+
+    await expect(controller.getByCpf('404'))
       .rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -86,6 +104,15 @@ describe('EmployeeController', () => {
     expect(mockService.update).toHaveBeenCalledWith('uuid-1', mockEmployee);
   });
 
+   it('updateByCpf → calls the service', async () => {
+    mockService.updateByCpf.mockResolvedValue(mockEmployee);
+
+    const result = await controller.updateByCpf('12345678901', mockEmployee as any);
+
+    expect(result.cpf).toBe('12345678901');
+    expect(mockService.updateByCpf).toHaveBeenCalledWith('12345678901', mockEmployee);
+  });
+
   it('delete → removes employee', async () => {
     mockService.delete.mockResolvedValue(mockEmployee);
 
@@ -93,5 +120,14 @@ describe('EmployeeController', () => {
 
     expect(result.id).toBe('uuid-1');
     expect(mockService.delete).toHaveBeenCalledWith('uuid-1');
+  });
+
+   it('deleteByCpf → removes employee', async () => {
+    mockService.deleteByCpf.mockResolvedValue(mockEmployee);
+
+    const result = await controller.deleteByCpf('12345678901');
+
+    expect(result.cpf).toBe('12345678901');
+    expect(mockService.deleteByCpf).toHaveBeenCalledWith('12345678901');
   });
 });

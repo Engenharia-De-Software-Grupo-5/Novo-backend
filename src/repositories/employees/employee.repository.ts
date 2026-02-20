@@ -71,9 +71,25 @@ export class EmployeeRepository {
     });
   }
 
+  updateByCpf(cpf: string, dto: EmployeeDto): Promise<EmployeeResponse> {
+    return this.prisma.employees.update({
+      where: { cpf },
+      data: { ...dto, deletedAt: null},
+      select: this.employeeSelect,
+    });
+  }
+
   delete(employeeId: string): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
       where: { id: employeeId, deletedAt: null },
+      data: { deletedAt: new Date() },
+      select: this.employeeSelect,
+    });
+  }
+
+  deleteByCpf(cpf: string): Promise<EmployeeResponse> {
+    return this.prisma.employees.update({
+      where: { cpf, deletedAt: null },
       data: { deletedAt: new Date() },
       select: this.employeeSelect,
     });
