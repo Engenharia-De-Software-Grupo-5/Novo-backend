@@ -6,6 +6,7 @@ model Tenants {
     updatedAt                   DateTime                      @updatedAt
     deletedAt                   DateTime?
     propertyTenantContractLinks PropertyTenantContractLinks[]
+    charges                     Charges[]
 
     @@map("tenants")
 }

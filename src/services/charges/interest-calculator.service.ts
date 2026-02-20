@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   InterestCalculatorDto,
-} from 'src/contracts/charges/interest-calculator.dto';
-import { InterestCalculatorResponse } from 'src/contracts/charges/interest-calculator.response';
+} from 'src/contracts/charges/calculator/interest-calculator.dto';
+import { InterestCalculatorResponse } from 'src/contracts/charges/calculator/interest-calculator.response';
 
 @Injectable()
 export class InterestCalculatorService {

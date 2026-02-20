@@ -50,6 +50,7 @@ model Properties {
   inspections                 PropertyInspections[]
   documents                   PropertyDocuments[]
   propertyTenantContractLinks PropertyTenantContractLinks[]
+  charges                     Charges[]
 
   @@map("properties")
 }

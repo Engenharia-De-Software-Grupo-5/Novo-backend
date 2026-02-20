@@ -1,4 +1,10 @@
 -- CreateEnum
+CREATE TYPE "ChargeStatus" AS ENUM ('PENDING', 'PAID', 'OVERDUE', 'CANCELED');
+
+-- CreateEnum
+CREATE TYPE "PaymentMethod" AS ENUM ('BOLETO', 'PIX', 'DEPOSIT');
+
+-- CreateEnum
 CREATE TYPE "UnityType" AS ENUM ('HOUSE', 'APARTMENT', 'COMMERCIAL_ROOM');
 
 -- CreateEnum
@@ -21,6 +27,50 @@ CREATE TYPE "ExpenseTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
 
 -- CreateEnum
 CREATE TYPE "ExpensePaymentMethod" AS ENUM ('CASH', 'PIX', 'BOLETO', 'CREDIT_CARD', 'DEBIT_CARD', 'TRANSFER', 'OTHER');
+
+-- CreateTable
+CREATE TABLE "Charges" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "tenantId" UUID NOT NULL,
+    "propertyId" UUID NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "dueDate" TIMESTAMP(3) NOT NULL,
+    "fineRate" DOUBLE PRECISION NOT NULL DEFAULT 2,
+    "monthlyRate" DOUBLE PRECISION NOT NULL DEFAULT 1,
+    "paymentMethod" "PaymentMethod" NOT NULL,
+    "status" "ChargeStatus" NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Charges_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Payments" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "chargeId" UUID NOT NULL,
+    "amountPaid" DOUBLE PRECISION NOT NULL,
+    "paymentDate" TIMESTAMP(3) NOT NULL,
+    "method" "PaymentMethod" NOT NULL,
+    "wasLate" BOOLEAN NOT NULL,
+    "daysLate" INTEGER NOT NULL,
+    "fineRate" DOUBLE PRECISION NOT NULL,
+    "monthlyRate" DOUBLE PRECISION NOT NULL,
+    "finePaid" DOUBLE PRECISION NOT NULL,
+    "interestPaid" DOUBLE PRECISION NOT NULL,
+    "totalPaid" DOUBLE PRECISION NOT NULL,
+    "proofObjectName" TEXT,
+    "proofOriginalName" TEXT,
+    "proofMimeType" TEXT,
+    "proofExtension" TEXT,
+    "proofSize" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Payments_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "condominiums" (
@@ -250,6 +300,24 @@ CREATE TABLE "tenants" (
 );
 
 -- CreateIndex
+CREATE INDEX "Charges_tenantId_idx" ON "Charges"("tenantId");
+
+-- CreateIndex
+CREATE INDEX "Charges_propertyId_idx" ON "Charges"("propertyId");
+
+-- CreateIndex
+CREATE INDEX "Charges_status_idx" ON "Charges"("status");
+
+-- CreateIndex
+CREATE INDEX "Charges_dueDate_idx" ON "Charges"("dueDate");
+
+-- CreateIndex
+CREATE INDEX "Payments_chargeId_idx" ON "Payments"("chargeId");
+
+-- CreateIndex
+CREATE INDEX "Payments_paymentDate_idx" ON "Payments"("paymentDate");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "condominiums_name_key" ON "condominiums"("name");
 
 -- CreateIndex
@@ -290,6 +358,15 @@ CREATE UNIQUE INDEX "tenants_cpf_key" ON "tenants"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tenants_name_key" ON "tenants"("name");
+
+-- AddForeignKey
+ALTER TABLE "Charges" ADD CONSTRAINT "Charges_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Charges" ADD CONSTRAINT "Charges_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_chargeId_fkey" FOREIGN KEY ("chargeId") REFERENCES "Charges"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "condominiums" ADD CONSTRAINT "condominiums_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

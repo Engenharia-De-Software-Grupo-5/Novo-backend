@@ -12,8 +12,8 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import {
   InterestCalculatorDto,
   
-} from 'src/contracts/charges/interest-calculator.dto';
-import { InterestCalculatorResponse } from 'src/contracts/charges/interest-calculator.response';
+} from 'src/contracts/charges/calculator/interest-calculator.dto';
+import { InterestCalculatorResponse } from 'src/contracts/charges/calculator/interest-calculator.response';
 
 import { InterestCalculatorService } from 'src/services/charges/interest-calculator.service';
 

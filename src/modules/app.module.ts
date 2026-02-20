@@ -13,7 +13,7 @@ import { PropertyModule } from './condominium/property.module';
 import { ExpenseModule } from './expense/expense.module';
 import { ContractModule } from './contract/contract.module';
 import { TenantModule } from './tenant/tenant.module';
-import { ChargeModule } from './charge/charge.module';
+import { ChargesModule } from './charge/charge.module';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { ChargeModule } from './charge/charge.module';
     ExpenseModule,
     ContractModule,
     TenantModule,
-    ChargeModule,
+    ChargesModule,
   ],
   controllers: [AppController],
   providers: [
