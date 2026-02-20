@@ -1,193 +1,155 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  NotFoundException,
-  UnsupportedMediaTypeException,
-  ConflictException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
+import { ContractsController } from 'src/controllers/contracts/contract.controller';
 import { ContractsService } from 'src/services/contracts/contract.service';
-import { ContractsRepository } from 'src/repositories/contracts/contract.repository';
-import { MinioClientService } from 'src/services/tools/minio-client.service';
 
-describe('ContractsService', () => {
-  let service: ContractsService;
-  let repo: jest.Mocked<ContractsRepository>;
-  let minio: jest.Mocked<MinioClientService>;
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
-  const mockRepo = (): jest.Mocked<ContractsRepository> =>
+describe('ContractsController', () => {
+  let controller: ContractsController;
+  let service: jest.Mocked<ContractsService>;
+
+  const mockService = (): jest.Mocked<ContractsService> =>
     ({
-      create: jest.fn(),
+      upload: jest.fn(),
       list: jest.fn(),
-      getById: jest.fn(),
-      softDelete: jest.fn(),
-
-      linkEmployee: jest.fn(),
-      unlinkEmployee: jest.fn(),
-      linkCondominium: jest.fn(),
-      unlinkCondominium: jest.fn(),
-      linkProperty: jest.fn(),
-      unlinkProperty: jest.fn(),
+      findOne: jest.fn(),
+      getDownloadUrl: jest.fn(),
+      remove: jest.fn(),
 
       linkLease: jest.fn(),
       unlinkLease: jest.fn(),
-
       listByTenant: jest.fn(),
       listByProperty: jest.fn(),
-      listByEmployee: jest.fn(),
-      listByCondominium: jest.fn(),
-    }) as any;
-
-  const mockMinio = (): jest.Mocked<MinioClientService> =>
-    ({
-      uploadFile: jest.fn(),
-      getFileUrl: jest.fn(),
-      deleteFile: jest.fn(),
     }) as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ContractsService,
-        { provide: ContractsRepository, useFactory: mockRepo },
-        { provide: MinioClientService, useFactory: mockMinio },
-      ],
-    }).compile();
+      controllers: [ContractsController],
+      providers: [{ provide: ContractsService, useFactory: mockService }],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
+    controller = module.get(ContractsController);
     service = module.get(ContractsService);
-    repo = module.get(ContractsRepository);
-    minio = module.get(MinioClientService);
   });
 
-  it('should upload contract (happy path)', async () => {
-    minio.uploadFile.mockResolvedValue({ fileName: 'contracts/obj.pdf' } as any);
-    repo.create.mockResolvedValue({ id: 'c-1' } as any);
+  it('should upload contract and call service', async () => {
+    service.upload.mockResolvedValue({ id: 'c-1' } as any);
 
     const file = {
       originalname: 'contrato.pdf',
       mimetype: 'application/pdf',
-      size: 123,
-      buffer: Buffer.from('x'),
-    } as any;
-
-    const res = await service.upload(file);
-
-    expect(minio.uploadFile).toHaveBeenCalledWith(
-      file,
-      ['pdf'],
-      expect.stringMatching(/^contracts\/.+\.pdf$/),
-    );
-
-    expect(repo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        objectName: 'contracts/obj.pdf',
-        originalName: 'contrato.pdf',
-        mimeType: 'application/pdf',
-        extension: 'pdf',
-        size: 123,
-      }),
-    );
-
-    expect(res).toEqual({ id: 'c-1' });
-  });
-
-  it('should reject non-pdf upload', async () => {
-    const file = {
-      originalname: 'contrato.png',
-      mimetype: 'image/png',
       size: 1,
       buffer: Buffer.from('x'),
     } as any;
 
-    await expect(service.upload(file)).rejects.toBeInstanceOf(
-      UnsupportedMediaTypeException,
+    const res = await controller.upload(file);
+
+    expect(service.upload).toHaveBeenCalledWith(file);
+    expect(res).toEqual({ id: 'c-1' });
+  });
+
+  it('should throw BadRequestException when upload has no file', async () => {
+    await expect(controller.upload(undefined)).rejects.toBeInstanceOf(
+      BadRequestException,
     );
-    expect(minio.uploadFile).not.toHaveBeenCalled();
-    expect(repo.create).not.toHaveBeenCalled();
   });
 
   it('should list contracts (no filter)', async () => {
-    repo.list.mockResolvedValue([{ id: 'c-1' }] as any);
+    service.list.mockResolvedValue([{ id: 'c-1' }] as any);
 
-    const res = await service.list();
+    const res = await controller.list(undefined);
 
-    expect(repo.list).toHaveBeenCalledWith({ tenantCpf: undefined });
+    expect(service.list).toHaveBeenCalledWith(undefined);
     expect(res).toEqual([{ id: 'c-1' }]);
   });
 
-  it('should list contracts (filtered by tenantCpf)', async () => {
-    repo.list.mockResolvedValue([{ id: 'c-2' }] as any);
+  it('should list contracts (tenantCpf filter)', async () => {
+    service.list.mockResolvedValue([{ id: 'c-2' }] as any);
 
-    const res = await service.list('11111111111');
+    const res = await controller.list('11111111111');
 
-    expect(repo.list).toHaveBeenCalledWith({ tenantCpf: '11111111111' });
+    expect(service.list).toHaveBeenCalledWith('11111111111');
     expect(res).toEqual([{ id: 'c-2' }]);
   });
 
-  it('should findOne include url', async () => {
-    repo.getById.mockResolvedValue({ id: 'c-1', objectName: 'obj' } as any);
-    minio.getFileUrl.mockResolvedValue('http://url');
+  it('should find contract details', async () => {
+    service.findOne.mockResolvedValue({ id: 'c-1', url: 'http://x' } as any);
 
-    const res = await service.findOne('c-1');
+    const res = await controller.findOne('c-1' as any);
 
-    expect(repo.getById).toHaveBeenCalledWith('c-1');
-    expect(minio.getFileUrl).toHaveBeenCalledWith('obj');
-    expect(res).toEqual(expect.objectContaining({ id: 'c-1', url: 'http://url' }));
-  });
-
-  it('should throw NotFound on findOne when missing', async () => {
-    repo.getById.mockResolvedValue(null as any);
-    await expect(service.findOne('x')).rejects.toBeInstanceOf(NotFoundException);
+    expect(service.findOne).toHaveBeenCalledWith('c-1');
+    expect(res).toEqual({ id: 'c-1', url: 'http://x' });
   });
 
   it('should get download url', async () => {
-    repo.getById.mockResolvedValue({ id: 'c-1', objectName: 'obj' } as any);
-    minio.getFileUrl.mockResolvedValue('http://download');
+    service.getDownloadUrl.mockResolvedValue({ url: 'http://x' } as any);
 
-    const res = await service.getDownloadUrl('c-1');
+    const res = await controller.download('c-1' as any);
 
-    expect(res).toEqual({ url: 'http://download' });
+    expect(service.getDownloadUrl).toHaveBeenCalledWith('c-1');
+    expect(res).toEqual({ url: 'http://x' });
   });
 
-  it('should remove contract: delete minio best-effort and soft delete', async () => {
-    repo.getById.mockResolvedValue({ id: 'c-1', objectName: 'obj' } as any);
-    minio.deleteFile.mockResolvedValue(undefined as any);
-    repo.softDelete.mockResolvedValue({} as any);
+  it('should remove contract (no content)', async () => {
+    service.remove.mockResolvedValue(undefined as any);
 
-    await service.remove('c-1');
+    const res = await controller.remove('c-1' as any);
 
-    expect(minio.deleteFile).toHaveBeenCalledWith('obj');
-    expect(repo.softDelete).toHaveBeenCalledWith('c-1');
+    expect(service.remove).toHaveBeenCalledWith('c-1');
+    expect(res).toBeUndefined();
   });
 
-  it('should remove even if minio delete fails', async () => {
-    repo.getById.mockResolvedValue({ id: 'c-1', objectName: 'obj' } as any);
-    minio.deleteFile.mockRejectedValue(new Error('fail'));
-    repo.softDelete.mockResolvedValue({} as any);
+  it('should link/unlink lease (ternary relation)', async () => {
+    service.linkLease.mockResolvedValue({ id: 'lease-1' } as any);
 
-    await service.remove('c-1');
-
-    expect(repo.softDelete).toHaveBeenCalledWith('c-1');
-  });
-
-  it('should proxy linkLease/unlinkLease', async () => {
-    repo.linkLease.mockResolvedValue({ id: 'l-1' } as any);
-
-    const linked = await service.linkLease('c-1', 'p-1', 't-1');
-    expect(repo.linkLease).toHaveBeenCalledWith('c-1', 'p-1', 't-1');
-    expect(linked).toEqual({ id: 'l-1' });
-
-    repo.unlinkLease.mockResolvedValue({} as any);
-    await service.unlinkLease('c-1', 'p-1', 't-1');
-    expect(repo.unlinkLease).toHaveBeenCalledWith('c-1', 'p-1', 't-1');
-  });
-
-  it('should propagate ConflictException from repo', async () => {
-    repo.linkLease.mockRejectedValue(
-      new ConflictException('Lease link already exists.'),
+    const linkRes = await controller.linkLease(
+      'c-1' as any,
+      't-1' as any,
+      'p-1' as any,
     );
 
-    await expect(service.linkLease('c-1', 'p-1', 't-1')).rejects.toBeInstanceOf(
-      ConflictException,
+    // service.linkLease(contractId, propertyId, tenantId)
+    expect(service.linkLease).toHaveBeenCalledWith('c-1', 'p-1', 't-1');
+    expect(linkRes).toEqual({ id: 'lease-1' });
+
+    service.unlinkLease.mockResolvedValue(undefined as any);
+
+    const unlinkRes = await controller.unlinkLease(
+      'c-1' as any,
+      't-1' as any,
+      'p-1' as any,
+    );
+
+    expect(service.unlinkLease).toHaveBeenCalledWith('c-1', 'p-1', 't-1');
+    expect(unlinkRes).toBeUndefined();
+  });
+
+  it('should listByTenant / listByProperty', async () => {
+    service.listByTenant.mockResolvedValue([{ id: 'c-1' }] as any);
+    service.listByProperty.mockResolvedValue([{ id: 'c-2' }] as any);
+
+    const byTenant = await controller.listByTenant('t-1' as any);
+    const byProp = await controller.listByProperty('p-1' as any);
+
+    expect(service.listByTenant).toHaveBeenCalledWith('t-1');
+    expect(service.listByProperty).toHaveBeenCalledWith('p-1');
+
+    expect(byTenant).toEqual([{ id: 'c-1' }]);
+    expect(byProp).toEqual([{ id: 'c-2' }]);
+  });
+
+  it('should propagate NotFoundException', async () => {
+    service.findOne.mockRejectedValue(new NotFoundException('x'));
+    await expect(controller.findOne('x' as any)).rejects.toBeInstanceOf(
+      NotFoundException,
     );
   });
 });

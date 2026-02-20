@@ -21,20 +21,10 @@ describe('ContractsService', () => {
       getById: jest.fn(),
       softDelete: jest.fn(),
 
-      linkEmployee: jest.fn(),
-      unlinkEmployee: jest.fn(),
-      linkCondominium: jest.fn(),
-      unlinkCondominium: jest.fn(),
-      linkProperty: jest.fn(),
-      unlinkProperty: jest.fn(),
-
       linkLease: jest.fn(),
       unlinkLease: jest.fn(),
-
       listByTenant: jest.fn(),
       listByProperty: jest.fn(),
-      listByEmployee: jest.fn(),
-      listByCondominium: jest.fn(),
     }) as any;
 
   const mockMinio = (): jest.Mocked<MinioClientService> =>
@@ -181,7 +171,7 @@ describe('ContractsService', () => {
     expect(repo.unlinkLease).toHaveBeenCalledWith('c-1', 'p-1', 't-1');
   });
 
-  it('should propagate ConflictException from repo', async () => {
+  it('should propagate ConflictException from repo (linkLease)', async () => {
     repo.linkLease.mockRejectedValue(
       new ConflictException('Lease link already exists.'),
     );
@@ -189,5 +179,19 @@ describe('ContractsService', () => {
     await expect(service.linkLease('c-1', 'p-1', 't-1')).rejects.toBeInstanceOf(
       ConflictException,
     );
+  });
+
+  it('should listByTenant / listByProperty', async () => {
+    repo.listByTenant.mockResolvedValue([{ id: 'c-1' }] as any);
+    repo.listByProperty.mockResolvedValue([{ id: 'c-2' }] as any);
+
+    const byTenant = await service.listByTenant('t-1');
+    const byProp = await service.listByProperty('p-1');
+
+    expect(repo.listByTenant).toHaveBeenCalledWith('t-1');
+    expect(repo.listByProperty).toHaveBeenCalledWith('p-1');
+
+    expect(byTenant).toEqual([{ id: 'c-1' }]);
+    expect(byProp).toEqual([{ id: 'c-2' }]);
   });
 });

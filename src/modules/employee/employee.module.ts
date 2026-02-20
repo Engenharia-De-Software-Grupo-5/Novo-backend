@@ -9,10 +9,13 @@ import { EmployeeBenefitsService } from 'src/services/employees/employee-benefit
 import { EmployeePaymentsService } from 'src/services/employees/employee-payments.service';
 import { EmployeeService } from 'src/services/employees/employee.service';
 import { MinioClientModule } from '../tools/minio-client.module';
+import { EmployeeContractsController } from 'src/controllers/employees/employee-contracts.controller';
+import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
+import { EmployeeContractsRepository } from 'src/repositories/employees/employee-contracts.repository';
 
 @Module({
   imports: [MinioClientModule],
-  controllers: [EmployeeController, EmployeeBenefitsController, EmployeePaymentsController],
-  providers: [EmployeeService, EmployeeRepository, EmployeeBenefitsService, EmployeeBenefitsRepository, EmployeePaymentsService, EmployeePaymentsRepository],
+  controllers: [EmployeeController, EmployeeBenefitsController, EmployeePaymentsController, EmployeeContractsController],
+  providers: [EmployeeService, EmployeeRepository, EmployeeBenefitsService, EmployeeBenefitsRepository, EmployeePaymentsService, EmployeePaymentsRepository, EmployeeContractsService, EmployeeContractsRepository],
 })
 export class EmployeeModule {}

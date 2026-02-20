@@ -79,67 +79,6 @@ export class ContractsController {
     await this.service.remove(id);
   }
 
-  
-  @Post(':id/link/employees/:employeeId')
-  @ApiOperation({ summary: 'Link contract to employee' })
-  @HttpCode(HttpStatus.OK)
-  linkEmployee(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('employeeId', new ParseUUIDPipe()) employeeId: string,
-  ) {
-    return this.service.linkEmployee(id, employeeId);
-  }
-
-  @Delete(':id/link/employees/:employeeId')
-  @ApiOperation({ summary: 'Unlink contract from employee' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async unlinkEmployee(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('employeeId', new ParseUUIDPipe()) employeeId: string,
-  ) {
-    await this.service.unlinkEmployee(id, employeeId);
-  }
-
-  @Post(':id/link/condominiums/:condominiumId')
-  @ApiOperation({ summary: 'Link contract to condominium' })
-  @HttpCode(HttpStatus.OK)
-  linkCondominium(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('condominiumId', new ParseUUIDPipe()) condominiumId: string,
-  ) {
-    return this.service.linkCondominium(id, condominiumId);
-  }
-
-  @Delete(':id/link/condominiums/:condominiumId')
-  @ApiOperation({ summary: 'Unlink contract from condominium' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async unlinkCondominium(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('condominiumId', new ParseUUIDPipe()) condominiumId: string,
-  ) {
-    await this.service.unlinkCondominium(id, condominiumId);
-  }
-
-  @Post(':id/link/properties/:propertyId')
-  @ApiOperation({ summary: 'Link contract to property' })
-  @HttpCode(HttpStatus.OK)
-  linkProperty(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('propertyId', new ParseUUIDPipe()) propertyId: string,
-  ) {
-    return this.service.linkProperty(id, propertyId);
-  }
-
-  @Delete(':id/link/properties/:propertyId')
-  @ApiOperation({ summary: 'Unlink contract from property' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async unlinkProperty(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('propertyId', new ParseUUIDPipe()) propertyId: string,
-  ) {
-    await this.service.unlinkProperty(id, propertyId);
-  }
-
 
   @Post(':id/leases')
   @ApiOperation({ summary: 'Link contract to a lease (tenant + property)' })

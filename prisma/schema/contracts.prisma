@@ -11,56 +11,9 @@ model Contracts {
     updatedAt DateTime  @updatedAt
     deletedAt DateTime?
 
-    employeesLinks    EmployeeContractLinks[]
-    condominiumsLinks CondominiumContractLinks[]
-    propertiesLinks   PropertyContractLinks[]
-
     leases PropertyTenantContractLinks[]
 
     @@map("contracts")
-}
-
-model EmployeeContractLinks {
-    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-    contractId String    @db.Uuid
-    contract   Contracts @relation(fields: [contractId], references: [id])
-
-    employeeId String    @db.Uuid
-    employee   Employees @relation(fields: [employeeId], references: [id])
-
-    createdAt DateTime @default(now())
-
-    @@map("employee_contract_links")
-}
-
-model CondominiumContractLinks {
-    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-    contractId String    @db.Uuid
-    contract   Contracts @relation(fields: [contractId], references: [id])
-
-    condominiumId String       @db.Uuid
-    condominium   Condominiums @relation(fields: [condominiumId], references: [id])
-
-    createdAt DateTime @default(now())
-
-    @@unique([contractId, condominiumId])
-    @@map("condominium_contract_links")
-}
-
-model PropertyContractLinks {
-    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-    contractId String    @db.Uuid
-    contract   Contracts @relation(fields: [contractId], references: [id])
-
-    propertyId String     @db.Uuid
-    property   Properties @relation(fields: [propertyId], references: [id])
-
-    createdAt DateTime @default(now())
-
-    @@map("property_contract_links")
 }
 
 model PropertyTenantContractLinks {
@@ -77,5 +30,9 @@ model PropertyTenantContractLinks {
 
     createdAt DateTime @default(now())
 
+    @@unique([contractId, propertyId, tenantId])
+    @@index([tenantId])
+    @@index([propertyId])
+    @@index([contractId])
     @@map("property_tenant_contract_links")
 }

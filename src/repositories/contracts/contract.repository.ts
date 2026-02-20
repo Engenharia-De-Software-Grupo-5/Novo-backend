@@ -53,28 +53,11 @@ export class ContractsRepository {
     });
   }
 
-  async assertEmployee(employeeId: string) {
-    const e = await this.prisma.employees.findFirst({
-      where: { id: employeeId, deletedAt: null },
-      select: { id: true },
-    });
-    if (!e) throw new NotFoundException('Employee not found.');
-    return e;
-  }
-
-  async assertCondominium(condominiumId: string) {
-    const c = await this.prisma.condominiums.findFirst({
-      where: { id: condominiumId, deletedAt: null },
-      select: { id: true },
-    });
-    if (!c) throw new NotFoundException('Condominium not found.');
-    return c;
-  }
 
   async assertProperty(propertyId: string) {
     const p = await this.prisma.properties.findFirst({
       where: { id: propertyId, deletedAt: null },
-      select: { id: true, condominiumId: true },
+      select: { id: true },
     });
     if (!p) throw new NotFoundException('Property not found.');
     return p;
@@ -89,100 +72,18 @@ export class ContractsRepository {
     return t;
   }
 
-  async linkEmployee(contractId: string, employeeId: string) {
-    await this.assertContract(contractId);
-    await this.assertEmployee(employeeId);
-    try {
-      return await this.prisma.employeeContractLinks.create({
-        data: { contractId, employeeId },
-      });
-    } catch {
-      throw new ConflictException('Link already exists.');
-    }
-  }
-
-  async unlinkEmployee(contractId: string, employeeId: string) {
-    await this.assertContract(contractId);
-    await this.assertEmployee(employeeId);
-
-    const link = await this.prisma.employeeContractLinks.findFirst({
-      where: { contractId, employeeId },
-    });
-    if (!link) throw new NotFoundException('Link not found.');
-
-    return this.prisma.employeeContractLinks.delete({ where: { id: link.id } });
-  }
-
-  async linkCondominium(contractId: string, condominiumId: string) {
-    await this.assertContract(contractId);
-    await this.assertCondominium(condominiumId);
-    try {
-      return await this.prisma.condominiumContractLinks.create({
-        data: { contractId, condominiumId },
-      });
-    } catch {
-      throw new ConflictException('Link already exists.');
-    }
-  }
-
-  async unlinkCondominium(contractId: string, condominiumId: string) {
-    await this.assertContract(contractId);
-    await this.assertCondominium(condominiumId);
-
-    const link = await this.prisma.condominiumContractLinks.findFirst({
-      where: { contractId, condominiumId },
-    });
-    if (!link) throw new NotFoundException('Link not found.');
-
-    return this.prisma.condominiumContractLinks.delete({ where: { id: link.id } });
-  }
-
-  async linkProperty(contractId: string, propertyId: string) {
-    await this.assertContract(contractId);
-    await this.assertProperty(propertyId);
-    try {
-      return await this.prisma.propertyContractLinks.create({
-        data: { contractId, propertyId },
-      });
-    } catch {
-      throw new ConflictException('Link already exists.');
-    }
-  }
-
-  async unlinkProperty(contractId: string, propertyId: string) {
-    await this.assertContract(contractId);
-    await this.assertProperty(propertyId);
-
-    const link = await this.prisma.propertyContractLinks.findFirst({
-      where: { contractId, propertyId },
-    });
-    if (!link) throw new NotFoundException('Link not found.');
-
-    return this.prisma.propertyContractLinks.delete({ where: { id: link.id } });
-  }
-
-  
   async linkLease(contractId: string, propertyId: string, tenantId: string) {
     await this.assertContract(contractId);
-    const property = await this.assertProperty(propertyId);
+    await this.assertProperty(propertyId);
     await this.assertTenant(tenantId);
 
-
-    if (property.condominiumId) {
-      await this.prisma.condominiumContractLinks.upsert({
-        where: {
-          contractId_condominiumId: { contractId, condominiumId: property.condominiumId },
-        },
-        create: { contractId, condominiumId: property.condominiumId },
-        update: {},
-      });
-    }
-
+  
     try {
       return await this.prisma.propertyTenantContractLinks.create({
         data: { contractId, propertyId, tenantId },
       });
-    } catch {
+    } catch (e: any) {
+
       throw new ConflictException('Lease link already exists.');
     }
   }
@@ -194,6 +95,7 @@ export class ContractsRepository {
 
     const link = await this.prisma.propertyTenantContractLinks.findFirst({
       where: { contractId, propertyId, tenantId },
+      select: { id: true },
     });
     if (!link) throw new NotFoundException('Lease link not found.');
 
@@ -210,20 +112,6 @@ export class ContractsRepository {
   listByProperty(propertyId: string) {
     return this.prisma.contracts.findMany({
       where: { deletedAt: null, leases: { some: { propertyId } } },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  listByEmployee(employeeId: string) {
-    return this.prisma.contracts.findMany({
-      where: { deletedAt: null, employeesLinks: { some: { employeeId } } },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  listByCondominium(condominiumId: string) {
-    return this.prisma.contracts.findMany({
-      where: { deletedAt: null, condominiumsLinks: { some: { condominiumId } } },
       orderBy: { createdAt: 'desc' },
     });
   }
