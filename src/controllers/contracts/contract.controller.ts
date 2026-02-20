@@ -24,7 +24,7 @@ import { ContractService } from 'src/services/contracts/contract.service';
 @ApiTags('Contracts')
 @ApiBearerAuth('access-token')
 @Controller('contracts')
-export class ContratoController {
+export class ContractController {
   constructor(private readonly contractService: ContractService) {}
 
   @Get()
