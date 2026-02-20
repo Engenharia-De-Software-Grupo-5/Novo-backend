@@ -183,7 +183,7 @@ export class ContractsController {
     await this.service.unlinkLease(id, propertyId, tenantId);
   }
 
-  // consultas úteis
+
   @Get('/by-tenant/:tenantId')
   @ApiOperation({ summary: 'List contracts linked to tenant' })
   @HttpCode(HttpStatus.OK)

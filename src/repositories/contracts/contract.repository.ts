@@ -53,7 +53,6 @@ export class ContractsRepository {
     });
   }
 
-  // asserts
   async assertEmployee(employeeId: string) {
     const e = await this.prisma.employees.findFirst({
       where: { id: employeeId, deletedAt: null },
