@@ -17,21 +17,19 @@ async function main() {
     permissionAdmin.id,
     permissionContractManager.id,
   );
-  const { contractTemplate1, contractTemplate2 } = await seedContractTemplates(prisma)
-  const { condominiumA, condominiumB } = await seedCondominiums(
-    prisma
-  );
+  const { contractTemplate1, contractTemplate2 } =
+    await seedContractTemplates(prisma);
+  const { condominiumA, condominiumB } = await seedCondominiums(prisma);
   const { property1, property2 } = await seedProperties(
     prisma,
     condominiumA.id,
   );
 
   const { employee1, employee2 } = await seedEmployees(prisma);
-}
-
 
   const { tenantA, tenantB } = await seedTenants(prisma);
 }
+
 main()
   .then(() => {
     console.log('Seed concluído com sucesso.');
