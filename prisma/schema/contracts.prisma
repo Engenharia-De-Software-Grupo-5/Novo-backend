@@ -7,8 +7,6 @@ model Contracts {
     extension    String
     size         Int
 
-    ownerCpf String?
-
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     deletedAt DateTime?
@@ -17,7 +15,8 @@ model Contracts {
     condominiumsLinks CondominiumContractLinks[]
     propertiesLinks   PropertyContractLinks[]
 
-    @@index([ownerCpf])
+    leases PropertyTenantContractLinks[]
+
     @@map("contracts")
 }
 
@@ -32,7 +31,6 @@ model EmployeeContractLinks {
 
     createdAt DateTime @default(now())
 
-    @@unique([contractId, employeeId])
     @@map("employee_contract_links")
 }
 
@@ -62,6 +60,22 @@ model PropertyContractLinks {
 
     createdAt DateTime @default(now())
 
-    @@unique([contractId, propertyId])
     @@map("property_contract_links")
+}
+
+model PropertyTenantContractLinks {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+    contractId String    @db.Uuid
+    contract   Contracts @relation(fields: [contractId], references: [id])
+
+    propertyId String     @db.Uuid
+    property   Properties @relation(fields: [propertyId], references: [id])
+
+    tenantId String  @db.Uuid
+    tenant   Tenants @relation(fields: [tenantId], references: [id])
+
+    createdAt DateTime @default(now())
+
+    @@map("property_tenant_contract_links")
 }

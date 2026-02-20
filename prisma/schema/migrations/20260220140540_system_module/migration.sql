@@ -112,7 +112,6 @@ CREATE TABLE "contracts" (
     "mimeType" TEXT NOT NULL,
     "extension" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
-    "ownerCpf" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -148,6 +147,17 @@ CREATE TABLE "property_contract_links" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "property_contract_links_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "property_tenant_contract_links" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "contractId" UUID NOT NULL,
+    "propertyId" UUID NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "property_tenant_contract_links_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -269,16 +279,7 @@ CREATE UNIQUE INDEX "property_documents_objectName_key" ON "property_documents"(
 CREATE UNIQUE INDEX "contracts_objectName_key" ON "contracts"("objectName");
 
 -- CreateIndex
-CREATE INDEX "contracts_ownerCpf_idx" ON "contracts"("ownerCpf");
-
--- CreateIndex
-CREATE UNIQUE INDEX "employee_contract_links_contractId_employeeId_key" ON "employee_contract_links"("contractId", "employeeId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "condominium_contract_links_contractId_condominiumId_key" ON "condominium_contract_links"("contractId", "condominiumId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "property_contract_links_contractId_propertyId_key" ON "property_contract_links"("contractId", "propertyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
@@ -321,6 +322,15 @@ ALTER TABLE "property_contract_links" ADD CONSTRAINT "property_contract_links_co
 
 -- AddForeignKey
 ALTER TABLE "property_contract_links" ADD CONSTRAINT "property_contract_links_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "property_tenant_contract_links" ADD CONSTRAINT "property_tenant_contract_links_contractId_fkey" FOREIGN KEY ("contractId") REFERENCES "contracts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "property_tenant_contract_links" ADD CONSTRAINT "property_tenant_contract_links_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "property_tenant_contract_links" ADD CONSTRAINT "property_tenant_contract_links_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

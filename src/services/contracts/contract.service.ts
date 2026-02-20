@@ -12,11 +12,9 @@ export class ContractsService {
     private readonly minio: MinioClientService,
   ) {}
 
-  async upload(file: Express.Multer.File, ownerCpf?: string) {
+  async upload(file: Express.Multer.File) {
     const extension = (file.originalname.split('.').pop() || '').toLowerCase();
-    if (extension !== 'pdf') {
-      throw new UnsupportedMediaTypeException('Only PDF files are allowed.');
-    }
+    if (extension !== 'pdf') throw new UnsupportedMediaTypeException('Only PDF files are allowed.');
 
     const objectName = `contracts/${randomUUID()}.pdf`;
     const { fileName } = await this.minio.uploadFile(file, this.allowedExtensions, objectName);
@@ -27,18 +25,16 @@ export class ContractsService {
       mimeType: file.mimetype,
       extension: 'pdf',
       size: file.size,
-      ownerCpf,
     });
   }
 
-  list(ownerCpf?: string) {
-    return this.repo.list({ ownerCpf });
+  list(tenantCpf?: string) {
+    return this.repo.list({ tenantCpf });
   }
 
   async findOne(contractId: string) {
     const c = await this.repo.getById(contractId);
     if (!c) throw new NotFoundException('Contract not found.');
-
     const url = await this.minio.getFileUrl(c.objectName);
     return { ...c, url };
   }
@@ -46,7 +42,6 @@ export class ContractsService {
   async getDownloadUrl(contractId: string) {
     const c = await this.repo.getById(contractId);
     if (!c) throw new NotFoundException('Contract not found.');
-
     const url = await this.minio.getFileUrl(c.objectName);
     return { url };
   }
@@ -56,7 +51,6 @@ export class ContractsService {
     if (!c) throw new NotFoundException('Contract not found.');
 
     try { await this.minio.deleteFile(c.objectName); } catch {}
-
     await this.repo.softDelete(contractId);
   }
 
@@ -81,10 +75,24 @@ export class ContractsService {
     return this.repo.unlinkProperty(contractId, propertyId);
   }
 
+
+  linkLease(contractId: string, propertyId: string, tenantId: string) {
+    return this.repo.linkLease(contractId, propertyId, tenantId);
+  }
+  unlinkLease(contractId: string, propertyId: string, tenantId: string) {
+    return this.repo.unlinkLease(contractId, propertyId, tenantId);
+  }
+
+  listByTenant(tenantId: string) {
+    return this.repo.listByTenant(tenantId);
+  }
+  listByProperty(propertyId: string) {
+    return this.repo.listByProperty(propertyId);
+  }
+
   listByEmployee(employeeId: string) {
     return this.repo.listByEmployee(employeeId);
   }
-
   listByCondominium(condominiumId: string) {
     return this.repo.listByCondominium(condominiumId);
   }

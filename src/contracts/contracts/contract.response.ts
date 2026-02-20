@@ -19,9 +19,6 @@ export class ContractResponse {
   @ApiProperty({ description: 'Size of the contract file in bytes', example: 102400 })
   size: number;
 
-  @ApiPropertyOptional({example: '11111111111', description: 'Owner CPF for searching contracts'})
-  ownerCpf?: string;
-
   @ApiProperty({example: '2023-09-15T14:48:00.000Z' })
   createdAt: string;
 
