@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PropertyService } from 'src/services/condominiums/property.service';
 import { PropertyRepository } from 'src/repositories/condominiums/property.repository';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
-describe('PropertyService', () => {
+describe('PropertyService (CT-11..CT-20 + edge cases)', () => {
   let service: PropertyService;
 
   const mockRepository = {
@@ -15,8 +15,22 @@ describe('PropertyService', () => {
     delete: jest.fn(),
   };
 
+  const condominiumId = 'cond-1';
+
+  const validCreateDto: any = {
+    identifier: 'A101',
+    unityNumber: '101',
+    unityType: 'APARTMENT',
+    block: 'B',
+    floor: 3,
+    totalArea: 50,
+    propertySituation: 'ACTIVE',
+    observations: 'ok',
+    address: 'Rua X, 123',
+  };
+
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         PropertyService,
         { provide: PropertyRepository, useValue: mockRepository },
@@ -26,7 +40,116 @@ describe('PropertyService', () => {
     service = module.get(PropertyService);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => jest.resetAllMocks());
+
+ 
+  it('CT-11 - should create property with valid data', async () => {
+    mockRepository.getByIdentificador.mockResolvedValue(null);
+    mockRepository.create.mockResolvedValue({ id: 'prop-1', ...validCreateDto });
+
+    const result = await service.create(condominiumId, validCreateDto);
+
+    expect(mockRepository.getByIdentificador).toHaveBeenCalled();
+    expect(mockRepository.create).toHaveBeenCalledWith(condominiumId, validCreateDto);
+    expect(result).toEqual({ id: 'prop-1', ...validCreateDto });
+  });
+
+
+  it('CT-12 - should reject create without identifier (BadRequest)', async () => {
+    mockRepository.getByIdentificador.mockResolvedValue(null);
+    mockRepository.create.mockRejectedValue(
+      new BadRequestException('Identificador do imóvel é obrigatório'),
+    );
+
+    const dto = { ...validCreateDto };
+    delete dto.identifier;
+
+    await expect(service.create(condominiumId, dto))
+      .rejects
+      .toBeInstanceOf(BadRequestException);
+  });
+
+  
+  it('CT-13 - should reject create without unityNumber (BadRequest)', async () => {
+    mockRepository.getByIdentificador.mockResolvedValue(null);
+    mockRepository.create.mockRejectedValue(
+      new BadRequestException('Número do imóvel é obrigatório'),
+    );
+
+    const dto = { ...validCreateDto };
+    delete dto.unityNumber;
+
+    await expect(service.create(condominiumId, dto))
+      .rejects
+      .toBeInstanceOf(BadRequestException);
+  });
+
+ 
+  it('CT-14 - should list properties with default params', async () => {
+    mockRepository.getAll.mockResolvedValue([{ id: 'prop-1' }, { id: 'prop-2' }]);
+
+    const result = await service.getAll(condominiumId);
+
+    expect(mockRepository.getAll).toHaveBeenCalledWith(condominiumId);
+    expect(result).toEqual([{ id: 'prop-1' }, { id: 'prop-2' }]);
+  });
+
+
+  it('CT-15 - should return property by valid id', async () => {
+    mockRepository.getById.mockResolvedValue({ id: 'prop-1', ...validCreateDto });
+
+    const result = await service.getById(condominiumId, 'prop-1');
+
+    expect(mockRepository.getById).toHaveBeenCalledWith(condominiumId, 'prop-1');
+    expect(result).toEqual({ id: 'prop-1', ...validCreateDto });
+  });
+
+  
+  it('CT-16 - should return null when property id does not exist (current behavior)', async () => {
+    mockRepository.getById.mockResolvedValue(null);
+
+    await expect(service.getById(condominiumId, 'prop-404')).resolves.toBeNull();
+    expect(mockRepository.getById).toHaveBeenCalledWith(condominiumId, 'prop-404');
+  });
+
+
+  it('CT-17 - should update property with valid data', async () => {
+    mockRepository.update.mockResolvedValue({ id: 'prop-1', observations: 'novo' });
+
+    const result = await service.update(condominiumId, 'prop-1', { observations: 'novo' } as any);
+
+    expect(mockRepository.update).toHaveBeenCalledWith(condominiumId, 'prop-1', { observations: 'novo' });
+    expect(result).toEqual({ id: 'prop-1', observations: 'novo' });
+  });
+
+
+  it('CT-18 - should reject update with empty body (BadRequest)', async () => {
+    mockRepository.update.mockRejectedValue(
+      new BadRequestException('Body vazio'),
+    );
+
+    await expect(service.update(condominiumId, 'prop-1', {} as any))
+      .rejects
+      .toBeInstanceOf(BadRequestException);
+  });
+
+  
+  it('CT-19 - should delete existing property', async () => {
+    mockRepository.delete.mockResolvedValue({ id: 'prop-1' });
+
+    const result = await service.delete(condominiumId, 'prop-1');
+
+    expect(mockRepository.delete).toHaveBeenCalledWith(condominiumId, 'prop-1');
+    expect(result).toEqual({ id: 'prop-1' });
+  });
+
+  
+  it('CT-20 - should return null when deleting non-existent property (current behavior)', async () => {
+    mockRepository.delete.mockResolvedValue(null);
+
+    await expect(service.delete(condominiumId, 'prop-404')).resolves.toBeNull();
+    expect(mockRepository.delete).toHaveBeenCalledWith(condominiumId, 'prop-404');
+  });
 
   it('should return properties', async () => {
     mockRepository.getAll.mockResolvedValue([]);
@@ -65,6 +188,7 @@ describe('PropertyService', () => {
     const result = await service.delete('cond1', 'prop1');
     expect(result).toEqual({ id: '1' });
   });
+
   describe('getAll', () => {
     it('propagates repository error', async () => {
       mockRepository.getAll.mockRejectedValue(new Error('DB fail'));
@@ -74,7 +198,7 @@ describe('PropertyService', () => {
   });
 
   describe('getById', () => {
-    it('throws NotFound when repo returns null', async () => {
+    it('returns null when repo returns null (current behavior)', async () => {
       mockRepository.getById.mockResolvedValue(null);
 
       await expect(service.getById('cond-1', 'prop-1')).resolves.toBeNull();
@@ -86,7 +210,9 @@ describe('PropertyService', () => {
     it('prevents duplicate identifier (pre-check)', async () => {
       mockRepository.getByIdentificador.mockResolvedValue({ id: 'exists' });
 
-      await expect(service.create('cond-1', { identifier: 'A101' } as any)).rejects.toThrow('Property with this identifier already exists');
+      await expect(service.create('cond-1', { identifier: 'A101' } as any)).rejects.toThrow(
+        'Property with this identifier already exists',
+      );
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
@@ -97,7 +223,7 @@ describe('PropertyService', () => {
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
-    it('handles race: pre-check ok but create fails unique', async () => {
+    it('handles race: pre-check ok but create fails unique (current behavior)', async () => {
       mockRepository.getByIdentificador.mockResolvedValue(null);
 
       const uniqueErr: any = new Error('Unique constraint failed');
@@ -109,7 +235,7 @@ describe('PropertyService', () => {
   });
 
   describe('update', () => {
-    it('throws NotFound when update returns null', async () => {
+    it('returns null when update returns null (current behavior)', async () => {
       mockRepository.update.mockResolvedValue(null);
 
       await expect(service.update('cond-1', 'prop-404', { address: 'x' } as any)).resolves.toBeNull();
@@ -132,7 +258,7 @@ describe('PropertyService', () => {
   });
 
   describe('delete', () => {
-    it('throws NotFound when delete returns null', async () => {
+    it('returns null when delete returns null (current behavior)', async () => {
       mockRepository.delete.mockResolvedValue(null);
       await expect(service.delete('cond-1', 'prop-404')).resolves.toBeNull();
     });

@@ -38,7 +38,30 @@ export class ContractRepository {
 
     return this.prisma.contracts.findMany({
       where: { deletedAt: null },
-      select: this.selectFields,
+      select: { 
+        id: true,
+        descricao: true,
+        owner: {
+          select: {
+            id: true,
+            identifier: true,
+          }
+        },
+        property: {
+          select: {
+            id: true,
+            identifier: true,
+            address: true,
+            unityNumber: true,
+            unityType: true,
+            block: true,
+            floor: true,
+            totalArea: true,
+            propertySituation: true,
+            observations: true,
+            
+          }
+        }},
     });
   }
   getById(contractId: string): Promise<ContractResponse> {
@@ -79,6 +102,20 @@ export class ContractRepository {
       where: { id: contratoId },
       data: { deletedAt: new Date() },
       select: this.selectFields,
+    });
+  }
+  
+  listByTenant(tenantId: string) {
+    return this.prisma.contracts.findMany({
+      where: { deletedAt: null, leases: { some: { tenantId } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  listByProperty(propertyId: string) {
+    return this.prisma.contracts.findMany({
+      where: { deletedAt: null, leases: { some: { propertyId } } },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

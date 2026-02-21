@@ -27,6 +27,7 @@ export class ContractDto {
   @IsNotEmpty()
   @ApiProperty({
     description: 'Unique identifier for the property',
+    example: '123'
   })
   propertyId: string;
 }

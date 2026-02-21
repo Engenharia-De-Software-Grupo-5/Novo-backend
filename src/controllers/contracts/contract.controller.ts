@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -6,17 +7,18 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { ContractService } from 'src/services/contracts/contract.service';
@@ -108,5 +110,29 @@ export class ContractController {
   })
   delete(@Param('id') ContractId: string): Promise<ContractResponse> {
     return this.contractService.delete(ContractId);
+  }
+
+  @Post()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload a contract (PDF)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.OK)
+  async upload(@UploadedFile() file?: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Uploaded file is required.');
+    return this.contractService.upload(file);
+  }
+
+  @Get(':id/download')
+  @ApiOperation({ summary: 'Get download URL (presigned)' })
+  @HttpCode(HttpStatus.OK)
+  download(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.contractService.getDownloadUrl(id);
   }
 }
