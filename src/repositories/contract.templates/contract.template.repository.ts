@@ -1,10 +1,57 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/database/prisma.service";
+import { CondominiumResponse } from "src/contracts/condominiums/condominium.response";
 import { ContractTemplateDto } from "src/contracts/contract.templates/contract.template.dto";
 import { ContractTemplateResponse } from "src/contracts/contract.templates/contract.template.response";
+import { PaginatedResult } from "src/contracts/pagination/paginated.result";
+import { PaginationDto } from "src/contracts/pagination/pagination.dto";
+import { buildDynamicWhere } from "src/contracts/pagination/prisma.utils";
 
 @Injectable()
 export class ContractTemplateRepository {
+  async getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<ContractTemplateResponse>> {
+    const where = buildDynamicWhere(
+      data,
+      { deletedAt: null },
+      {
+        enumFields: ['status'], 
+        customMappings: {
+          permissionName: (content) => ({
+            permission: { name: { contains: content, mode: 'insensitive' } },
+          }),
+        },
+      },
+    );
+
+    const [totalItems, items] = await this.prisma.$transaction([
+      this.prisma.contractTemplates.count({
+        where,
+      }),
+      this.prisma.contractTemplates.findMany({
+        where,
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+        take: data.limit,
+        skip: (data.page - 1) * data.limit,
+        orderBy: { id: 'asc' },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / data.limit),
+        page: data.page,
+        limit: data.limit,
+      },
+    };
+  }
   constructor(private prisma: PrismaService) { }
 
   getById(contractTemplateId: string): Promise<ContractTemplateResponse> {

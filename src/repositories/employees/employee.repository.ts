@@ -2,9 +2,58 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { EmployeeDto } from 'src/contracts/employees/employee.dto';
 import { EmployeeResponse } from 'src/contracts/employees/employee.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 
 @Injectable()
 export class EmployeeRepository {
+  async getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<EmployeeResponse>> {
+    const where = buildDynamicWhere(
+      data,
+      { deletedAt: null },
+      {
+        enumFields: ['status'], 
+        customMappings: {
+          permissionName: (content) => ({
+            permission: { name: { contains: content, mode: 'insensitive' } },
+          }),
+        },
+      },
+    );
+
+    const [totalItems, items] = await this.prisma.$transaction([
+      this.prisma.employees.count({
+        where,
+      }),
+      this.prisma.employees.findMany({
+        where,
+        include: {
+          bankData: true,
+        },
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+        take: data.limit,
+        skip: (data.page - 1) * data.limit,
+        orderBy: { id: 'asc' },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / data.limit),
+        page: data.page,
+        limit: data.limit,
+      },
+    };
+  }
   
 
   private readonly employeeSelect = {
@@ -43,7 +92,7 @@ export class EmployeeRepository {
     });
   }
 
-  create(dto: EmployeeDto): Promise<EmployeeResponse> {
+  async create(dto: EmployeeDto): Promise<EmployeeResponse> {
     const { bankData, ...rest } = dto;
     return this.prisma.employees.upsert({
       where: {

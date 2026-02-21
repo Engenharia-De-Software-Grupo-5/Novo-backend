@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,8 +18,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { UserResponse } from 'src/contracts/auth/user.response';
 import { PropertyDto } from 'src/contracts/condominiums/property.dto';
 import { PropertyResponse } from 'src/contracts/condominiums/property.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { PropertyService } from 'src/services/condominiums/property.service';
 
 @ApiTags('properties')
@@ -39,6 +44,23 @@ export class PropertyController {
   getAll(@Param('condominiumId') condominiumId: string) {
     return this.propertyService.getAll(condominiumId);
   }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get properties filtered and paginated',
+    description: 'Get properties filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(PropertyResponse),
+  })
+  getPaginated(
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<PropertyResponse>> {
+    return this.propertyService.getPaginated(data);
+  }
+
 
   @Get(':propertyId')
   @HttpCode(HttpStatus.OK)

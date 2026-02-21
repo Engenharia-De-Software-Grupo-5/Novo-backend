@@ -3,9 +3,13 @@ import { PrismaService } from 'src/common/database/prisma.service';
 import { ChargeStatus } from '@prisma/client';
 import { ChargeDto} from 'src/contracts/charges/charge.dto';
 import { UpdateChargeDto } from 'src/contracts/charges/charge-update.dto';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 
 @Injectable()
 export class ChargesRepository {
+  getPaginated(data: PaginationDto): Promise<import("../../contracts/pagination/paginated.result").PaginatedResult<import("../../contracts/condominiums/property.response").PropertyResponse>> {
+    throw new Error('Method not implemented.');
+  }
   constructor(private readonly prisma: PrismaService) {}
 
   private async assertTenant(tenantId: string) {

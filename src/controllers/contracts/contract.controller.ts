@@ -15,9 +15,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { CondominiumResponse } from 'src/contracts/condominiums/condominium.response';
+import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { ContractsService } from 'src/services/contracts/contract.service';
 
 @ApiTags('Contracts')
@@ -56,6 +61,22 @@ export class ContractsController {
   @HttpCode(HttpStatus.OK)
   list(@Query('tenantCpf') tenantCpf?: string) {
     return this.service.list(tenantCpf);
+  }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get service types filtered and paginated',
+    description: 'Get service types filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(ContractResponse),
+  })
+  getPaginated(
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<ContractResponse>> {
+    return this.service.listPaginated(data);
   }
 
   @Get(':id')

@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,6 +18,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
 import { TenantService } from 'src/services/tenants/tenant.service';
@@ -40,6 +44,37 @@ export class TenantController {
   })
   getAll(): Promise<TenantResponse[]> {
     return this.tenantService.getAll();
+  }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get tenants filtered and paginated',
+    description: 'Get tenants filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(TenantResponse),
+  })
+  getPaginated(
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<TenantResponse>> {
+    return this.tenantService.getPaginated(data);
+  }
+
+  @Get(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get tenant by CPF',
+    description:
+      'Retrieve details of a specific tenant identified by its CPF.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieved tenant details by CPF',
+    type: TenantResponse,
+  })
+  getByCpf(@Param('cpf') cpf: string): Promise<TenantResponse> {
+    return this.tenantService.getByCpf(cpf);
   }
 
   @Get(':id')
@@ -97,6 +132,21 @@ export class TenantController {
     return this.tenantService.update(id, dto);
   }
 
+  @Delete(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete tenant by CPF',
+    description:
+      'Soft delete a specific tenant identified by its CPF.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully deleted tenant by CPF',
+    type: TenantResponse,
+  })
+  deleteByCpf(@Param('cpf') cpf: string): Promise<TenantResponse> {
+    return this.tenantService.deleteByCpf(cpf);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -108,6 +158,6 @@ export class TenantController {
     type: TenantResponse,
   })
   delete(@Param('id') tenantId: string): Promise<TenantResponse> {
-    return this.tenantService.delete(tenantId);
+    return this.tenantService.deleteById(tenantId);
   }
 }

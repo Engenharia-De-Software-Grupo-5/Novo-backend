@@ -1,5 +1,8 @@
 import { Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { ContractsRepository } from 'src/repositories/contracts/contract.repository';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 
@@ -28,6 +31,12 @@ export class ContractsService {
     });
   }
 
+  listPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<ContractResponse>> {
+    return this.repo.getPaginated(data);
+  }
+  
   list(tenantCpf?: string) {
     return this.repo.list({ tenantCpf });
   }

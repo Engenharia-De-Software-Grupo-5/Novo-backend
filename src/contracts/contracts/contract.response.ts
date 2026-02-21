@@ -18,10 +18,4 @@ export class ContractResponse {
 
   @ApiProperty({ description: 'Size of the contract file in bytes', example: 102400 })
   size: number;
-
-  @ApiProperty({example: '2023-09-15T14:48:00.000Z' })
-  createdAt: string;
-
-  @ApiPropertyOptional({example: '2023-10-01T10:30:00.000Z', description: 'Date when the contract was deleted, if applicable'})
-  deletedAt?: string | null;
 }
