@@ -11,6 +11,7 @@ import { LoginValidationMiddleware } from 'src/common/middlewares/login-validati
 import { AuthController } from 'src/controllers/auth/auth.controller';
 import { AuthRepository } from 'src/repositories/auth/auth.repository';
 import { AuthService } from 'src/services/auth/auth.service';
+import { MailService } from 'src/services/tools/mail.service';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { AuthService } from 'src/services/auth/auth.service';
     AuthRepository,
     LocalStrategy,
     JwtStrategy,
-    // MailService,
+    MailService,
   ],
 })
 export class AuthModule implements NestModule {
