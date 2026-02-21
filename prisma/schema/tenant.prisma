@@ -1,12 +1,12 @@
 model Tenants {
-    id                          String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    cpf                         String                        @unique
-    name                        String                        @unique
-    createdAt                   DateTime                      @default(now())
-    updatedAt                   DateTime                      @updatedAt
-    deletedAt                   DateTime?
-    propertyTenantContractLinks PropertyTenantContractLinks[]
-    charges                     Charges[]
+    id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    cpf       String      @unique
+    name      String      @unique
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+    deletedAt DateTime?
+    contracts Contracts[]
+    charges   Charges[]
 
     @@map("tenants")
 }

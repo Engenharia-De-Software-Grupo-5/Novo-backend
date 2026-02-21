@@ -6,6 +6,7 @@ model ContractTemplates {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
+  contract Contracts[]
 
   @@map("contracttemplates")
 }

@@ -1,3 +1,9 @@
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- CreateEnum
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED');
+
 -- CreateEnum
 CREATE TYPE "ChargeStatus" AS ENUM ('PENDING', 'PAID', 'OVERDUE', 'CANCELED');
 
@@ -27,6 +33,34 @@ CREATE TYPE "ExpenseTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
 
 -- CreateEnum
 CREATE TYPE "ExpensePaymentMethod" AS ENUM ('CASH', 'PIX', 'BOLETO', 'CREDIT_CARD', 'DEBIT_CARD', 'TRANSFER', 'OTHER');
+
+-- CreateTable
+CREATE TABLE "users" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" TEXT NOT NULL,
+    "cpf" TEXT,
+    "name" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "permissionsId" UUID NOT NULL,
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "permissions" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" TEXT NOT NULL,
+    "functionalities" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Charges" (
@@ -157,11 +191,11 @@ CREATE TABLE "property_documents" (
 -- CreateTable
 CREATE TABLE "contracts" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "objectName" TEXT NOT NULL,
-    "originalName" TEXT NOT NULL,
-    "mimeType" TEXT NOT NULL,
-    "extension" TEXT NOT NULL,
-    "size" INTEGER NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "propertyId" UUID NOT NULL,
+    "contractTemplateId" UUID NOT NULL,
+    "contractUrl" TEXT NOT NULL,
+    "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -170,14 +204,16 @@ CREATE TABLE "contracts" (
 );
 
 -- CreateTable
-CREATE TABLE "property_tenant_contract_links" (
+CREATE TABLE "contracttemplates" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "contractId" UUID NOT NULL,
-    "propertyId" UUID NOT NULL,
-    "tenantId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "template" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
 
-    CONSTRAINT "property_tenant_contract_links_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "contracttemplates_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -288,6 +324,17 @@ CREATE TABLE "invoices" (
 );
 
 -- CreateTable
+CREATE TABLE "owners" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "identifier" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "owners_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "tenants" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "cpf" TEXT NOT NULL,
@@ -298,6 +345,15 @@ CREATE TABLE "tenants" (
 
     CONSTRAINT "tenants_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_cpf_key" ON "users"("cpf");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
 
 -- CreateIndex
 CREATE INDEX "Charges_tenantId_idx" ON "Charges"("tenantId");
@@ -330,19 +386,10 @@ CREATE UNIQUE INDEX "property_inspections_objectName_key" ON "property_inspectio
 CREATE UNIQUE INDEX "property_documents_objectName_key" ON "property_documents"("objectName");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "contracts_objectName_key" ON "contracts"("objectName");
+CREATE UNIQUE INDEX "contracts_tenantId_propertyId_key" ON "contracts"("tenantId", "propertyId");
 
 -- CreateIndex
-CREATE INDEX "property_tenant_contract_links_tenantId_idx" ON "property_tenant_contract_links"("tenantId");
-
--- CreateIndex
-CREATE INDEX "property_tenant_contract_links_propertyId_idx" ON "property_tenant_contract_links"("propertyId");
-
--- CreateIndex
-CREATE INDEX "property_tenant_contract_links_contractId_idx" ON "property_tenant_contract_links"("contractId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "property_tenant_contract_links_contractId_propertyId_tenant_key" ON "property_tenant_contract_links"("contractId", "propertyId", "tenantId");
+CREATE UNIQUE INDEX "contracttemplates_name_key" ON "contracttemplates"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
@@ -354,10 +401,16 @@ CREATE UNIQUE INDEX "employee_contracts_objectName_key" ON "employee_contracts"(
 CREATE UNIQUE INDEX "invoices_objectName_key" ON "invoices"("objectName");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "owners_identifier_key" ON "owners"("identifier");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tenants_cpf_key" ON "tenants"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tenants_name_key" ON "tenants"("name");
+
+-- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_permissionsId_fkey" FOREIGN KEY ("permissionsId") REFERENCES "permissions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Charges" ADD CONSTRAINT "Charges_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -381,13 +434,13 @@ ALTER TABLE "property_inspections" ADD CONSTRAINT "property_inspections_property
 ALTER TABLE "property_documents" ADD CONSTRAINT "property_documents_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_tenant_contract_links" ADD CONSTRAINT "property_tenant_contract_links_contractId_fkey" FOREIGN KEY ("contractId") REFERENCES "contracts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_tenant_contract_links" ADD CONSTRAINT "property_tenant_contract_links_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "property_tenant_contract_links" ADD CONSTRAINT "property_tenant_contract_links_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_contractTemplateId_fkey" FOREIGN KEY ("contractTemplateId") REFERENCES "contracttemplates"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

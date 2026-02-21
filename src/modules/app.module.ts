@@ -12,8 +12,8 @@ import { EmployeeModule } from './employee/employee.module';
 import { CondominiumModule } from './condominium/condominium.module';
 import { PropertyModule } from './condominium/property.module';
 import { ExpenseModule } from './expense/expense.module';
-import { ContractModule } from './contract/contract.module';
 import { TenantModule } from './tenant/tenant.module';
+import { ContractModule } from './contract/contract.module';
 import { ChargesModule } from './charge/charge.module';
 import { UserModule } from './auth/user.module';
 
