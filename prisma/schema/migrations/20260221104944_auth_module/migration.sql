@@ -8,7 +8,7 @@ CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED');
 CREATE TABLE "users" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "email" TEXT NOT NULL,
-    "cpf" TEXT NOT NULL,
+    "cpf" TEXT,
     "name" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "permissionsId" UUID NOT NULL,

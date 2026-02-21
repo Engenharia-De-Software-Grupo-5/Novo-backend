@@ -1,7 +1,7 @@
 model Users {
   id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email         String      @unique
-  cpf           String      @unique
+  cpf           String?     @unique
   name          String
   password      String
   permission    Permissions @relation(fields: [permissionsId], references: [id])
