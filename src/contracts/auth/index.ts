@@ -3,3 +3,5 @@ export * from './auth-request.model';
 export * from './login.dto';
 export * from './login.response';
 export * from './permission.response';
+export * from './user.dto';
+export * from './user.response';

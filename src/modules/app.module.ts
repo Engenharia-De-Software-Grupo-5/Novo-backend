@@ -15,6 +15,7 @@ import { ExpenseModule } from './expense/expense.module';
 import { ContractModule } from './contract/contract.module';
 import { TenantModule } from './tenant/tenant.module';
 import { ChargesModule } from './charge/charge.module';
+import { UserModule } from './auth/user.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ChargesModule } from './charge/charge.module';
     ContractModule,
     TenantModule,
     ChargesModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
@@ -47,4 +49,4 @@ import { ChargesModule } from './charge/charge.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
