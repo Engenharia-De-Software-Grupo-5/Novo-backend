@@ -11,7 +11,7 @@ describe('TenantController', () => {
     getById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn(),
+    deleteById: jest.fn(),
   };
 
   const validCreateDto: any = {
@@ -89,16 +89,16 @@ describe('TenantController', () => {
   });
 
   it('CT-08 - should delete tenant and return success', async () => {
-    mockService.delete.mockResolvedValue({ id: 'ten-1', ...validCreateDto });
+    mockService.deleteById.mockResolvedValue({ id: 'ten-1', ...validCreateDto });
 
     const result = await controller.delete('ten-1');
 
-    expect(mockService.delete).toHaveBeenCalledWith('ten-1');
+    expect(mockService.deleteById).toHaveBeenCalledWith('ten-1');
     expect(result).toEqual({ id: 'ten-1', ...validCreateDto });
   });
 
   it('CT-09 - should propagate NotFound from service on delete', async () => {
-    mockService.delete.mockRejectedValue(new NotFoundException('Tenant not found'));
+    mockService.deleteById.mockRejectedValue(new NotFoundException('Tenant not found'));
 
     await expect(controller.delete('ten-404')).rejects.toThrow(NotFoundException);
   });
