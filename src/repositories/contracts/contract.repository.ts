@@ -7,7 +7,8 @@ import { ContractResponse } from 'src/contracts/contracts/contract.response';
 export class ContractRepository {
 
   private readonly selectFields = {
-    id: true,
+        id: true,
+        contractUrl: true,
         description: true,
         property: {
           select: {
@@ -21,6 +22,25 @@ export class ContractRepository {
             totalArea: true,
             propertySituation: true,
             observations: true,
+            condominium: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                address: {
+                  select: {
+                    id: true,
+                    zip: true,
+                    neighborhood: true,
+                    city: true,
+                    complement: true,
+                    number: true,
+                    street: true,
+                    uf: true,
+                  },
+                },
+              }
+            }
           }
         },
         contractTemplate: {
@@ -79,6 +99,14 @@ export class ContractRepository {
     return this.prisma.contracts.update({
       where: { id: id },
       data: { ...dto},
+      select: this.selectFields,
+    });
+  }
+
+  updateUrl(id: string, url: string): Promise<ContractResponse> {
+    return this.prisma.contracts.update({
+      where: { id: id },
+      data: { contractUrl: url},
       select: this.selectFields,
     });
   }

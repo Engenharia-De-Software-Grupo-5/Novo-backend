@@ -58,23 +58,49 @@ export class ContractController {
     return this.contractService.getById(ContratoId);
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create a new contract',
-    description: 'Register a new contract in the system.',
-  })
+  @Post() // Recomendo usar um caminho específico para evitar conflitos
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Create contract with PDF upload' })
   @ApiBody({
-    description: 'contract data to be registered',
-    type: ContractDto,
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' }, // Campo do arquivo
+        tenantId: { type: 'string' },               // Campos do seu ContractDto
+        propertyId: { type: 'string' },
+        contractTemplateID: { type: 'string' },
+        descricao: { type: 'string' },
+      },
+      required: ['tenantId', 'propertyId', 'contractTemplateID'],
+    },
   })
-  @ApiCreatedResponse({
-    description: 'contract successfully created',
-    type: ContractResponse,
-  })
-  create(@Body() dto: ContractDto): Promise<ContractResponse> {
-    return this.contractService.create(dto);
+  @HttpCode(HttpStatus.CREATED)
+  async createWithFile(
+    @Body() dto: ContractDto, // O NestJS preenche o DTO com os outros campos do formulário
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    // Agora você pode passar ambos para o seu serviço
+    return this.contractService.create(dto, file);
   }
+
+  // @Post()
+  // @HttpCode(HttpStatus.CREATED)
+  // @ApiOperation({
+  //   summary: 'Create a new contract',
+  //   description: 'Register a new contract in the system.',
+  // })
+  // @ApiBody({
+  //   description: 'contract data to be registered',
+  //   type: ContractDto,
+  // })
+  // @ApiCreatedResponse({
+  //   description: 'contract successfully created',
+  //   type: ContractResponse,
+  // })
+  // create(@Body() dto: ContractDto): Promise<ContractResponse> {
+  //   return this.contractService.create(dto);
+  // }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
@@ -112,27 +138,27 @@ export class ContractController {
     return this.contractService.delete(ContractId);
   }
 
-  @Post(':id')
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload a contract (PDF)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['file'],
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  @HttpCode(HttpStatus.OK)
-  async upload(@UploadedFile() file?: Express.Multer.File) {
-    if (!file) throw new BadRequestException('Uploaded file is required.');
-    return this.contractService.upload(file);
-  }
+  // @Post()
+  // @ApiConsumes('multipart/form-data')
+  // @ApiOperation({ summary: 'Upload a contract (PDF)' })
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     required: ['file'],
+  //     properties: { file: { type: 'string', format: 'binary' } },
+  //   },
+  // })
+  // @UseInterceptors(FileInterceptor('file'))
+  // @HttpCode(HttpStatus.OK)
+  // async upload(@UploadedFile() file?: Express.Multer.File) {
+  //   if (!file) throw new BadRequestException('Uploaded file is required.');
+  //   return this.contractService.upload(file);
+  // }
 
-  @Get(':id/download')
-  @ApiOperation({ summary: 'Get download URL (presigned)' })
-  @HttpCode(HttpStatus.OK)
-  download(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.contractService.getDownloadUrl(id);
-  }
+  // @Get(':id/download')
+  // @ApiOperation({ summary: 'Get download URL (presigned)' })
+  // @HttpCode(HttpStatus.OK)
+  // download(@Param('id', new ParseUUIDPipe()) id: string) {
+  //   return this.contractService.getDownloadUrl(id);
+  // }
 }

@@ -37,14 +37,5 @@ export class ContractDto {
     description: 'Unique identifier for contractTemplate',
     example: '123'
   })
-  contractTemplateId: string;
-  
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'Unique identifier for contractTemplate',
-    example: 'https://.../.../...'
-  })
-  contractUrl: string;
-
+  contractTemplateId?: string;
 }

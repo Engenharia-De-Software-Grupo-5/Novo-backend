@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 
-import { ContractsRepository } from '../../repositories/contracts/contract.repository'
+import { ContractRepository } from '../../repositories/contracts/contract.repository'
 
 import { TemplateEngineService } from './template-engine.service'
 import { PdfGeneratorService } from './pdf-generator.service'
@@ -10,7 +10,7 @@ import { MinioClientService } from './minio-client.service'
 @Injectable()
 export class GenerateContractService {
     constructor(
-        private readonly contractsRepository: ContractsRepository,
+        private readonly contractsRepository: ContractRepository,
         private readonly templateEngine: TemplateEngineService,
         private readonly pdfGenerator: PdfGeneratorService,
         private readonly minioService: MinioClientService,
@@ -22,15 +22,15 @@ export class GenerateContractService {
         if (!contract) {
             throw new NotFoundException('Contrato não encontrado');
         }
-        const template = contract.template
+        const template = contract.contractTemplate
         if (!template) {
             throw new NotFoundException('Template não encontrado');
         }
-        const condominium = contract.condominium
+        const condominium = contract.property.condominium
         if (!condominium) {
             throw new NotFoundException('Condomínio não encontrado');
         }
-        const property = condominium.property
+        const property = contract.property
         if (!property) {
             throw new NotFoundException('Imóvel não encontrado');
         }
@@ -67,7 +67,7 @@ export class GenerateContractService {
 
         const pdfBuffer = await this.pdfGenerator.generate(processedHtml);
 
-        const timeStamp = contract.createdAt.getTime()
+        const timeStamp = new Date().getTime()
         const fileName = `${contractId}_${timeStamp}.pdf`;
         const objectPath = `contracts/${fileName}`;
 
