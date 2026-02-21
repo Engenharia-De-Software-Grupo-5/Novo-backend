@@ -25,11 +25,11 @@ export class PaginatedResult<T> {
         type: 'number',
         description: 'Número total de páginas disponíveis',
       },
-      pageNumber: {
+      page: {
         type: 'number',
         description: 'Número da página atual (1-based)',
       },
-      pageSize: {
+      limit: {
         type: 'number',
         description: 'Quantidade de itens por página (15-based)',
       },
@@ -38,7 +38,7 @@ export class PaginatedResult<T> {
   meta: {
     totalItems: number;
     totalPages: number;
-    pageNumber: number;
-    pageSize: number;
+    page: number;
+    limit: number;
   };
 }

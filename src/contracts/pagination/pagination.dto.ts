@@ -14,7 +14,7 @@ export class PaginationDto {
     default: 10,
     required: false,
   })
-  pageSize?: number = 10;
+  limit?: number = 10;
 
   @IsOptional()
   @Type(() => Number)
@@ -26,7 +26,7 @@ export class PaginationDto {
     default: 1,
     required: false,
   })
-  pageNumber?: number = 1;
+  page?: number = 1;
 
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value])) // Garante que sempre será array

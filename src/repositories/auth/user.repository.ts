@@ -77,8 +77,8 @@ export class UserRepository {
           updatedAt: true,
           deletedAt: true,
         },
-        take: data.pageSize,
-        skip: (data.pageNumber - 1) * data.pageSize,
+        take: data.limit,
+        skip: (data.page - 1) * data.limit,
         orderBy: { name: 'asc' },
       }),
     ]);
@@ -87,9 +87,9 @@ export class UserRepository {
       items,
       meta: {
         totalItems,
-        totalPages: Math.ceil(totalItems / data.pageSize),
-        pageNumber: data.pageNumber,
-        pageSize: data.pageSize,
+        totalPages: Math.ceil(totalItems / data.limit),
+        page: data.page,
+        limit: data.limit,
       },
     };
   }
