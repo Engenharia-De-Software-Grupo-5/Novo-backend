@@ -6,6 +6,7 @@ model Users {
   password      String
   permission    Permissions @relation(fields: [permissionsId], references: [id])
   permissionsId String      @db.Uuid
+  status        UserStatus  @default(ACTIVE)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   deletedAt     DateTime?
@@ -23,4 +24,10 @@ model Permissions {
   users           Users[]
 
   @@map("permissions")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
