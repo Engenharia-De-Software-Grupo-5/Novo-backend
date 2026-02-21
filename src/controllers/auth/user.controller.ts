@@ -16,10 +16,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UserDto, UserResponse } from 'src/contracts/auth';
 import { UserPasswordDto } from 'src/contracts/auth/user-password.dto';
 import { UserService } from 'src/services/auth/user.service';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -39,6 +43,22 @@ export class UserController {
   })
   getAll(): Promise<UserResponse[]> {
     return this.userService.getAll();
+  }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get service types filtered and paginated',
+    description: 'Get service types filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(UserResponse),
+  })
+  getUserPaginated(
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<UserResponse>> {
+    return this.userService.getUserPaginated(data);
   }
 
   @Get(':id')

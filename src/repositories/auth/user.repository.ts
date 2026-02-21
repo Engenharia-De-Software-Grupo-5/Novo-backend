@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { permission } from 'process';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { UserDto, UserResponse } from 'src/contracts/auth';
 import { UserPasswordDto } from 'src/contracts/auth/user-password.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 
 @Injectable()
 export class UserRepository {
@@ -37,6 +41,57 @@ export class UserRepository {
         deletedAt: true,
       },
     });
+  }
+
+  async getUserPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<UserResponse>> {
+    const where = buildDynamicWhere(
+      data,
+      { deletedAt: null },
+      {
+        enumFields: ['status'],
+        customMappings: {
+          permissionName: (content) => ({
+            permission: { name: { contains: content, mode: 'insensitive' } },
+          }),
+        },
+      },
+    );
+
+    const [totalItems, items] = await this.prisma.$transaction([
+      this.prisma.users.count({
+        where,
+      }),
+      this.prisma.users.findMany({
+        where,
+        include: {
+          permission: {
+            select: { id: true, name: true, functionalities: true },
+          },
+        },
+        omit: {
+          password: true,
+          permissionsId: true,
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+        take: data.pageSize,
+        skip: (data.pageNumber - 1) * data.pageSize,
+        orderBy: { name: 'asc' },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / data.pageSize),
+        pageNumber: data.pageNumber,
+        pageSize: data.pageSize,
+      },
+    };
   }
 
   create(userDto: UserDto, password: string): Promise<UserResponse> {

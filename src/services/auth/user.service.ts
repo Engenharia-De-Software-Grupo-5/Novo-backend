@@ -9,6 +9,8 @@ import { UserPasswordDto } from 'src/contracts/auth/user-password.dto';
 import { UserRepository } from 'src/repositories/auth/user.repository';
 import * as bcrypt from 'bcrypt';
 import { MailService } from '../tools/mail.service';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 
 @Injectable()
 export class UserService {
@@ -23,6 +25,12 @@ export class UserService {
 
   getById(userId: string): Promise<UserResponse> {
     return this.userRepository.getById(userId);
+  }
+
+  getUserPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<UserResponse>> {
+    return this.userRepository.getUserPaginated(data);
   }
 
   async create(userDto: UserDto): Promise<UserResponse> {
