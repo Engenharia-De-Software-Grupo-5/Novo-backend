@@ -115,4 +115,29 @@ export class MinioClientService {
       throw new Error(`Não foi possível remover o arquivo: ${error.message}`);
     }
   }
+
+  public async uploadFileBuffer(
+    buffer: Buffer,
+    fileName: string,
+    mimeType: string,
+  ): Promise<{ fileName: string }> {
+    const metaData = { 'Content-Type': mimeType };
+
+    try {
+      await this.minio.client.putObject(
+        this.bucketName,
+        fileName,
+        buffer,
+        buffer.length,
+        metaData,
+      );
+
+      return { fileName };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(
+        'Falha no upload do arquivo para o MinIO.',
+      );
+    }
+  }
 }
