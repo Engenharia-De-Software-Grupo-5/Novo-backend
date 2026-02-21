@@ -1,14 +1,17 @@
 model Contracts {
-    id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    owner       Owners     @relation(fields: [ownerId], references: [id])
-    property    Properties @relation(fields: [propertyId], references: [id])
-    ownerId     String     @db.Uuid
-    propertyId  String     @db.Uuid
-    description String?
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
-    deletedAt   DateTime?
+    id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    tenant             Tenants           @relation(fields: [tenantId], references: [id])
+    property           Properties        @relation(fields: [propertyId], references: [id])
+    contractTemplate   ContractTemplates @relation(fields: [contractTemplateId], references: [id])
+    tenantId           String            @db.Uuid
+    propertyId         String            @db.Uuid
+    contractTemplateId String            @db.Uuid
+    contractUrl        String
+    description        String?
+    createdAt          DateTime          @default(now())
+    updatedAt          DateTime          @updatedAt
+    deletedAt          DateTime?
 
-    @@unique([ownerId, propertyId])
+    @@unique([tenantId, propertyId])
     @@map("contracts")
 }

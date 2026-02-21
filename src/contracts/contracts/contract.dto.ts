@@ -13,7 +13,7 @@ export class ContractDto {
     description: 'Unique identifier for the owner',
     example: '123',
   })
-  ownerId: string;
+  tenantId: string;
 
   @IsString()
   @IsOptional()
@@ -30,4 +30,21 @@ export class ContractDto {
     example: '123'
   })
   propertyId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Unique identifier for contractTemplate',
+    example: '123'
+  })
+  contractTemplateId: string;
+  
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Unique identifier for contractTemplate',
+    example: 'https://.../.../...'
+  })
+  contractUrl: string;
+
 }

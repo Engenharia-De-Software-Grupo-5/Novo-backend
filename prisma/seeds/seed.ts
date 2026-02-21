@@ -27,11 +27,11 @@ async function main() {
   );
 
   const { employee1, employee2 } = await seedEmployees(prisma);
-}
-
-
   const { tenantA, tenantB } = await seedTenants(prisma);
 }
+
+
+
 main()
   .then(() => {
     console.log('Seed concluído com sucesso.');

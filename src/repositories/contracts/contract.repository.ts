@@ -8,13 +8,7 @@ export class ContractRepository {
 
   private readonly selectFields = {
     id: true,
-        descricao: true,
-        owner: {
-          select: {
-            id: true,
-            identifier: true,
-          }
-        },
+        description: true,
         property: {
           select: {
             id: true,
@@ -27,6 +21,21 @@ export class ContractRepository {
             totalArea: true,
             propertySituation: true,
             observations: true,
+          }
+        },
+        contractTemplate: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            template: true
+          }
+        },
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+            cpf: true,
           }
         }
   }
@@ -38,31 +47,8 @@ export class ContractRepository {
 
     return this.prisma.contracts.findMany({
       where: { deletedAt: null },
-      select: { 
-        id: true,
-        descricao: true,
-        owner: {
-          select: {
-            id: true,
-            identifier: true,
-          }
-        },
-        property: {
-          select: {
-            id: true,
-            identifier: true,
-            address: true,
-            unityNumber: true,
-            unityType: true,
-            block: true,
-            floor: true,
-            totalArea: true,
-            propertySituation: true,
-            observations: true,
-            
-          }
-        }},
-    });
+      select: this.selectFields
+        })
   }
   getById(contractId: string): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
@@ -74,8 +60,8 @@ export class ContractRepository {
   checkIfHas(dto: ContractDto): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
       where: {
-        ownerId_propertyId: {
-          ownerId: dto.ownerId,
+        tenantId_propertyId: {
+          tenantId: dto.tenantId,
           propertyId: dto.propertyId
         }
       },
@@ -92,7 +78,7 @@ export class ContractRepository {
   update(id: string, dto: ContractDto): Promise<ContractResponse> {
     return this.prisma.contracts.update({
       where: { id: id },
-      data: { ...dto },
+      data: { ...dto},
       select: this.selectFields,
     });
   }
@@ -107,14 +93,14 @@ export class ContractRepository {
   
   listByTenant(tenantId: string) {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null, leases: { some: { tenantId } } },
+      where: { deletedAt: null, tenant: { id: tenantId }},
       orderBy: { createdAt: 'desc' },
     });
   }
 
   listByProperty(propertyId: string) {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null, leases: { some: { propertyId } } },
+      where: { deletedAt: null, property: { id: propertyId }},
       orderBy: { createdAt: 'desc' },
     });
   }

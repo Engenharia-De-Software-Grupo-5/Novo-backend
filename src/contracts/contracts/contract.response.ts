@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { PropertyResponse } from "../condominiums/property.response";
-import { OwnerResponse } from "../owner/owner.response";
 import { TenantResponse } from "../tenants/tenant.response";
+import { ContractTemplateResponse } from "../contract.templates/contract.template.response";
 
 export class ContractResponse {
   @ApiProperty({
@@ -11,10 +11,10 @@ export class ContractResponse {
     id: string;
 
   @ApiProperty({
-      description: 'Owner object who detains a property ',
-      example: OwnerResponse,
+      description: 'Tenant object who detains a property ',
+      example: TenantResponse,
     }) 
-  owner: OwnerResponse;
+  tenant: TenantResponse;
 
   @ApiProperty({
       description: 'additional description about this contract',
@@ -27,4 +27,16 @@ export class ContractResponse {
       example: PropertyResponse,
     })
   property: PropertyResponse 
+
+  @ApiProperty({
+      description: 'Template associated with this contract',
+      example: ContractTemplateResponse,
+    })
+  contractTemplate: ContractTemplateResponse 
+
+  @ApiProperty({
+      description: 'Template associated with this contract',
+      example: 'https://.../.../...',
+    })
+  contractUrl: string 
 }

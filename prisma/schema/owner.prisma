@@ -4,7 +4,5 @@ model Owners {
     createdAt  DateTime    @default(now())
     updatedAt  DateTime    @updatedAt
     deletedAt  DateTime?
-    contracts  Contracts[]
-
     @@map("owners")
 }

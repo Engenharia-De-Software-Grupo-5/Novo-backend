@@ -112,7 +112,7 @@ export class ContractController {
     return this.contractService.delete(ContractId);
   }
 
-  @Post()
+  @Post(':id')
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload a contract (PDF)' })
   @ApiBody({
