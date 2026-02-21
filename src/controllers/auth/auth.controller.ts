@@ -24,11 +24,15 @@ import { LocalAuthGuard } from 'src/common/guards';
 import { LoginDto, LoginResponse } from 'src/contracts/auth';
 import { AuthRequestModel } from 'src/contracts/auth/auth-request.model';
 import { ResetPasswordDto } from 'src/contracts/auth/reset-password.dto';
+import { MailService } from 'src/services/tools/mail.service';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailService: MailService,
+  ) {}
 
   @IsPublic()
   @Post('login')
@@ -50,34 +54,34 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  // @IsPublic()
-  // @Put('login/password')
-  // @HttpCode(HttpStatus.ACCEPTED)
-  // @ApiOperation({
-  //   summary: 'Send password reset email',
-  //   description: 'Send an email to the user with a new random password',
-  // })
-  // @ApiBody({
-  //   description: 'Email address of the user',
-  //   type: ResetPasswordDto,
-  // })
-  // @ApiAcceptedResponse({
-  //   description: 'Password reset email sent successfully.',
-  // })
-  // async passwordResetEmail(
-  //   @Body() authResetPasswordDto: ResetPasswordDto,
-  // ): Promise<void> {
-  //   try {
-  //     const password: string = await this.authService.passwordResetEmail(
-  //       authResetPasswordDto.email,
-  //     );
-  //     this.mailService.sendMail(
-  //       authResetPasswordDto.email,
-  //       'Password Reset',
-  //       `Your new password is: ${password}`,
-  //     );
-  //   } catch (error) {
-  //     throw new HttpException('User not found.', HttpStatus.UNAUTHORIZED);
-  //   }
-  // }
+  @IsPublic()
+  @Put('login/password')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Send password reset email',
+    description: 'Send an email to the user with a new random password',
+  })
+  @ApiBody({
+    description: 'Email address of the user',
+    type: ResetPasswordDto,
+  })
+  @ApiAcceptedResponse({
+    description: 'Password reset email sent successfully.',
+  })
+  async passwordResetEmail(
+    @Body() authResetPasswordDto: ResetPasswordDto,
+  ): Promise<void> {
+    try {
+      const password: string = await this.authService.passwordResetEmail(
+        authResetPasswordDto.email,
+      );
+      this.mailService.sendMail(
+        authResetPasswordDto.email,
+        'Password Reset',
+        `Your new password is: ${password}`,
+      );
+    } catch (error) {
+      throw new HttpException('User not found.', HttpStatus.UNAUTHORIZED);
+    }
+  }
 }
