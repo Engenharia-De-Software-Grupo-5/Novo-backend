@@ -26,6 +26,8 @@ model Addresses {
   updatedAt    DateTime       @updatedAt
   deletedAt    DateTime?
   condominiums Condominiums[]
+  tenants      Tenants[]
+  professionalInfo ProfessionalInfo[]
 
   @@map("addresses")
 }
