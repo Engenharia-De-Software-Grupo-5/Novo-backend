@@ -91,10 +91,11 @@
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/src/$1"
     },
-    "collectCoverageFrom": [
-      "src/**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
+    "collectCoverageFrom": 
+       ["src/**/*.{ts,js}"]
+    ,
+    "coverageDirectory": "<rootDir>/coverage",
+    "coverageReporters": ["json", "lcov", "text", "text-summary"],
     "testEnvironment": "node"
   },
   "prisma": {
