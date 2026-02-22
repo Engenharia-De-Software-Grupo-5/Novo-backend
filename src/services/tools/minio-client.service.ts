@@ -46,7 +46,7 @@ export class MinioClientService {
       );
     }
 
-    const fileName = customFileName.replace(/\s/g, '_');
+    const fileName = customFileName.replaceAll(/\s/g, '_');
     const metaData = { 'Content-Type': file.mimetype };
 
     try {

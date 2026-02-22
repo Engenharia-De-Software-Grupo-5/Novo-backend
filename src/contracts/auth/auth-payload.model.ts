@@ -5,8 +5,6 @@ import {
   IsOptional,
   IsString,
   IsUUID,
-  Max,
-  Min,
 } from 'class-validator';
 import { SkipUppercase } from 'src/common/decorators';
 

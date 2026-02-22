@@ -55,7 +55,7 @@ export function buildDynamicWhere(
     if (!col || val === undefined || val === '') continue;
 
     // 2. FILTRO CUSTOMIZADO
-    if (options.customMappings && options.customMappings[col]) {
+    if (options.customMappings?.[col]) {
       const customFilter = options.customMappings[col](val);
       Object.assign(where, customFilter);
       continue;
@@ -89,14 +89,14 @@ export function buildDynamicWhere(
     // 6. NÚMEROS
     if (options.numberFields?.includes(col)) {
       const numValue = Number(val);
-      if (!isNaN(numValue)) where[col] = { equals: numValue };
+      if (!Number.isNaN(numValue)) where[col] = { equals: numValue };
       continue;
     }
 
     // 7. DATAS
     if (options.dateFields?.includes(col)) {
       const dateValue = new Date(val);
-      if (!isNaN(dateValue.getTime())) {
+      if (!Number.isNaN(dateValue.getTime())) {
         const startOfDay = new Date(dateValue.setHours(0, 0, 0, 0));
         const endOfDay = new Date(dateValue.setHours(23, 59, 59, 999));
         where[col] = { gte: startOfDay, lte: endOfDay };

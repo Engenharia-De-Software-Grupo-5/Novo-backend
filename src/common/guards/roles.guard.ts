@@ -17,8 +17,8 @@ interface RequestWithAuth extends Request {
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
-    private reflector: Reflector,
-    private prisma: PrismaService,
+    private readonly reflector: Reflector,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -56,7 +56,7 @@ export class RolesGuard implements CanActivate {
       where: { id: user.permission },
     });
 
-    if (!permission || !permission.functionalities) {
+    if (!permission?.functionalities) {
       throw new ForbiddenException('Permissão inválida.');
     }
 
