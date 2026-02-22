@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmployeeService } from 'src/services/employees/employee.service';
 import { EmployeeRepository } from 'src/repositories/employees/employee.repository';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException} from '@nestjs/common';
 
 describe('EmployeeService', () => {
   let service: EmployeeService;

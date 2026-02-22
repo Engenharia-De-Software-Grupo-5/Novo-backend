@@ -8,7 +8,7 @@ import { AuthDataModel } from 'src/contracts/auth/auth-data.model';
 @Injectable()
 export class AuthService {
   constructor(
-    private authRepository: AuthRepository,
+    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -35,17 +35,13 @@ export class AuthService {
     recievedPassword: string,
   ): Promise<AuthDataModel> {
     let user: AuthDataModel | null;
-    try {
-      if (!userLogin.includes('@')) userLogin = userLogin.replace(/[.-]/g, '');
+    if (!userLogin.includes('@')) userLogin = userLogin.replaceAll(/[.-]/g, '');
 
-      user = await this.authRepository.getUserByEmailOrCpf(userLogin);
-      if (user == null) throw new UnauthorizedException();
+    user = await this.authRepository.getUserByEmailOrCpf(userLogin);
+    if (user == null) throw new UnauthorizedException('Incorrect email/cpf and/or password.');
 
-      const isMatch = await bcrypt.compare(recievedPassword, user.password);
-      if (!isMatch) throw new UnauthorizedException();
-    } catch (error) {
-      throw new UnauthorizedException('Incorrect email/cpf and/or password.');
-    }
+    const isMatch = await bcrypt.compare(recievedPassword, user.password);
+    if (!isMatch) throw new UnauthorizedException('Incorrect email/cpf and/or password.');
 
     return { ...user, password: undefined };
   }

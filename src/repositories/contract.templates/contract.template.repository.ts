@@ -5,7 +5,7 @@ import { ContractTemplateResponse } from "src/contracts/contract.templates/contr
 
 @Injectable()
 export class ContractTemplateRepository {
-  constructor(private prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) { }
 
   getById(contractTemplateId: string): Promise<ContractTemplateResponse> {
     return this.prisma.contractTemplates.findUnique({

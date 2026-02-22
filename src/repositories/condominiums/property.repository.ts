@@ -5,7 +5,7 @@ import { PropertyResponse } from "src/contracts/condominiums/property.response";
 
 @Injectable()
 export class PropertyRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
     private readonly propertySelect = {
         id: true,
         identifier: true,

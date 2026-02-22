@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { ChargePaymentsService } from 'src/services/charges/charge-payments.service';
 import { ChargePaymentsRepository } from 'src/repositories/charges/charge-payments.repository';
 import { InterestCalculatorService } from 'src/services/charges/interest-calculator.service';
-import { MinioClientService } from 'src/services/tools/minio-client.service';
 import { ChargePaymentsController } from 'src/controllers/charges/charges-payment.controller';
 import { InterestCalculatorController } from 'src/controllers/charges/interest-calculator.controller';
 import { MinioClientModule } from '../tools/minio-client.module';
