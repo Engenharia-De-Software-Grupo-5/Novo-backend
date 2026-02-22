@@ -23,7 +23,7 @@ export class ContractService {
     private readonly minioService: MinioClientService,
     private readonly generateContract: GenerateContractService,
     private readonly contractRepository: ContractRepository,
-  ) {}
+  ) { }
   getAll(): Promise<ContractResponse[]> {
     return this.contractRepository.getAll();
   }
@@ -45,7 +45,7 @@ export class ContractService {
 
     if (dto.contractTemplateId) {
       const response = await this.contractRepository.create(dto);
-      const urlPromise = await this.generateContract.execute(response.id);
+      const urlPromise = await this.generateContract.execute(response.id, dto.content);
       const result = await this.contractRepository.updateUrl(
         response.id,
         urlPromise.url,

@@ -38,4 +38,13 @@ export class ContractDto {
   // O class-validator vai ignorar esse campo se o Swagger enviar ele vazio.
   @IsOptional()
   file?: any;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: '', // Falta preencher
+    example: '',  // Falta preencher
+  })
+  content?: string;
+
 }
