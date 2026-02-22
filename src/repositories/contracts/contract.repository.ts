@@ -140,9 +140,10 @@ export class ContractRepository {
         },
       },
     },
+    content: true
   };
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // getAll, getById, create, update, delete
   getAll(): Promise<ContractResponse[]> {

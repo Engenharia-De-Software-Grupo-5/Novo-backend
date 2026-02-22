@@ -16,7 +16,7 @@ export class GenerateContractService {
         private readonly minioService: MinioClientService,
     ) { }
 
-    async execute(contractId: string): Promise<{ url: string }> {
+    async execute(contractId: string, manualContent?: string): Promise<{ url: string }> {
 
         const contract = await this.contractsRepository.getById(contractId);
         if (!contract) {
@@ -34,6 +34,10 @@ export class GenerateContractService {
         if (!property) {
             throw new NotFoundException('Imóvel não encontrado');
         }
+        const tenant = contract.tenant
+        if (!tenant) {
+            throw new NotFoundException('Locatário não encontrado');
+        }
         const address = condominium.address
         if (!address) {
             throw new NotFoundException('Endereço não encontrado');
@@ -46,6 +50,8 @@ export class GenerateContractService {
 
             condominio: {
                 nome: condominium.name,
+                endereco: `${condominium.address.street}, ${condominium.address.number} - ${condominium.address.city}/${condominium.address.uf}`,
+                descricao: condominium.description,
             },
 
             propriedade: {
@@ -60,12 +66,32 @@ export class GenerateContractService {
 
             locatario: {
                 nome: contract.tenant.name,
+                data_nascimento: contract.tenant.birthDate,
                 cpf: contract.tenant.cpf,
+                email: contract.tenant.email,
+                estado_civil: contract.tenant.maritalStatus,
+                renda_mensal: contract.tenant.monthlyIncome,
+                telefone_principal: contract.tenant.primaryPhone,
+                telefone_secundario: contract.tenant.secondaryPhone,
+                profissao: contract.tenant.professionalInfo.position,
+                nome_banco: contract.tenant.bankingInfo.bank,   // Falar com arthur, placeholder duplicado
+                agencia: contract.tenant.bankingInfo.agency,
+                conta: contract.tenant.bankingInfo.accountNumber,
+                tipo_conta: contract.tenant.bankingInfo.accountNumber,  // Falar com arthur, melhorar o nome placeholder
+                residentes_adicionais: contract.tenant.additionalResidents,
             },
+            segundo_proponente: {
+                nome: contract.tenant.spouse.name,
+                cpf: contract.tenant.spouse.cpf,
+                data_nascimento: contract.tenant.spouse.birthDate,
+                profissao: contract.tenant.spouse.profession,
+                renda_mensal: contract.tenant.spouse.monthlyIncome,
+            }
         };
 
+        const baseContent = manualContent || template.template
         const processedMarkdown = this.templateEngine.parse(
-            template.template,
+            baseContent,
             templateData,
         );
 
