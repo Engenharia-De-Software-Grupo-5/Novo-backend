@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
-import { ChargeStatus } from '@prisma/client';
+import { ChargeStatus, PaymentMethod, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ChargePaymentsRepository {
@@ -77,7 +77,7 @@ export class ChargePaymentsRepository {
     data: {
       amountPaid: number;
       paymentDate: Date;
-      method: any;
+      method: PaymentMethod;
       calc: {
         wasLate: boolean;
         daysLate: number;
@@ -141,7 +141,7 @@ export class ChargePaymentsRepository {
     data: {
       amountPaid: number;
       paymentDate: Date;
-      method: any;
+      method: PaymentMethod;
       calc: {
         wasLate: boolean;
         daysLate: number;
@@ -167,7 +167,7 @@ export class ChargePaymentsRepository {
       throw new ConflictException('Charge is canceled.');
     }
 
-    let proofData: any;
+    let proofData: Partial<Prisma.PaymentsUpdateInput> = {};
     
     if (data.proof === null) {
       proofData = {

@@ -76,7 +76,7 @@ export class AuthController {
       const password: string = await this.authService.passwordResetEmail(
         authResetPasswordDto.email,
       );
-      this.mailService.sendMail(
+      void this.mailService.sendMail(
         authResetPasswordDto.email,
         'Password Reset',
         `Your new password is: ${password}`,

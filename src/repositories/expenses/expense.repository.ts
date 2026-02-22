@@ -20,7 +20,7 @@ export class ExpenseRepository {
     targetType: ExpenseTargetType;
     condominiumId?: string;
     propertyId?: string;
-  }) {
+  }): Promise<{ condominiumId?: string; propertyId?: string }> {
     const { targetType, condominiumId, propertyId } = input;
 
     if (condominiumId && propertyId) {

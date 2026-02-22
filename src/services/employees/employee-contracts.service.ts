@@ -65,7 +65,8 @@ export class EmployeeContractsService {
     if (!contract) throw new NotFoundException('Contract not found.');
     try {
       await this.minio.deleteFile(contract.objectName);
-    } catch {
+    } catch(error) {
+      console.warn('Error deleting employee contract file:', error);
     }
 
     await this.repo.softDelete(contractId);

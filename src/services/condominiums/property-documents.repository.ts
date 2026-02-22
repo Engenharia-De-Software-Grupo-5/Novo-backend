@@ -52,7 +52,8 @@ export class PropertyDocumentsService {
 
     try {
       await this.minio.deleteFile(doc.objectName);
-    } catch {
+    } catch(error) {
+      console.warn('Error deleting document file:', error);
     }
 
     await this.repo.softDelete(condominiumId, propertyId, documentId);

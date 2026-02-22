@@ -9,6 +9,7 @@ import { MinioClientService } from 'src/services/tools/minio-client.service';
 import { InterestCalculatorService } from 'src/services/charges/interest-calculator.service';
 import { CreateChargePaymentDto } from 'src/contracts/charges/payments/create-payment.dto';
 import { UpdateChargePaymentDto } from 'src/contracts/charges/payments/update-payment.dto';
+import { InterestCalculatorResponse } from 'src/contracts/charges/calculator/interest-calculator.response';
 
 @Injectable()
 export class ChargePaymentsService {
@@ -42,7 +43,7 @@ export class ChargePaymentsService {
     referenceDate: dto.paymentDate,
     fineRate: dto.fineRate,
     monthlyInterestRate: dto.monthlyInterestRate,
-  } as any);
+  } as InterestCalculatorResponse);
 
   return {
     wasLate: calc.daysLate > 0,
@@ -126,7 +127,7 @@ export class ChargePaymentsService {
       monthlyInterestRate: dto.monthlyInterestRate ?? prev.monthlyRate,
     };
 
-    const calc = this.compute(charge, merged as any);
+    const calc = this.compute(charge, merged);
 
     const proof = file
       ? await this.minio.uploadFile(
@@ -157,7 +158,8 @@ export class ChargePaymentsService {
     if (file && previousProofObject) {
       try {
         await this.minio.deleteFile(previousProofObject);
-      } catch {
+      } catch (error) {
+        console.warn('Error deleting previous proof file:', error);
       }
     }
 
@@ -173,7 +175,8 @@ export class ChargePaymentsService {
     if (p.proofObjectName) {
       try {
         await this.minio.deleteFile(p.proofObjectName);
-      } catch {
+      } catch (error) {
+        console.warn('Error deleting previous proof file:', error);
       }
     }
 

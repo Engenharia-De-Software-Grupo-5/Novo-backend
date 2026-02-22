@@ -44,7 +44,8 @@ export class EmployeeRepository {
   }
 
   create(dto: EmployeeDto): Promise<EmployeeResponse> {
-    const { bankData, ...rest } = dto;
+    const rest = { ...dto };
+    delete rest.bankData;
     return this.prisma.employees.upsert({
       where: {
         cpf: dto.cpf,

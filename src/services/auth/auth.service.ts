@@ -34,10 +34,9 @@ export class AuthService {
     userLogin: string,
     recievedPassword: string,
   ): Promise<AuthDataModel> {
-    let user: AuthDataModel | null;
     if (!userLogin.includes('@')) userLogin = userLogin.replaceAll(/[.-]/g, '');
 
-    user = await this.authRepository.getUserByEmailOrCpf(userLogin);
+    const user = await this.authRepository.getUserByEmailOrCpf(userLogin);
     if (user == null) throw new UnauthorizedException('Incorrect email/cpf and/or password.');
 
     const isMatch = await bcrypt.compare(recievedPassword, user.password);

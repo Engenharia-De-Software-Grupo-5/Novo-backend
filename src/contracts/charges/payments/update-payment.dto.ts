@@ -4,7 +4,7 @@ import { Transform, Type } from 'class-transformer';
 import { PaymentMethod } from '@prisma/client';
 
 const emptyToUndefined = () =>
-  Transform(({ value }) => (value === '' || value === null ? undefined : value));
+  Transform(({ value }: { value: unknown }) => (value === '' || value === null ? undefined : value));
 
 export class UpdateChargePaymentDto {
   @ApiPropertyOptional({ example: 1000, minimum: 0.01 })

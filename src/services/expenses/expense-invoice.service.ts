@@ -49,7 +49,9 @@ export class ExpenseInvoiceService {
 
     try {
       await this.minio.deleteFile(inv.objectName);
-    } catch {}
+    } catch(error) {
+      console.warn('Error deleting expense invoice file:', error);
+    }
 
     await this.repo.softDelete(expenseId, invoiceId);
   }

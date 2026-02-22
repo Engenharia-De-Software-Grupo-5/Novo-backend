@@ -50,7 +50,9 @@ export class ContractsService {
     const c = await this.repo.getById(contractId);
     if (!c) throw new NotFoundException('Contract not found.');
 
-    try { await this.minio.deleteFile(c.objectName); } catch {}
+    try { await this.minio.deleteFile(c.objectName); } catch (error) {
+      console.warn('Error deleting contract file:', error);
+    }
     await this.repo.softDelete(contractId);
   }
 

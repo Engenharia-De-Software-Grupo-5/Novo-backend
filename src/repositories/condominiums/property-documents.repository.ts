@@ -24,7 +24,8 @@ export class PropertyDocumentsRepository {
     extension: string;
     size: number;
   }) {
-    const { condominiumId: _condId, ...payload } = data;
+    const payload = { ...data };
+    delete payload.condominiumId;
     return this.prisma.propertyDocuments.create({ data: payload });
   }
 

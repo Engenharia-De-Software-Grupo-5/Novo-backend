@@ -53,7 +53,8 @@ export class PropertyInspectionsService {
 
     try {
       await this.minio.deleteFile(inspection.objectName);
-    } catch {
+    } catch(error) {
+      console.warn('Error deleting inspection file:', error);
     }
 
     await this.repo.softDelete(condominiumId, propertyId, inspectionId);

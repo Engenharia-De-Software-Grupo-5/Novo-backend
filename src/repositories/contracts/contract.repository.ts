@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/common/database/prisma.service';
 
 @Injectable()
@@ -82,8 +83,11 @@ export class ContractsRepository {
       return await this.prisma.propertyTenantContractLinks.create({
         data: { contractId, propertyId, tenantId },
       });
-    } catch (e: any) {
-      if (e.code === 'P2002') {
+    } catch (e: unknown) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
         throw new ConflictException('Lease link already exists.');
       }
       throw e;

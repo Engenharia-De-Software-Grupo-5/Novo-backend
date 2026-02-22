@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
-import { BenefitType } from '@prisma/client';
+import { BenefitType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class EmployeeBenefitsRepository {
@@ -34,7 +34,7 @@ export class EmployeeBenefitsRepository {
     });
   }
 
-  update(id: string, data: any) {
+  update(id: string, data: Prisma.EmployeeBenefitsUpdateInput) {
     return this.prisma.employeeBenefits.update({
       where: { id },
       data,

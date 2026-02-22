@@ -29,7 +29,8 @@ export class PropertyInspectionsRepository {
     size: number;
   }) {
    
-    const { condominiumId: _condId, ...payload } = data;
+    const payload = { ...data };
+    delete payload.condominiumId;
 
     return this.prisma.propertyInspections.create({
       data: payload,
