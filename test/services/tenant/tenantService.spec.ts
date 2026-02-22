@@ -139,7 +139,7 @@ describe('TenantService', () => {
 
   describe('update', () => {
     it('propagates repository error on update', async () => {
-      mockRepository.getById.mockResolvedValue({ id: 'id-1' }); // 👈 ADICIONE
+      mockRepository.getById.mockResolvedValue({ id: 'id-1' }); 
       mockRepository.update.mockRejectedValue(new Error('deadlock'));
 
       await expect(service.update('id-1', { name: 'X', cpf: '1' } as any))
@@ -148,7 +148,7 @@ describe('TenantService', () => {
     });
 
     it('propagates repository error on update', async () => {
-      mockRepository.getById.mockResolvedValue({ id: 'id-1' }); // 👈 ADICIONE
+      mockRepository.getById.mockResolvedValue({ id: 'id-1' }); 
       mockRepository.update.mockRejectedValue(new Error('deadlock'));
 
       await expect(service.update('id-1', { name: 'X', cpf: '1' } as any))
