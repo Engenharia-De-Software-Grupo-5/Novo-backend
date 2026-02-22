@@ -21,7 +21,7 @@ export class ContractDto {
     description: 'Describe an aditional info about the contract',
     example: 'Clausulas do contrato',
   })
-  descricao?: string;
+  description?: string;
 
   @IsString()
   @IsNotEmpty()

@@ -21,13 +21,18 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PreviewContractDto } from 'src/contracts/contracts/preview.contract.dto';
 import { ContractService } from 'src/services/contracts/contract.service';
+import { PreviewContractService } from 'src/services/contracts/preview.contract.service';
 
 @ApiTags('Contracts')
 @ApiBearerAuth('access-token')
 @Controller('contracts')
 export class ContractController {
-  constructor(private readonly contractService: ContractService) {}
+  constructor(
+    private readonly contractService: ContractService,
+    private readonly previewContractService: PreviewContractService,
+  ) { }
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -69,10 +74,10 @@ export class ContractController {
         file: { type: 'string', format: 'binary' }, // Campo do arquivo
         tenantId: { type: 'string' },               // Campos do seu ContractDto
         propertyId: { type: 'string' },
-        contractTemplateID: { type: 'string' },
-        descricao: { type: 'string' },
+        contractTemplateId: { type: 'string' },
+        description: { type: 'string' },
       },
-      required: ['tenantId', 'propertyId', 'contractTemplateID'],
+      required: ['tenantId', 'propertyId', 'contractTemplateId'],
     },
   })
   @HttpCode(HttpStatus.CREATED)
@@ -161,4 +166,14 @@ export class ContractController {
   // download(@Param('id', new ParseUUIDPipe()) id: string) {
   //   return this.contractService.getDownloadUrl(id);
   // }
+
+  @Post('preview')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Preview contract before creation',
+    description: 'Generate a temporary HTML preview of the contract',
+  })
+  async preview(@Body() dto: PreviewContractDto) {
+    return this.previewContractService.execute(dto);
+  }
 }
