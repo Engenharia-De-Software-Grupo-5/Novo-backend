@@ -52,7 +52,7 @@ describe('PropertyInspectionsController', () => {
   });
 
   it('should throw BadRequestException when upload has no file', async () => {
-    await expect(controller.upload('cond-1', 'prop-1', undefined)).rejects.toBeInstanceOf(
+    await expect(controller.upload('cond-1', 'prop-1')).rejects.toBeInstanceOf(
       BadRequestException,
     );
   });

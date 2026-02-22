@@ -7,7 +7,6 @@ import {
 import { AddressDto } from './address.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { PropertyDto} from './property.dto';
 
 export class CondominiumDto {
   @IsString()

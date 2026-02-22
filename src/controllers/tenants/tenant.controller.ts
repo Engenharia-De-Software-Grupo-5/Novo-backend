@@ -42,6 +42,21 @@ export class TenantController {
     return this.tenantService.getAll();
   }
 
+  @Get(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get tenant by CPF',
+    description:
+      'Retrieve details of a specific tenant identified by its CPF.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieved tenant details by CPF',
+    type: TenantResponse,
+  })
+  getByCpf(@Param('cpf') cpf: string): Promise<TenantResponse> {
+    return this.tenantService.getByCpf(cpf);
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -97,6 +112,21 @@ export class TenantController {
     return this.tenantService.update(id, dto);
   }
 
+  @Delete(':cpf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete tenant by CPF',
+    description:
+      'Soft delete a specific tenant identified by its CPF.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully deleted tenant by CPF',
+    type: TenantResponse,
+  })
+  deleteByCpf(@Param('cpf') cpf: string): Promise<TenantResponse> {
+    return this.tenantService.deleteByCpf(cpf);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -108,6 +138,6 @@ export class TenantController {
     type: TenantResponse,
   })
   delete(@Param('id') tenantId: string): Promise<TenantResponse> {
-    return this.tenantService.delete(tenantId);
+    return this.tenantService.deleteById(tenantId);
   }
 }
