@@ -20,8 +20,8 @@ let PropertyService = class PropertyService {
     getAll(condominiumId) {
         return this.propertyRepository.getAll(condominiumId);
     }
-    getPaginated(data) {
-        return this.propertyRepository.getPaginated(data);
+    getPaginated(condominiumId, data) {
+        return this.propertyRepository.getPaginated(condominiumId, data);
     }
     getById(condominiumId, propertyId) {
         return this.propertyRepository.getById(condominiumId, propertyId);

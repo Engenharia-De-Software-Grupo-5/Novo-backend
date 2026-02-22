@@ -5,9 +5,9 @@ import { TenantResponse } from 'src/contracts/tenants/tenant.response';
 import { TenantRepository } from 'src/repositories/tenants/tenant.repository';
 export declare class TenantService {
     private readonly tenantRepository;
+    getPaginated(data: PaginationDto): Promise<PaginatedResult<TenantResponse>>;
     constructor(tenantRepository: TenantRepository);
     getAll(): Promise<TenantResponse[]>;
-    getPaginated(data: PaginationDto): Promise<PaginatedResult<TenantResponse>>;
     getByCpf(cpf: string): Promise<TenantResponse>;
     getById(tenantId: string): Promise<TenantResponse>;
     create(dto: TenantDto): Promise<TenantResponse>;

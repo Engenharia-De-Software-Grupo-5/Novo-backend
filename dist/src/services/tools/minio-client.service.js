@@ -14,11 +14,13 @@ exports.MinioClientService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const nestjs_minio_client_1 = require("nestjs-minio-client");
+const Minio = require("minio");
 let MinioClientService = MinioClientService_1 = class MinioClientService {
     minio;
     configService;
     logger = new common_1.Logger(MinioClientService_1.name);
     bucketName;
+    publicMinioClient;
     constructor(minio, configService) {
         this.minio = minio;
         this.configService = configService;
@@ -27,6 +29,13 @@ let MinioClientService = MinioClientService_1 = class MinioClientService {
         if (!this.bucketName) {
             throw new Error('MINIO_BUCKET_NAME não definido no .env');
         }
+        this.publicMinioClient = new Minio.Client({
+            endPoint: 's3.bemconnect.com.br',
+            port: 443,
+            useSSL: true,
+            accessKey: this.configService.get('MINIO_ACCESS_KEY') || 'minioadmin',
+            secretKey: this.configService.get('MINIO_SECRET_KEY') || 'minioadmin',
+        });
     }
     async uploadFile(file, allowedExtensions, customFileName) {
         const extension = file.originalname.split('.').pop()?.toLowerCase();
@@ -66,7 +75,7 @@ let MinioClientService = MinioClientService_1 = class MinioClientService {
     }
     async getFileUrl(fileName, expiry = 60 * 60) {
         try {
-            return await this.minio.client.presignedGetObject(this.bucketName, fileName, expiry);
+            return await this.publicMinioClient.presignedGetObject(this.bucketName, fileName, expiry);
         }
         catch (error) {
             throw new Error(`Não foi possível obter a URL do arquivo: ${error.message}`);

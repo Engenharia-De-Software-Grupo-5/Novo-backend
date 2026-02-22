@@ -57,8 +57,9 @@ export class PropertyController {
   })
   getPaginated(
     @Query() data: PaginationDto,
+    @Param('condominiumId') condominiumId: string,
   ): Promise<PaginatedResult<PropertyResponse>> {
-    return this.propertyService.getPaginated(data);
+    return this.propertyService.getPaginated(condominiumId, data);
   }
 
 

@@ -66,8 +66,8 @@ export class ContractsController {
   @Get('paginated')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get service types filtered and paginated',
-    description: 'Get service types filtered and paginated',
+    summary: 'Get contracts filtered and paginated',
+    description: 'Get contracts filtered and paginated',
   })
   @ApiOkResponse({
     description: 'Success',

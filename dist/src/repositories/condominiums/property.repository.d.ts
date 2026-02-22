@@ -5,7 +5,7 @@ import { PaginatedResult } from "src/contracts/pagination/paginated.result";
 import { PaginationDto } from "src/contracts/pagination/pagination.dto";
 export declare class PropertyRepository {
     private prisma;
-    getPaginated(data: PaginationDto): Promise<PaginatedResult<PropertyResponse>>;
+    getPaginated(condominiumId: string, data: PaginationDto): Promise<PaginatedResult<PropertyResponse>>;
     constructor(prisma: PrismaService);
     private readonly propertySelect;
     getAll(condominiumId: string): Promise<PropertyResponse[]>;

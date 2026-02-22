@@ -28,8 +28,8 @@ let PropertyController = class PropertyController {
     getAll(condominiumId) {
         return this.propertyService.getAll(condominiumId);
     }
-    getPaginated(data) {
-        return this.propertyService.getPaginated(data);
+    getPaginated(data, condominiumId) {
+        return this.propertyService.getPaginated(condominiumId, data);
     }
     getById(condominiumId, propertyId) {
         return this.propertyService.getById(condominiumId, propertyId);
@@ -73,8 +73,9 @@ __decorate([
         schema: (0, swagger_paginated_schema_1.PaginatedResponseSchema)(property_response_1.PropertyResponse),
     }),
     __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Param)('condominiumId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [pagination_dto_1.PaginationDto]),
+    __metadata("design:paramtypes", [pagination_dto_1.PaginationDto, String]),
     __metadata("design:returntype", Promise)
 ], PropertyController.prototype, "getPaginated", null);
 __decorate([

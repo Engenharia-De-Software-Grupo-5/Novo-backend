@@ -14,14 +14,14 @@ const common_1 = require("@nestjs/common");
 const tenant_repository_1 = require("../../repositories/tenants/tenant.repository");
 let TenantService = class TenantService {
     tenantRepository;
+    getPaginated(data) {
+        return this.tenantRepository.getPaginated(data);
+    }
     constructor(tenantRepository) {
         this.tenantRepository = tenantRepository;
     }
     getAll() {
         return this.tenantRepository.getAll();
-    }
-    getPaginated(data) {
-        return this.tenantRepository.getPaginated(data);
     }
     async getByCpf(cpf) {
         const tenant = await this.tenantRepository.getByCpf(cpf);

@@ -15,8 +15,8 @@ const prisma_service_1 = require("../../common/database/prisma.service");
 const prisma_utils_1 = require("../../contracts/pagination/prisma.utils");
 let PropertyRepository = class PropertyRepository {
     prisma;
-    async getPaginated(data) {
-        const where = (0, prisma_utils_1.buildDynamicWhere)(data, { deletedAt: null }, {
+    async getPaginated(condominiumId, data) {
+        const where = (0, prisma_utils_1.buildDynamicWhere)(data, { deletedAt: null, condominiumId }, {
             enumFields: ['status'],
             customMappings: {
                 permissionName: (content) => ({

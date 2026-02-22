@@ -13,9 +13,10 @@ export class PropertyService {
   }
 
   getPaginated(
+    condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<PropertyResponse>> {
-    return this.propertyRepository.getPaginated(data);
+    return this.propertyRepository.getPaginated(condominiumId, data);
   }
 
   getById(condominiumId: string, propertyId: string): Promise<PropertyResponse> {

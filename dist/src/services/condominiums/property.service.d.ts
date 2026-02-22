@@ -7,7 +7,7 @@ export declare class PropertyService {
     private readonly propertyRepository;
     constructor(propertyRepository: PropertyRepository);
     getAll(condominiumId: string): Promise<PropertyResponse[]>;
-    getPaginated(data: PaginationDto): Promise<PaginatedResult<PropertyResponse>>;
+    getPaginated(condominiumId: string, data: PaginationDto): Promise<PaginatedResult<PropertyResponse>>;
     getById(condominiumId: string, propertyId: string): Promise<PropertyResponse>;
     getByIdentificador(condominiumId: string, identificador: string): Promise<PropertyResponse>;
     create(condominiumId: string, dto: PropertyDto): Promise<PropertyResponse>;

@@ -10,6 +10,7 @@ export declare class MinioClientService {
     private readonly configService;
     private readonly logger;
     private readonly bucketName;
+    private readonly publicMinioClient;
     constructor(minio: MinioService, configService: ConfigService);
     uploadFile(file: Express.Multer.File, allowedExtensions: string[], customFileName: string): Promise<{
         fileName: string;

@@ -7,38 +7,38 @@ export declare class ContractsController {
     constructor(service: ContractsService);
     upload(file?: Express.Multer.File): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         objectName: string;
         originalName: string;
         mimeType: string;
         extension: string;
         size: number;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
     }>;
     list(tenantCpf?: string): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         objectName: string;
         originalName: string;
         mimeType: string;
         extension: string;
         size: number;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
     }[]>;
     getPaginated(data: PaginationDto): Promise<PaginatedResult<ContractResponse>>;
     findOne(id: string): Promise<{
         url: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         objectName: string;
         originalName: string;
         mimeType: string;
         extension: string;
         size: number;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
     }>;
     download(id: string): Promise<{
         url: string;
@@ -47,31 +47,31 @@ export declare class ContractsController {
     linkLease(id: string, tenantId: string, propertyId: string): Promise<{
         id: string;
         createdAt: Date;
+        tenantId: string;
         contractId: string;
         propertyId: string;
-        tenantId: string;
     }>;
     unlinkLease(id: string, tenantId: string, propertyId: string): Promise<void>;
     listByTenant(tenantId: string): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         objectName: string;
         originalName: string;
         mimeType: string;
         extension: string;
         size: number;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
     }[]>;
     listByProperty(propertyId: string): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         objectName: string;
         originalName: string;
         mimeType: string;
         extension: string;
         size: number;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
     }[]>;
 }

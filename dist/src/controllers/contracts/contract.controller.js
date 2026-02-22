@@ -99,8 +99,8 @@ __decorate([
     (0, common_1.Get)('paginated'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({
-        summary: 'Get service types filtered and paginated',
-        description: 'Get service types filtered and paginated',
+        summary: 'Get contracts filtered and paginated',
+        description: 'Get contracts filtered and paginated',
     }),
     (0, swagger_1.ApiOkResponse)({
         description: 'Success',
