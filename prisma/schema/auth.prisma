@@ -1,15 +1,13 @@
 model Users {
-  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String      @unique
-  cpf           String?     @unique
-  name          String
-  password      String
-  permission    Permissions @relation(fields: [permissionsId], references: [id])
-  permissionsId String      @db.Uuid
-  status        UserStatus  @default(ACTIVE)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String    @unique
+  cpf       String?   @unique
+  name      String
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  accesses  Access[]
 
   @@map("users")
 }
@@ -21,9 +19,27 @@ model Permissions {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
-  users           Users[]
+  accesses        Access[]
 
   @@map("permissions")
+}
+
+model Access {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user           Users        @relation(fields: [usersId], references: [id])
+  usersId        String       @db.Uuid
+  permission     Permissions  @relation(fields: [permissionsId], references: [id])
+  condominium    Condominiums @relation(fields: [condominiumsId], references: [id])
+  permissionsId  String       @db.Uuid
+  condominiumsId String       @db.Uuid
+  status         UserStatus   @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([usersId, condominiumsId])
+  @@map("access")
 }
 
 enum UserStatus {

@@ -49,12 +49,13 @@ export class AppController {
     type: AuthJwtResponse,
   })
   getMe(@CurrentUser() user: AuthPayload): AuthJwtResponse {
-    const { sub: id, email, name, permission, cpf } = user;
+    const { sub: id, email, name, permission, condominium, cpf } = user;
     return {
       id,
       email,
       name,
       permission,
+      condominium,
       cpf,
     };
   }

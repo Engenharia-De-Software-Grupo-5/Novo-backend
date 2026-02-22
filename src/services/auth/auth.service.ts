@@ -19,7 +19,8 @@ export class AuthService {
       email: user.email,
       cpf: user.cpf,
       name: user.name,
-      permission: user.permission.id,
+      permission: user.accesses.map((access) => access.permission),
+      condominium: user.accesses.map((access) => access.condominium),
     };
 
     const jwtToken = this.jwtService.sign(payload);

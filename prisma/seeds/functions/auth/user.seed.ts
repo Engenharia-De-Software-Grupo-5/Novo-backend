@@ -5,6 +5,8 @@ export async function seedUsers(
   prisma: PrismaClient,
   permission1: string,
   permission2: string,
+  condominiumIdA: string,
+  condominiumIdB: string,
 ) {
   const password = await bcrypt.hash('12340', 10);
 
@@ -14,7 +16,20 @@ export async function seedUsers(
       name: 'Admin User',
       cpf: '11111111111',
       password,
-      permissionsId: permission1,
+      accesses: {
+        create: [
+          {
+            condominiumsId: condominiumIdA,
+            permissionsId: permission1,
+            status: 'ACTIVE',
+          },
+          {
+            condominiumsId: condominiumIdB,
+            permissionsId: permission1,
+            status: 'ACTIVE',
+          },
+        ],
+      },
     },
   });
 
@@ -24,9 +39,22 @@ export async function seedUsers(
       name: 'Regular User',
       cpf: '22222222222',
       password,
-      permissionsId: permission2,
+      accesses: {
+        create: [
+          {
+            condominiumsId: condominiumIdA,
+            permissionsId: permission2,
+            status: 'ACTIVE',
+          },
+          {
+            condominiumsId: condominiumIdB,
+            permissionsId: permission1,
+            status: 'ACTIVE',
+          },
+        ],
+      },
     },
   });
 
-  return { admin, user, password };
+  return { admin, user };
 }
