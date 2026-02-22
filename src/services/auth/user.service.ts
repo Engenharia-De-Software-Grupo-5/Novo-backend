@@ -40,12 +40,13 @@ export class UserService {
     const result = await this.userRepository.create(userDto, hashedPassword);
 
     try {
-      this.mailService.sendMail(
+      await this.mailService.sendMail(
         userDto.email,
         'Credentials for your new account',
         `To login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`,
       );
     } catch (error) {
+      console.error('Failed to send email:', error);
       throw new HttpException(
         'Failed to send email.',
         HttpStatus.INTERNAL_SERVER_ERROR,

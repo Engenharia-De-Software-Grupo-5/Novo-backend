@@ -49,7 +49,7 @@ jest.mock('@nestjs/swagger', () => {
 
   return new Proxy(base, {
     get(target, prop: string | symbol) {
-      if (prop in target) return (target as any)[prop];
+      if (prop in target) return (target)[prop];
 
       if (typeof prop === 'string' && prop.startsWith('Api')) {
         return noopDecorator;
@@ -95,7 +95,6 @@ describe('main bootstrap', () => {
       );
     }
 
-    // porta
     expect(mockApp.listen).toHaveBeenCalledWith('3333');
   });
 });

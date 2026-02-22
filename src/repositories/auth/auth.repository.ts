@@ -4,7 +4,7 @@ import { AuthDataModel } from 'src/contracts/auth/auth-data.model';
 
 @Injectable()
 export class AuthRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   getUserByEmailOrCpf(userLogin: string): Promise<AuthDataModel | null> {
     return this.prisma.users.findFirst({

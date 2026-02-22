@@ -83,8 +83,10 @@ export class ContractsRepository {
         data: { contractId, propertyId, tenantId },
       });
     } catch (e: any) {
-
-      throw new ConflictException('Lease link already exists.');
+      if (e.code === 'P2002') {
+        throw new ConflictException('Lease link already exists.');
+      }
+      throw e;
     }
   }
 

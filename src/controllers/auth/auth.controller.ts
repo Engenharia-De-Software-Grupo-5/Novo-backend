@@ -1,11 +1,9 @@
 import {
   ApiAcceptedResponse,
-  ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
   Body,
@@ -13,6 +11,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Logger,
   Post,
   Put,
   Request,
@@ -29,6 +28,8 @@ import { MailService } from 'src/services/tools/mail.service';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly mailService: MailService,
@@ -81,6 +82,7 @@ export class AuthController {
         `Your new password is: ${password}`,
       );
     } catch (error) {
+      this.logger.error(`Password reset failed for email: ${authResetPasswordDto.email}`, error);
       throw new HttpException('User not found.', HttpStatus.UNAUTHORIZED);
     }
   }

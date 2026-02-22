@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 import { PropertyInspectionsRepository } from 'src/repositories/condominiums/property-inspections.repository';
 

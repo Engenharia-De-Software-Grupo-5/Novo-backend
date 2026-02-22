@@ -18,7 +18,7 @@ export class CondominiumService {
       dto.name,
     );
 
-    if (!!condominioExistente) {
+    if (condominioExistente) {
       throw new BadRequestException('This condominium name already exists in the database.');
     }
 

@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { permission } from 'process';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { UserDto, UserResponse } from 'src/contracts/auth';
-import { UserPasswordDto } from 'src/contracts/auth/user-password.dto';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 
 @Injectable()
 export class UserRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   getAll(): Promise<UserResponse[]> {
     return this.prisma.users.findMany({
