@@ -1,4 +1,6 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger';
+import { PermissionResponse } from './permission.response';
+import { CondominiumSimpleResponse } from './auth-data.model';
 
 @ApiSchema()
 export class AuthJwtResponse {
@@ -28,7 +30,13 @@ export class AuthJwtResponse {
 
   @ApiProperty({
     description: 'Permission name',
-    example: 'ADMIN',
+    type: [PermissionResponse],
   })
-  permission?: string;
+  permission: PermissionResponse[];
+
+  @ApiProperty({
+    description: 'Permission name',
+    type: [CondominiumSimpleResponse],
+  })
+  condominium: CondominiumSimpleResponse[];
 }

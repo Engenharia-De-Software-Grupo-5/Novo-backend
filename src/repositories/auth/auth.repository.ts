@@ -13,9 +13,14 @@ export class AuthRepository {
         deletedAt: null,
       },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: { permissionsId: true, createdAt: true, updatedAt: true },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 

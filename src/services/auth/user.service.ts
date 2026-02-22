@@ -19,44 +19,66 @@ export class UserService {
     private readonly mailService: MailService,
   ) {}
 
-  getAll(): Promise<UserResponse[]> {
-    return this.userRepository.getAll();
+  getAll(condominiumId: string): Promise<UserResponse[]> {
+    return this.userRepository.getAll(condominiumId);
   }
 
-  getById(userId: string): Promise<UserResponse> {
+  getById(userId: string, condominiumId: string): Promise<UserResponse> {
     return this.userRepository.getById(userId);
   }
 
   getUserPaginated(
     data: PaginationDto,
+    condominiumId: string,
   ): Promise<PaginatedResult<UserResponse>> {
     return this.userRepository.getUserPaginated(data);
   }
 
-  async create(userDto: UserDto): Promise<UserResponse> {
-    const newPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+  async create(userDto: UserDto, condominiumId: string): Promise<UserResponse> {
+    const existingUser = await this.userRepository.findByEmail(userDto.email);
 
-    const result = await this.userRepository.create(userDto, hashedPassword);
-
-    try {
-      await this.mailService.sendMail(
-        userDto.email,
-        'Credentials for your new account',
-        `To login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`,
+    if (existingUser) {
+      if (
+        existingUser.accesses.some(
+          (access) => access.condominium.id === condominiumId,
+        )
+      ) {
+        return this.userRepository.update(
+          existingUser.id,
+          userDto,
+          condominiumId,
+        );
+      }
+    } else {
+      const newPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const result = await this.userRepository.create(
+        userDto,
+        hashedPassword,
+        condominiumId,
       );
-    } catch (error) {
-      console.error('Failed to send email:', error);
-      throw new HttpException(
-        'Failed to send email.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      try {
+        this.mailService.sendMail(
+          userDto.email,
+          'Credentials for your new account',
+          `To login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`,
+        );
+      } catch (error) {
+        throw new HttpException(
+          'Failed to send email.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      return result;
     }
-    return result;
   }
 
-  update(userId: string, userDto: UserDto): Promise<UserResponse> {
-    return this.userRepository.update(userId, userDto);
+  update(
+    userId: string,
+    userDto: UserDto,
+    condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.userRepository.update(userId, userDto, condominiumId);
   }
 
   async updatePassword(
@@ -76,7 +98,7 @@ export class UserService {
     return this.userRepository.updatePassword(userId, newPassword);
   }
 
-  delete(userId: string): Promise<UserResponse> {
-    return this.userRepository.delete(userId);
+  delete(userId: string, condominiumId: string): Promise<UserResponse> {
+    return this.userRepository.delete(userId, condominiumId);
   }
 }

@@ -13,10 +13,4 @@ export class PermissionResponse {
     example: 'admin',
   })
   name: string;
-
-  @ApiProperty({
-    description: 'List of screen identifiers this permission grants access to',
-    example: ['contractsGET', 'contractsPOST'],
-  })
-  functionalities: string[];
 }
