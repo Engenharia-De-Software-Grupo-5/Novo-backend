@@ -9,6 +9,8 @@ import {
   Min,
 } from 'class-validator';
 import { SkipUppercase } from 'src/common/decorators';
+import { PermissionResponse } from './permission.response';
+import { CondominiumSimpleResponse } from './auth-data.model';
 
 export class AuthPayload {
   @IsUUID()
@@ -42,14 +44,21 @@ export class AuthPayload {
   })
   name: string;
 
-  @IsOptional()
   @IsString()
   @SkipUppercase()
   @ApiProperty({
-    description: 'Permission id',
-    example: 'c376f0d2-8eaa-4f88-9f2f-52f8dff8794a',
+    description: 'Permissions',
+    type: [PermissionResponse],
   })
-  permission?: string;
+  permission: PermissionResponse[];
+
+  @IsString()
+  @SkipUppercase()
+  @ApiProperty({
+    description: 'Condominiums',
+    type: [CondominiumSimpleResponse],
+  })
+  condominium: CondominiumSimpleResponse[];
 
   @IsOptional()
   @IsNumber()

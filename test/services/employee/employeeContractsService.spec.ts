@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
 import { EmployeeContractsRepository } from 'src/repositories/employees/employee-contracts.repository';
 
-jest.mock('crypto', () => ({
+jest.mock('node:crypto', () => ({
   randomUUID: jest.fn(),
 }));
 
@@ -44,8 +44,12 @@ describe('EmployeeContractsService', () => {
     minio = module.get(MinioClientService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should upload PDF contract for employee', async () => {
-    (randomUUID as jest.Mock).mockReturnValue('uuid-1');
+    (randomUUID as unknown as jest.Mock).mockReturnValue('uuid-1');
 
     const employeeId = 'emp-1';
     const file = {
@@ -177,7 +181,7 @@ describe('EmployeeContractsService', () => {
 
     expect(minio.deleteFile).toHaveBeenCalledWith('obj');
     expect(repo.softDelete).toHaveBeenCalledWith('ctr-1');
-    expect(result).toBeUndefined(); 
+    expect(result).toBeUndefined();
   });
 
   it('should remove contract even if minio deleteFile fails', async () => {

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MinioService } from 'nestjs-minio-client';
+import * as Minio from 'minio';
 
 export interface FileInfo {
   fullName: string;
@@ -17,6 +18,7 @@ export interface FileInfo {
 export class MinioClientService {
   private readonly logger = new Logger(MinioClientService.name);
   private readonly bucketName: string;
+  private readonly publicMinioClient: Minio.Client;
 
   constructor(
     private readonly minio: MinioService,
@@ -28,6 +30,16 @@ export class MinioClientService {
     if (!this.bucketName) {
       throw new Error('MINIO_BUCKET_NAME não definido no .env');
     }
+
+    this.publicMinioClient = new Minio.Client({
+      endPoint: 's3.bemconnect.com.br',
+      port: 443,
+      useSSL: true,
+      accessKey:
+        this.configService.get<string>('MINIO_ACCESS_KEY') || 'minioadmin',
+      secretKey:
+        this.configService.get<string>('MINIO_SECRET_KEY') || 'minioadmin',
+    });
   }
 
   public async uploadFile(
@@ -96,7 +108,12 @@ export class MinioClientService {
     expiry: number = 60 * 60,
   ): Promise<string> {
     try {
-      return await this.minio.client.presignedGetObject(
+      // return await this.minio.client.presignedGetObject(
+      //   this.bucketName,
+      //   fileName,
+      //   expiry,
+      // );
+      return await this.publicMinioClient.presignedGetObject(
         this.bucketName,
         fileName,
         expiry,

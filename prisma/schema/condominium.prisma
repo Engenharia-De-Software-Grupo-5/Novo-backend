@@ -9,6 +9,7 @@ model Condominiums {
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
   expenses    Expenses[]
+  accesses    Access[]
 
   @@map("condominiums")
 }
@@ -26,6 +27,8 @@ model Addresses {
   updatedAt    DateTime       @updatedAt
   deletedAt    DateTime?
   condominiums Condominiums[]
+  tenants      Tenants[]
+  professionalInfo ProfessionalInfo[]
 
   @@map("addresses")
 }

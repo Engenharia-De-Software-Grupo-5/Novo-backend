@@ -6,7 +6,135 @@ model Tenants {
     updatedAt DateTime    @updatedAt
     deletedAt DateTime?
     contracts Contracts[]
-    charges   Charges[]
 
-    @@map("tenants")
+  birthDate      DateTime
+  maritalStatus  String
+  monthlyIncome  Float
+  email          String
+  primaryPhone   String
+  secondaryPhone String?
+  addressId      String     @db.Uuid
+  address        Addresses  @relation(fields: [addressId], references: [id])
+
+  condominiumId String
+
+  emergencyContacts   EmergencyContact[]
+  professionalInfo    ProfessionalInfo?
+  bankingInfo         BankingInfo?
+  spouse              Spouse?
+  additionalResidents AdditionalResident[]
+  documents           TenantDocument?
+  propertyLinks       PropertyTenantContractLinks[]
+  charges             Charges[]
+
+  status TenantStatus
+
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+model EmergencyContact {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  relationship String?
+  phone     String
+
+  tenantId String  @db.Uuid
+  tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("emergency_contacts")
+}
+
+model ProfessionalInfo {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyName    String
+  companyPhone   String
+  addressId      String     @db.Uuid
+  companyAddress Addresses  @relation(fields: [addressId], references: [id])
+  position       String
+  monthsWorking  Int
+
+  tenantId String  @db.Uuid @unique
+  tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("professional_info")
+}
+
+model BankingInfo {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bank          String
+  accountType   String
+  accountNumber String
+  agency        String
+
+  tenantId String  @unique @db.Uuid
+  tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("banking_info")
+}
+
+model Spouse {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  cpf           String
+  profession    String
+  monthlyIncome Float
+  birthDate     DateTime
+
+  tenantId String  @unique @db.Uuid
+  tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("spouses")
+}
+
+model AdditionalResident {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  relationship String?
+  birthDate   DateTime
+
+  tenantId String  @db.Uuid
+  tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("additional_residents")
+}
+
+model TenantDocument {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cpfFileId   String?
+  incomeProofId String?
+
+  tenantId String  @db.Uuid @unique
+  tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("tenant_documents")
 }

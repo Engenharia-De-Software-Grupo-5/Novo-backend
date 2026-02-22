@@ -20,7 +20,7 @@ export class EmployeeRepository {
     status: true,
   }
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // getAll, getById, create, update, delete
   getAll(): Promise<EmployeeResponse[]> {
@@ -43,7 +43,7 @@ export class EmployeeRepository {
     });
   }
 
-  create(dto: EmployeeDto): Promise<EmployeeResponse> {
+  async create(dto: EmployeeDto): Promise<EmployeeResponse> {
     const { bankData, ...rest } = dto;
     return this.prisma.employees.upsert({
       where: {

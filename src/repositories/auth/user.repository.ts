@@ -1,29 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { permission } from 'process';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { UserDto, UserResponse } from 'src/contracts/auth';
-import { UserPasswordDto } from 'src/contracts/auth/user-password.dto';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 
 @Injectable()
 export class UserRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  getAll(): Promise<UserResponse[]> {
+  getAll(condominiumId: string): Promise<UserResponse[]> {
     return this.prisma.users.findMany({
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        accesses: { some: { condominiumsId: condominiumId } },
+      },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          where: { deletedAt: null },
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: {
-        password: true,
-        permissionsId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
@@ -31,15 +32,15 @@ export class UserRepository {
     return this.prisma.users.findUnique({
       where: { id: userId, deletedAt: null },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          where: { deletedAt: null },
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: {
-        password: true,
-        permissionsId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
@@ -66,17 +67,15 @@ export class UserRepository {
       this.prisma.users.findMany({
         where,
         include: {
-          permission: {
-            select: { id: true, name: true, functionalities: true },
+          accesses: {
+            where: { deletedAt: null },
+            select: {
+              permission: { select: { id: true, name: true } },
+              condominium: { select: { id: true, name: true } },
+            },
           },
         },
-        omit: {
-          password: true,
-          permissionsId: true,
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
+        omit: { createdAt: true, updatedAt: true },
         take: data.limit,
         skip: (data.page - 1) * data.limit,
         orderBy: { name: 'asc' },
@@ -94,38 +93,69 @@ export class UserRepository {
     };
   }
 
-  create(userDto: UserDto, password: string): Promise<UserResponse> {
-    return this.prisma.users.upsert({
-      where: { email: userDto.email },
-      update: { ...userDto, password, deletedAt: null },
-      create: { ...userDto, password },
+  create(
+    userDto: UserDto,
+    password: string,
+    condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.prisma.users.create({
+      data: {
+        ...userDto,
+        password,
+        accesses: {
+          create: {
+            condominiumsId: condominiumId,
+            permissionsId: userDto.permissionsId,
+            status: userDto.status,
+          },
+        },
+      },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: {
-        password: true,
-        permissionsId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
-  update(userId: string, userDto: UserDto): Promise<UserResponse> {
+  update(
+    userId: string,
+    userDto: UserDto,
+    condominiumId: string,
+  ): Promise<UserResponse> {
     return this.prisma.users.update({
       where: { id: userId, deletedAt: null },
-      data: userDto,
+      data: {
+        ...userDto,
+        accesses: {
+          update: {
+            where: {
+              usersId_condominiumsId: {
+                usersId: userId,
+                condominiumsId: condominiumId,
+              },
+            },
+            data: {
+              deletedAt: null,
+              permissionsId: userDto.permissionsId,
+              status: userDto.status,
+            },
+          },
+        },
+      },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: {
-        password: true,
-        permissionsId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
@@ -134,32 +164,43 @@ export class UserRepository {
       where: { id: userId, deletedAt: null },
       data: { password },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          where: { deletedAt: null },
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: {
-        password: true,
-        permissionsId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
-  delete(userId: string): Promise<UserResponse> {
+  delete(userId: string, condominiumId: string): Promise<UserResponse> {
     return this.prisma.users.update({
       where: { id: userId, deletedAt: null },
-      data: { deletedAt: new Date() },
+      data: {
+        accesses: {
+          update: {
+            where: {
+              usersId_condominiumsId: {
+                usersId: userId,
+                condominiumsId: condominiumId,
+              },
+            },
+            data: { deletedAt: new Date() },
+          },
+        },
+      },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: {
-        password: true,
-        permissionsId: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
@@ -167,6 +208,21 @@ export class UserRepository {
     return this.prisma.users.findUnique({
       where: { id: userId, deletedAt: null },
       select: { password: true },
+    });
+  }
+
+  findByEmail(email: string): Promise<UserResponse> {
+    return this.prisma.users.findUnique({
+      where: { email, deletedAt: null },
+      include: {
+        accesses: {
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
+      },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 }

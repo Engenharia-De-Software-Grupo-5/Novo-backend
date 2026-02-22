@@ -18,7 +18,7 @@ export class ChargePaymentsService {
     private readonly calculator: InterestCalculatorService,
   ) {}
 
-  private allowedProofExt = ['pdf', 'jpg', 'jpeg', 'png'];
+  private readonly allowedProofExt = ['pdf', 'jpg', 'jpeg', 'png'];
 
   private ensureFile(file?: Express.Multer.File) {
     if (!file) return;
@@ -79,7 +79,7 @@ export class ChargePaymentsService {
       calc,
       proof: file
         ? {
-            objectName: proof!.fileName,
+            objectName: proof.fileName,
             originalName: file.originalname,
             mimeType: file.mimetype,
             extension: ext ?? '',
@@ -145,7 +145,7 @@ export class ChargePaymentsService {
       calc,
       proof: file
         ? {
-            objectName: proof!.fileName,
+            objectName: proof.fileName,
             originalName: file.originalname,
             mimeType: file.mimetype,
             extension: ext ?? '',

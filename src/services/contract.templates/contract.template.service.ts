@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ContractTemplateDto as ContractTemplateDto } from 'src/contracts/contract.templates/contract.template.dto';
-import { ContractTemplateResponse as ContractTemplateResponse } from 'src/contracts/contract.templates/contract.template.response';
-import { ContractTemplateRepository as ContractTemplateRepository } from 'src/repositories/contract.templates/contract.template.repository';
+import { ContractTemplateDto } from 'src/contracts/contract.templates/contract.template.dto';
+import { ContractTemplateResponse } from 'src/contracts/contract.templates/contract.template.response';
+import { ContractTemplateRepository } from 'src/repositories/contract.templates/contract.template.repository';
 
 @Injectable()
 export class ContractTemplateService {
