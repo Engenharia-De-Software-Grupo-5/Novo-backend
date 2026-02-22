@@ -16,7 +16,16 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
@@ -32,7 +41,7 @@ export class ContractController {
   constructor(
     private readonly contractService: ContractService,
     private readonly previewContractService: PreviewContractService,
-  ) { }
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -63,29 +72,35 @@ export class ContractController {
     return this.contractService.getById(ContratoId);
   }
 
-  @Post() // Recomendo usar um caminho específico para evitar conflitos
+  @Post()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Create contract with PDF upload' })
+  @ApiOperation({ summary: 'Create contract with (optional) PDF upload' })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary' }, // Campo do arquivo
-        tenantId: { type: 'string' },               // Campos do seu ContractDto
+        file: {
+          type: 'string',
+          format: 'binary',
+          nullable: true, // Indica explicitamente ao Swagger que é opcional
+        },
+        tenantId: { type: 'string' },
         propertyId: { type: 'string' },
         contractTemplateId: { type: 'string' },
         description: { type: 'string' },
       },
+      // 'file' e 'description' fora do required
       required: ['tenantId', 'propertyId', 'contractTemplateId'],
     },
   })
   @HttpCode(HttpStatus.CREATED)
   async createWithFile(
-    @Body() dto: ContractDto, // O NestJS preenche o DTO com os outros campos do formulário
-    @UploadedFile() file?: Express.Multer.File,
+    @Body() dto: ContractDto,
+    @UploadedFile() file?: Express.Multer.File, // O '?' já indica que é opcional
   ) {
-    // Agora você pode passar ambos para o seu serviço
+    // Se o arquivo não for enviado, 'file' será undefined.
+    // Seu service deve estar preparado para lidar com file sendo undefined.
     return this.contractService.create(dto, file);
   }
 

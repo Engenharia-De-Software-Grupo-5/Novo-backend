@@ -5,70 +5,68 @@ import { ContractResponse } from 'src/contracts/contracts/contract.response';
 
 @Injectable()
 export class ContractRepository {
-
   private readonly selectFields = {
+    id: true,
+    contractUrl: true,
+    description: true,
+    property: {
+      select: {
         id: true,
-        contractUrl: true,
-        description: true,
-        property: {
-          select: {
-            id: true,
-            identifier: true,
-            address: true,
-            unityNumber: true,
-            unityType: true,
-            block: true,
-            floor: true,
-            totalArea: true,
-            propertySituation: true,
-            observations: true,
-            condominium: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                address: {
-                  select: {
-                    id: true,
-                    zip: true,
-                    neighborhood: true,
-                    city: true,
-                    complement: true,
-                    number: true,
-                    street: true,
-                    uf: true,
-                  },
-                },
-              }
-            }
-          }
-        },
-        contractTemplate: {
+        identifier: true,
+        address: true,
+        unityNumber: true,
+        unityType: true,
+        block: true,
+        floor: true,
+        totalArea: true,
+        propertySituation: true,
+        observations: true,
+        condominium: {
           select: {
             id: true,
             name: true,
             description: true,
-            template: true
-          }
+            address: {
+              select: {
+                id: true,
+                zip: true,
+                neighborhood: true,
+                city: true,
+                complement: true,
+                number: true,
+                street: true,
+                uf: true,
+              },
+            },
+          },
         },
-        tenant: {
-          select: {
-            id: true,
-            name: true,
-            cpf: true,
-          }
-        }
-  }
+      },
+    },
+    contractTemplate: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        template: true,
+      },
+    },
+    tenant: {
+      select: {
+        id: true,
+        name: true,
+        cpf: true,
+      },
+    },
+  };
 
   constructor(private prisma: PrismaService) {}
 
   // getAll, getById, create, update, delete
   getAll(): Promise<ContractResponse[]> {
-
     return this.prisma.contracts.findMany({
       where: { deletedAt: null },
-      select: this.selectFields
-        })
+      select: this.selectFields,
+    });
   }
   getById(contractId: string): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
@@ -82,23 +80,26 @@ export class ContractRepository {
       where: {
         tenantId_propertyId: {
           tenantId: dto.tenantId,
-          propertyId: dto.propertyId
-        }
+          propertyId: dto.propertyId,
+        },
       },
       select: this.selectFields,
     });
   }
 
   create(dto: ContractDto): Promise<ContractResponse> {
+    const { file, ...dadosDoContrato } = dto;
+
     return this.prisma.contracts.create({
-      data: { ...dto },
+      data: { ...dadosDoContrato },
       select: this.selectFields,
     });
   }
   update(id: string, dto: ContractDto): Promise<ContractResponse> {
+    const { file, ...dadosDoContrato } = dto;
     return this.prisma.contracts.update({
       where: { id: id },
-      data: { ...dto},
+      data: { ...dadosDoContrato },
       select: this.selectFields,
     });
   }
@@ -106,7 +107,7 @@ export class ContractRepository {
   updateUrl(id: string, url: string): Promise<ContractResponse> {
     return this.prisma.contracts.update({
       where: { id: id },
-      data: { contractUrl: url},
+      data: { contractUrl: url },
       select: this.selectFields,
     });
   }
@@ -118,17 +119,17 @@ export class ContractRepository {
       select: this.selectFields,
     });
   }
-  
+
   listByTenant(tenantId: string) {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null, tenant: { id: tenantId }},
+      where: { deletedAt: null, tenant: { id: tenantId } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   listByProperty(propertyId: string) {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null, property: { id: propertyId }},
+      where: { deletedAt: null, property: { id: propertyId } },
       orderBy: { createdAt: 'desc' },
     });
   }

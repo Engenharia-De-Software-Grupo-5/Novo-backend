@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
 import { Multer } from 'multer';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
@@ -18,34 +23,49 @@ export class ContractService {
   getAll(): Promise<ContractResponse[]> {
     return this.contractRepository.getAll();
   }
-  getById(contratoId: string): Promise<ContractResponse> {
-    return this.contractRepository.getById(contratoId);
+  async getById(contratoId: string): Promise<ContractResponse> {
+    const result = await this.contractRepository.getById(contratoId);
+    const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+    result.contractUrl = tempUrl;
+    return result;
   }
 
-  async create(dto: ContractDto, file?: Express.Multer.File): Promise<ContractResponse> {
+  async create(
+    dto: ContractDto,
+    file?: Express.Multer.File,
+  ): Promise<ContractResponse> {
     const contratoExistente = await this.contractRepository.checkIfHas(dto);
     if (contratoExistente) {
       throw new BadRequestException('This contract already exists');
     }
 
-    if(dto.contractTemplateId){
+    if (dto.contractTemplateId) {
       const response = await this.contractRepository.create(dto);
-      const urlPromise = await this.generateContract.execute(response.id)
-      return await this.contractRepository.updateUrl (response.id, urlPromise.url )
+      const urlPromise = await this.generateContract.execute(response.id);
+      const result = await this.contractRepository.updateUrl(
+        response.id,
+        urlPromise.url,
+      );
+
+      const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+      result.contractUrl = tempUrl;
+      return result;
+    } else {
+      const response = await this.contractRepository.create(dto);
+      const minioResponse = await this.minioService.uploadFile(
+        file,
+        ['pdf'],
+        response.id + '_' + new Date().getTime() + '.pdf',
+      );
+      const result = await this.contractRepository.updateUrl(
+        response.id,
+        minioResponse.fileName,
+      );
+
+      const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+      result.contractUrl = tempUrl;
+      return result;
     }
-    else{
-      const response = await this.contractRepository.create(dto);      
-      const minioResponse = await this.minioService.uploadFile(file, ['pdf'], 
-        response.id + "_" + new Date().getTime() + ".pdf")
-        return await this.contractRepository.updateUrl (response.id, minioResponse.fileName)
-    }
-
-
-
-
-
-
-    
   }
   update(id: string, dto: ContractDto): Promise<ContractResponse> {
     return this.contractRepository.update(id, dto);
