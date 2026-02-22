@@ -1,11 +1,11 @@
 model Tenants {
-    id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    cpf       String      @unique
-    name      String      @unique
-    createdAt DateTime    @default(now())
-    updatedAt DateTime    @updatedAt
-    deletedAt DateTime?
-    contracts Contracts[]
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cpf       String      @unique
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+  contracts Contracts[]
 
   birthDate      DateTime
   maritalStatus  String
@@ -13,8 +13,8 @@ model Tenants {
   email          String
   primaryPhone   String
   secondaryPhone String?
-  addressId      String     @db.Uuid
-  address        Addresses  @relation(fields: [addressId], references: [id])
+  addressId      String    @db.Uuid
+  address        Addresses @relation(fields: [addressId], references: [id])
 
   condominiumId String
 
@@ -24,7 +24,6 @@ model Tenants {
   spouse              Spouse?
   additionalResidents AdditionalResident[]
   documents           TenantDocument?
-  propertyLinks       PropertyTenantContractLinks[]
   charges             Charges[]
 
   status TenantStatus
@@ -39,10 +38,10 @@ enum TenantStatus {
 }
 
 model EmergencyContact {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
   relationship String?
-  phone     String
+  phone        String
 
   tenantId String  @db.Uuid
   tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -55,15 +54,15 @@ model EmergencyContact {
 }
 
 model ProfessionalInfo {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   companyName    String
   companyPhone   String
-  addressId      String     @db.Uuid
-  companyAddress Addresses  @relation(fields: [addressId], references: [id])
+  addressId      String    @db.Uuid
+  companyAddress Addresses @relation(fields: [addressId], references: [id])
   position       String
   monthsWorking  Int
 
-  tenantId String  @db.Uuid @unique
+  tenantId String  @unique @db.Uuid
   tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
@@ -82,7 +81,7 @@ model BankingInfo {
 
   tenantId String  @unique @db.Uuid
   tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -100,7 +99,7 @@ model Spouse {
 
   tenantId String  @unique @db.Uuid
   tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -109,10 +108,10 @@ model Spouse {
 }
 
 model AdditionalResident {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
   relationship String?
-  birthDate   DateTime
+  birthDate    DateTime
 
   tenantId String  @db.Uuid
   tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -125,11 +124,11 @@ model AdditionalResident {
 }
 
 model TenantDocument {
-  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cpfFileId   String?
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cpfFileId     String?
   incomeProofId String?
 
-  tenantId String  @db.Uuid @unique
+  tenantId String  @unique @db.Uuid
   tenant   Tenants @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime  @default(now())

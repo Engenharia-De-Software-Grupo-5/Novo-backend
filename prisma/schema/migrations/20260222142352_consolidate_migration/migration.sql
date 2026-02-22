@@ -34,6 +34,9 @@ CREATE TYPE "ExpenseTargetType" AS ENUM ('CONDOMINIUM', 'PROPERTY');
 -- CreateEnum
 CREATE TYPE "ExpensePaymentMethod" AS ENUM ('CASH', 'PIX', 'BOLETO', 'CREDIT_CARD', 'DEBIT_CARD', 'TRANSFER', 'OTHER');
 
+-- CreateEnum
+CREATE TYPE "TenantStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'PENDING');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -41,8 +44,6 @@ CREATE TABLE "users" (
     "cpf" TEXT,
     "name" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "permissionsId" UUID NOT NULL,
-    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -60,6 +61,20 @@ CREATE TABLE "permissions" (
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "access" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "usersId" UUID NOT NULL,
+    "permissionsId" UUID NOT NULL,
+    "condominiumsId" UUID NOT NULL,
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "access_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -193,8 +208,8 @@ CREATE TABLE "contracts" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "tenantId" UUID NOT NULL,
     "propertyId" UUID NOT NULL,
-    "contractTemplateId" UUID NOT NULL,
-    "contractUrl" TEXT NOT NULL,
+    "contractTemplateId" UUID,
+    "contractUrl" TEXT,
     "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -342,8 +357,105 @@ CREATE TABLE "tenants" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
+    "birthDate" TIMESTAMP(3) NOT NULL,
+    "maritalStatus" TEXT NOT NULL,
+    "monthlyIncome" DOUBLE PRECISION NOT NULL,
+    "email" TEXT NOT NULL,
+    "primaryPhone" TEXT NOT NULL,
+    "secondaryPhone" TEXT,
+    "addressId" UUID NOT NULL,
+    "condominiumId" TEXT NOT NULL,
+    "status" "TenantStatus" NOT NULL,
 
     CONSTRAINT "tenants_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "emergency_contacts" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" TEXT NOT NULL,
+    "relationship" TEXT,
+    "phone" TEXT NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "emergency_contacts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "professional_info" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "companyName" TEXT NOT NULL,
+    "companyPhone" TEXT NOT NULL,
+    "addressId" UUID NOT NULL,
+    "position" TEXT NOT NULL,
+    "monthsWorking" INTEGER NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "professional_info_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "banking_info" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "bank" TEXT NOT NULL,
+    "accountType" TEXT NOT NULL,
+    "accountNumber" TEXT NOT NULL,
+    "agency" TEXT NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "banking_info_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "spouses" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" TEXT NOT NULL,
+    "cpf" TEXT NOT NULL,
+    "profession" TEXT NOT NULL,
+    "monthlyIncome" DOUBLE PRECISION NOT NULL,
+    "birthDate" TIMESTAMP(3) NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "spouses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "additional_residents" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" TEXT NOT NULL,
+    "relationship" TEXT,
+    "birthDate" TIMESTAMP(3) NOT NULL,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "additional_residents_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tenant_documents" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "cpfFileId" TEXT,
+    "incomeProofId" TEXT,
+    "tenantId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "tenant_documents_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -354,6 +466,9 @@ CREATE UNIQUE INDEX "users_cpf_key" ON "users"("cpf");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "access_usersId_condominiumsId_key" ON "access"("usersId", "condominiumsId");
 
 -- CreateIndex
 CREATE INDEX "Charges_tenantId_idx" ON "Charges"("tenantId");
@@ -409,8 +524,26 @@ CREATE UNIQUE INDEX "tenants_cpf_key" ON "tenants"("cpf");
 -- CreateIndex
 CREATE UNIQUE INDEX "tenants_name_key" ON "tenants"("name");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "professional_info_tenantId_key" ON "professional_info"("tenantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "banking_info_tenantId_key" ON "banking_info"("tenantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "spouses_tenantId_key" ON "spouses"("tenantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tenant_documents_tenantId_key" ON "tenant_documents"("tenantId");
+
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_permissionsId_fkey" FOREIGN KEY ("permissionsId") REFERENCES "permissions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "access" ADD CONSTRAINT "access_usersId_fkey" FOREIGN KEY ("usersId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "access" ADD CONSTRAINT "access_permissionsId_fkey" FOREIGN KEY ("permissionsId") REFERENCES "permissions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "access" ADD CONSTRAINT "access_condominiumsId_fkey" FOREIGN KEY ("condominiumsId") REFERENCES "condominiums"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Charges" ADD CONSTRAINT "Charges_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -440,7 +573,7 @@ ALTER TABLE "contracts" ADD CONSTRAINT "contracts_tenantId_fkey" FOREIGN KEY ("t
 ALTER TABLE "contracts" ADD CONSTRAINT "contracts_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "contracts" ADD CONSTRAINT "contracts_contractTemplateId_fkey" FOREIGN KEY ("contractTemplateId") REFERENCES "contracttemplates"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_contractTemplateId_fkey" FOREIGN KEY ("contractTemplateId") REFERENCES "contracttemplates"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -462,3 +595,27 @@ ALTER TABLE "expenses" ADD CONSTRAINT "expenses_propertyId_fkey" FOREIGN KEY ("p
 
 -- AddForeignKey
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_expenseId_fkey" FOREIGN KEY ("expenseId") REFERENCES "expenses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tenants" ADD CONSTRAINT "tenants_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "emergency_contacts" ADD CONSTRAINT "emergency_contacts_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "professional_info" ADD CONSTRAINT "professional_info_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "professional_info" ADD CONSTRAINT "professional_info_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "banking_info" ADD CONSTRAINT "banking_info_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "spouses" ADD CONSTRAINT "spouses_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "additional_residents" ADD CONSTRAINT "additional_residents_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tenant_documents" ADD CONSTRAINT "tenant_documents_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
