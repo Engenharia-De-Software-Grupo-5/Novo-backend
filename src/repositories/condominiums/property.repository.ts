@@ -8,21 +8,28 @@ export class PropertyRepository {
   constructor(private readonly prisma: PrismaService) {}
     private readonly propertySelect = {
         id: true,
-        identifier: true,
-        address: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
+        name: true,
+        description: true,
+        address: {
+          select: {
+            id: true,
+            zip: true,
+            neighborhood: true,
+            city: true,
+            complement: true,
+            number: true,
+            street: true,
+            uf: true,
+          },
+        },
+      },
     }
+  }
 
   // getAll, getById, create, update, delete
   getAll(condominiumId: string): Promise<PropertyResponse[]> {
     return this.prisma.properties.findMany({
-      where: { deletedAt: null, condominiumId},
+      where: { deletedAt: null, condominiumId },
       select: {
         ...this.propertySelect
       },
@@ -30,7 +37,7 @@ export class PropertyRepository {
   }
   getById(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
     return this.prisma.properties.findFirst({
-      where: { id: propertyId, deletedAt: null, condominiumId},
+      where: { id: propertyId, deletedAt: null, condominiumId },
       select: {
         ...this.propertySelect
       },
@@ -46,9 +53,9 @@ export class PropertyRepository {
   }
   create(condominiumId: string, dto: PropertyDto): Promise<PropertyResponse> {
     return this.prisma.properties.create({
-      data: { ...dto, condominiumId},
+      data: { ...dto, condominiumId },
       select: {
-       ...this.propertySelect
+        ...this.propertySelect
       },
     });
   }
@@ -57,16 +64,16 @@ export class PropertyRepository {
       where: { id: propertyId, condominiumId, deletedAt: null },
       data: { ...dto },
       select: {
-       ...this.propertySelect
+        ...this.propertySelect
       },
     });
   }
   delete(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
     return this.prisma.properties.update({
-      where: { id: propertyId, condominiumId},
+      where: { id: propertyId, condominiumId },
       data: { deletedAt: new Date() },
       select: {
-       ...this.propertySelect
+        ...this.propertySelect
       },
     });
   }

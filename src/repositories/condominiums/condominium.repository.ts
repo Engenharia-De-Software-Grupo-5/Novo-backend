@@ -21,21 +21,6 @@ export class CondominiumRepository {
         uf: true,
       },
     },
-    properties: {
-      where: { deletedAt: null },
-      select: {
-        id: true,
-        identifier: true,
-        address: true,
-        totalArea: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        propertySituation: true,
-        observations: true,
-      },
-    },
   };
 
   constructor(private readonly prisma: PrismaService) {}

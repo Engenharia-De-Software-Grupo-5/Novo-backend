@@ -9,131 +9,186 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { ContractsService } from 'src/services/contracts/contract.service';
+import { ContractDto } from 'src/contracts/contracts/contract.dto';
+import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PreviewContractDto } from 'src/contracts/contracts/preview.contract.dto';
+import { ContractService } from 'src/services/contracts/contract.service';
+import { PreviewContractService } from 'src/services/contracts/preview.contract.service';
 
 @ApiTags('Contracts')
 @ApiBearerAuth('access-token')
 @Controller('contracts')
-@UseGuards(JwtAuthGuard, RolesGuard)
-export class ContractsController {
-  constructor(private readonly service: ContractsService) {}
-
-  @Post()
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload a contract (PDF)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['file'],
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  @HttpCode(HttpStatus.OK)
-  async upload(@UploadedFile() file?: Express.Multer.File) {
-    if (!file) throw new BadRequestException('Uploaded file is required.');
-    return this.service.upload(file);
-  }
+export class ContractController {
+  constructor(
+    private readonly contractService: ContractService,
+    private readonly previewContractService: PreviewContractService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List contracts' })
-  @ApiQuery({
-    name: 'tenantCpf',
-    required: false,
-    type: String,
-    description: 'Filter contracts by tenant CPF (11 digits)',
-    example: '11111111111',
-  })
   @HttpCode(HttpStatus.OK)
-  list(@Query('tenantCpf') tenantCpf?: string) {
-    return this.service.list(tenantCpf);
+  @ApiOperation({
+    summary: 'List all contracts',
+    description: 'Retrieve all contracts registered in the system.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieved all contracts',
+    type: [ContractResponse],
+  })
+  getAll(): Promise<ContractResponse[]> {
+    return this.contractService.getAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get contract details (includes presigned url)' })
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.service.findOne(id);
+  @ApiOperation({
+    summary: 'Get contract by ID',
+    description:
+      'Retrieve details of a specific contract identified by its ID.',
+  })
+  @ApiOkResponse({
+    description: 'Successfully retrieved contract details',
+    type: ContractResponse,
+  })
+  getById(@Param('id') ContratoId: string): Promise<ContractResponse> {
+    return this.contractService.getById(ContratoId);
   }
 
-  @Get(':id/download')
-  @ApiOperation({ summary: 'Get download URL (presigned)' })
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Create contract with (optional) PDF upload' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          nullable: true, // Indica explicitamente ao Swagger que é opcional
+        },
+        tenantId: { type: 'string' },
+        propertyId: { type: 'string' },
+        contractTemplateId: { type: 'string' },
+        description: { type: 'string' },
+      },
+      // 'file' e 'description' fora do required
+      required: ['tenantId', 'propertyId', 'contractTemplateId'],
+    },
+  })
+  @HttpCode(HttpStatus.CREATED)
+  async createWithFile(
+    @Body() dto: ContractDto,
+    @UploadedFile() file?: Express.Multer.File, // O '?' já indica que é opcional
+  ) {
+    // Se o arquivo não for enviado, 'file' será undefined.
+    // Seu service deve estar preparado para lidar com file sendo undefined.
+    return this.contractService.create(dto, file);
+  }
+
+  // @Post()
+  // @HttpCode(HttpStatus.CREATED)
+  // @ApiOperation({
+  //   summary: 'Create a new contract',
+  //   description: 'Register a new contract in the system.',
+  // })
+  // @ApiBody({
+  //   description: 'contract data to be registered',
+  //   type: ContractDto,
+  // })
+  // @ApiCreatedResponse({
+  //   description: 'contract successfully created',
+  //   type: ContractResponse,
+  // })
+  // create(@Body() dto: ContractDto): Promise<ContractResponse> {
+  //   return this.contractService.create(dto);
+  // }
+
+  @Put(':id')
   @HttpCode(HttpStatus.OK)
-  download(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.service.getDownloadUrl(id);
+  @ApiOperation({
+    summary: 'Update an existing contract',
+    description:
+      'Update the data of an existing contract identified by its ID.',
+  })
+  @ApiBody({
+    description: 'Updated contract data',
+    type: ContractDto,
+  })
+  @ApiOkResponse({
+    description: 'contract successfully updated',
+    type: ContractResponse,
+  })
+  update(
+    @Param('id') id: string,
+    @Body() dto: ContractDto,
+  ): Promise<ContractResponse> {
+    return this.contractService.update(id, dto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete contract' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.service.remove(id);
-  }
-
-
-  @Post(':id/leases')
-  @ApiOperation({ summary: 'Link contract to a lease (tenant + property)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['tenantId', 'propertyId'],
-      properties: {
-        tenantId: { type: 'string', format: 'uuid' },
-        propertyId: { type: 'string', format: 'uuid' },
-      },
-    },
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete a contract',
+    description: 'Perform a soft delete of a contract identified by its ID.',
   })
-  @HttpCode(HttpStatus.OK)
-  linkLease(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body('tenantId', new ParseUUIDPipe()) tenantId: string,
-    @Body('propertyId', new ParseUUIDPipe()) propertyId: string,
-  ) {
-    return this.service.linkLease(id, propertyId, tenantId);
-  }
-
-  @Delete(':id/leases')
-  @ApiOperation({ summary: 'Unlink contract from a lease (tenant + property)' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['tenantId', 'propertyId'],
-      properties: {
-        tenantId: { type: 'string', format: 'uuid' },
-        propertyId: { type: 'string', format: 'uuid' },
-      },
-    },
+  @ApiOkResponse({
+    description: 'contract successfully deleted',
+    type: ContractResponse,
   })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async unlinkLease(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body('tenantId', new ParseUUIDPipe()) tenantId: string,
-    @Body('propertyId', new ParseUUIDPipe()) propertyId: string,
-  ) {
-    await this.service.unlinkLease(id, propertyId, tenantId);
+  delete(@Param('id') ContractId: string): Promise<ContractResponse> {
+    return this.contractService.delete(ContractId);
   }
 
+  // @Post()
+  // @ApiConsumes('multipart/form-data')
+  // @ApiOperation({ summary: 'Upload a contract (PDF)' })
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     required: ['file'],
+  //     properties: { file: { type: 'string', format: 'binary' } },
+  //   },
+  // })
+  // @UseInterceptors(FileInterceptor('file'))
+  // @HttpCode(HttpStatus.OK)
+  // async upload(@UploadedFile() file?: Express.Multer.File) {
+  //   if (!file) throw new BadRequestException('Uploaded file is required.');
+  //   return this.contractService.upload(file);
+  // }
 
-  @Get('/by-tenant/:tenantId')
-  @ApiOperation({ summary: 'List contracts linked to tenant' })
-  @HttpCode(HttpStatus.OK)
-  listByTenant(@Param('tenantId', new ParseUUIDPipe()) tenantId: string) {
-    return this.service.listByTenant(tenantId);
-  }
+  // @Get(':id/download')
+  // @ApiOperation({ summary: 'Get download URL (presigned)' })
+  // @HttpCode(HttpStatus.OK)
+  // download(@Param('id', new ParseUUIDPipe()) id: string) {
+  //   return this.contractService.getDownloadUrl(id);
+  // }
 
-  @Get('/by-property/:propertyId')
-  @ApiOperation({ summary: 'List contracts linked to property (via leases)' })
+  @Post('preview')
   @HttpCode(HttpStatus.OK)
-  listByProperty(@Param('propertyId', new ParseUUIDPipe()) propertyId: string) {
-    return this.service.listByProperty(propertyId);
+  @ApiOperation({
+    summary: 'Preview contract before creation',
+    description: 'Generate a temporary HTML preview of the contract',
+  })
+  async preview(@Body() dto: PreviewContractDto) {
+    return this.previewContractService.execute(dto);
   }
 }

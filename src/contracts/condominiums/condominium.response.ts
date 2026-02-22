@@ -24,10 +24,4 @@ export class CondominiumResponse {
       type: () => AddressResponse,
     })
   address: AddressResponse;
-    @ApiProperty({
-      description: 'List of properties in the condominium',
-      type: () => PropertyResponse,
-      isArray: true,
-    })
-  properties: PropertyResponse[];
 }
