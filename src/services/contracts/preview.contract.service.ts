@@ -21,11 +21,11 @@ export class PreviewContractService {
             throw new NotFoundException('Template not found');
         }
 
+        const markdownToProcess = dto.editedMarkdown || template.template;
         const processedMarkdown = this.templateEngine.parse(
-            template.template,
+            markdownToProcess,
             dto.data,
         );
-
         const html = marked.parse(processedMarkdown)
 
 

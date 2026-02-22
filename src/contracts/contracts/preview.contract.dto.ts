@@ -12,4 +12,11 @@ export class PreviewContractDto {
   @ApiProperty({ description: 'Dados preenchidos do front' })
   @IsObject()
   data: Record<string, any>;
+
+  @ApiProperty({
+    description: 'Markdown editado'
+  })
+  @IsString()
+  editedMarkdown?: string;
+
 }
