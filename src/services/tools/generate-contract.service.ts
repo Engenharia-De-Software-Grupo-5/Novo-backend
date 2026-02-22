@@ -40,32 +40,36 @@ export class GenerateContractService {
         }
 
         const templateData = {
-            condominiumName: condominium.name,
-            condominiumAddress: condominium.address,
-            propertyAddress: property.address,
-            propertyNumber: property.unityNumber,
-            propertyUnityType: property.unityType,
-            propertyBlock: property.block,
-            propertyFloor: property.floor,
-            propertyTotalArea: property.totalArea,
-            propertySituation: property.propertySituation,
-            propertyObservations: property.observations,
-            addressZip: address.zip,
-            addressStreet: address.street,
-            addressNeighborhood: address.neighborhood,
-            addressCity: address.city,
-            addressUf: address.uf,
-            addressNumber: address.number,
-            addressComplement: address.complement,
+            imovel: {
+                endereco: `${property.address}, ${address.street}, ${address.number} - ${address.city}/${address.uf}`,
+            },
 
-        }
+            condominio: {
+                nome: condominium.name,
+            },
 
-        const processedHtml = this.templateEngine.parse(
+            propriedade: {
+                numero: property.unityNumber,
+                tipo: property.unityType,
+                bloco: property.block,
+                andar: property.floor,
+                area_total: property.totalArea,
+                situacao: property.propertySituation,
+                observacoes: property.observations,
+            },
+
+            locatario: {
+                nome: contract.tenant.name,
+                cpf: contract.tenant.cpf,
+            },
+        };
+
+        const processedMarkdown = this.templateEngine.parse(
             template.template,
             templateData,
         );
 
-        const pdfBuffer = await this.pdfGenerator.generate(processedHtml);
+        const pdfBuffer = await this.pdfGenerator.generate(processedMarkdown);
 
         const timeStamp = new Date().getTime()
         const fileName = `${contractId}_${timeStamp}.pdf`;

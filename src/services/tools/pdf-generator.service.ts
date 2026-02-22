@@ -1,12 +1,15 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
+import * as marked from 'marked';
 
 @Injectable()
 export class PdfGeneratorService {
-    public async generate(htmlContent: string): Promise<Buffer> {
+    public async generate(markdownContent: string): Promise<Buffer> {
         let browser: puppeteer.Browser | null = null;
 
         try {
+            const htmlContent = marked.parse(markdownContent)
+
             browser = await puppeteer.launch({
                 headless: true,
                 args: ['--no-sandbox', '--disable-setuid-sandbox'],

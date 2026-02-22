@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class TemplateEngineService {
     parse(template: string, data: Record<string, any>): string {
-        return template.replace(/¿¿\s*([\w.]+)\s*¿¿/g, (_, key) => {
+        return template.replace(/{{\s*([\w.]+)\s*}}/g, (_, key) => {
             const value = this.resolvePath(data, key);
             return value !== undefined && value !== null ? String(value) : '';
         });
