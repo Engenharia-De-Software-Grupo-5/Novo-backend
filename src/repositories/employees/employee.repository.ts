@@ -43,7 +43,7 @@ export class EmployeeRepository {
     });
   }
 
-  create(dto: EmployeeDto): Promise<EmployeeResponse> {
+  async create(dto: EmployeeDto): Promise<EmployeeResponse> {
     const { bankData, ...rest } = dto;
     return this.prisma.employees.upsert({
       where: {

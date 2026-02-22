@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TenantService } from 'src/services/tenants/tenant.service';
 import { TenantRepository } from 'src/repositories/tenants/tenant.repository';
 
@@ -12,12 +12,13 @@ describe('TenantService', () => {
     getByCpf: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn(),
+    deleteById: jest.fn(),
   };
 
   const validCreateDto: any = {
+    id: 'ten-1',
     name: 'João da Silva',
-    cpf: '11111111111',
+    cpf: '12345678901',
   };
 
   beforeEach(async () => {
@@ -70,20 +71,23 @@ describe('TenantService', () => {
   });
 
   it('CT-05 - should update tenant', async () => {
+    mockRepository.getById.mockResolvedValue({ id: 'ten-1' });
     mockRepository.update.mockResolvedValue({ id: 'ten-1', name: 'Novo', cpf: '11111111111' });
 
     const result = await service.update('ten-1', { name: 'Novo', cpf: '11111111111' } as any);
 
+    expect(mockRepository.getById).toHaveBeenCalledWith('ten-1');
     expect(mockRepository.update).toHaveBeenCalledWith('ten-1', { name: 'Novo', cpf: '11111111111' });
     expect(result).toEqual({ id: 'ten-1', name: 'Novo', cpf: '11111111111' });
   });
 
   it('CT-06 - should delete tenant (soft delete)', async () => {
-    mockRepository.delete.mockResolvedValue({ id: 'ten-1' });
+    mockRepository.getById.mockResolvedValue({ id: 'ten-1' });
+    mockRepository.deleteById.mockResolvedValue({ id: 'ten-1' });
 
-    const result = await service.delete('ten-1');
+    const result = await service.deleteById('ten-1');
 
-    expect(mockRepository.delete).toHaveBeenCalledWith('ten-1');
+    expect(mockRepository.deleteById).toHaveBeenCalledWith('ten-1');
     expect(result).toEqual({ id: 'ten-1' });
   });
 
@@ -101,7 +105,7 @@ describe('TenantService', () => {
     it('returns null when repository returns null (current behavior)', async () => {
       mockRepository.getById.mockResolvedValue(null);
 
-      await expect(service.getById('id-404')).resolves.toBeNull();
+      await expect(service.getById('id-404')).rejects.toBeInstanceOf(NotFoundException);
       expect(mockRepository.getById).toHaveBeenCalledWith('id-404');
     });
 
@@ -134,30 +138,44 @@ describe('TenantService', () => {
   });
 
   describe('update', () => {
-    it('returns null when updating non-existent (repo returns null) (current behavior)', async () => {
-      mockRepository.update.mockResolvedValue(null);
+    it('propagates repository error on update', async () => {
+      mockRepository.getById.mockResolvedValue({ id: 'id-1' }); 
+      mockRepository.update.mockRejectedValue(new Error('deadlock'));
 
-      await expect(service.update('id-404', { name: 'X', cpf: '1' } as any)).resolves.toBeNull();
+      await expect(service.update('id-1', { name: 'X', cpf: '1' } as any))
+        .rejects
+        .toThrow('deadlock');
     });
 
     it('propagates repository error on update', async () => {
+      mockRepository.getById.mockResolvedValue({ id: 'id-1' }); 
       mockRepository.update.mockRejectedValue(new Error('deadlock'));
 
-      await expect(service.update('id-1', { name: 'X', cpf: '1' } as any)).rejects.toThrow('deadlock');
+      await expect(service.update('id-1', { name: 'X', cpf: '1' } as any))
+        .rejects
+        .toThrow('deadlock');
     });
   });
 
   describe('delete', () => {
-    it('returns null when delete returns null (current behavior)', async () => {
-      mockRepository.delete.mockResolvedValue(null);
+    it('throws NotFound when tenant does not exist', async () => {
+      mockRepository.getById.mockResolvedValue(null);
 
-      await expect(service.delete('id-404')).resolves.toBeNull();
+      await expect(service.deleteById('id-404'))
+        .rejects
+        .toBeInstanceOf(NotFoundException);
+
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
     });
 
-    it('propagates repository error on delete', async () => {
-      mockRepository.delete.mockRejectedValue(new Error('permission denied'));
+    it('throws NotFound when tenant does not exist', async () => {
+      mockRepository.getById.mockResolvedValue(null);
 
-      await expect(service.delete('id-1')).rejects.toThrow('permission denied');
+      await expect(service.update('id-404', { name: 'X', cpf: '1' } as any))
+        .rejects
+        .toBeInstanceOf(NotFoundException);
+
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
 });
