@@ -1,0 +1,77 @@
+enum ChargeStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum PaymentMethod {
+  BOLETO
+  PIX
+  DEPOSIT
+}
+
+model Charges {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+
+  tenantId   String       @db.Uuid
+  propertyId String       @db.Uuid
+
+  amount     Float
+  dueDate    DateTime
+
+ 
+  fineRate        Float   @default(2)  
+  monthlyRate     Float   @default(1)  
+  paymentMethod   PaymentMethod
+
+  status     ChargeStatus @default(PENDING)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  tenant     Tenants   @relation(fields: [tenantId], references: [id])
+  property   Properties @relation(fields: [propertyId], references: [id])
+
+  payments   Payments[]
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Payments {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  chargeId String @db.Uuid
+
+  amountPaid  Float
+  paymentDate DateTime
+  method      PaymentMethod
+
+  wasLate  Boolean
+  daysLate Int
+
+  fineRate     Float
+  monthlyRate  Float
+  finePaid     Float
+  interestPaid Float
+  totalPaid    Float
+
+  proofObjectName   String?
+  proofOriginalName String?
+  proofMimeType     String?
+  proofExtension    String?
+  proofSize         Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  charge Charges @relation(fields: [chargeId], references: [id])
+
+  @@index([chargeId])
+  @@index([paymentDate])
+}
