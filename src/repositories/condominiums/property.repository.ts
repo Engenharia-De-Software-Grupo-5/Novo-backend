@@ -1,12 +1,24 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/common/database/prisma.service";
-import { PropertyDto } from "src/contracts/condominiums/property.dto";
-import { PropertyResponse } from "src/contracts/condominiums/property.response";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/common/database/prisma.service';
+import { PropertyDto } from 'src/contracts/condominiums/property.dto';
+import { PropertyResponse } from 'src/contracts/condominiums/property.response';
 
 @Injectable()
 export class PropertyRepository {
   constructor(private readonly prisma: PrismaService) {}
-    private readonly propertySelect = {
+  private readonly propertySelect = {
+    id: true,
+    identifier: true,
+    address: true,
+    unityNumber: true,
+    unityType: true,
+    block: true,
+    floor: true,
+    totalArea: true,
+    propertySituation: true,
+    observations: true,
+    condominium: {
+      select: {
         id: true,
         name: true,
         description: true,
@@ -23,31 +35,37 @@ export class PropertyRepository {
           },
         },
       },
-    }
-  }
+    },
+  };
 
   // getAll, getById, create, update, delete
   getAll(condominiumId: string): Promise<PropertyResponse[]> {
     return this.prisma.properties.findMany({
       where: { deletedAt: null, condominiumId },
       select: {
-        ...this.propertySelect
+        ...this.propertySelect,
       },
     });
   }
-  getById(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
+  getById(
+    condominiumId: string,
+    propertyId: string,
+  ): Promise<PropertyResponse> {
     return this.prisma.properties.findFirst({
       where: { id: propertyId, deletedAt: null, condominiumId },
       select: {
-        ...this.propertySelect
+        ...this.propertySelect,
       },
     });
   }
-  getByIdentificador(condominiumId: string, identifier: string): Promise<PropertyResponse> {
+  getByIdentificador(
+    condominiumId: string,
+    identifier: string,
+  ): Promise<PropertyResponse> {
     return this.prisma.properties.findUnique({
       where: { identifier, condominiumId, deletedAt: null },
       select: {
-        ...this.propertySelect
+        ...this.propertySelect,
       },
     });
   }
@@ -55,16 +73,20 @@ export class PropertyRepository {
     return this.prisma.properties.create({
       data: { ...dto, condominiumId },
       select: {
-        ...this.propertySelect
+        ...this.propertySelect,
       },
     });
   }
-  update(condominiumId: string, propertyId: string, dto: PropertyDto): Promise<PropertyResponse> {
+  update(
+    condominiumId: string,
+    propertyId: string,
+    dto: PropertyDto,
+  ): Promise<PropertyResponse> {
     return this.prisma.properties.update({
       where: { id: propertyId, condominiumId, deletedAt: null },
       data: { ...dto },
       select: {
-        ...this.propertySelect
+        ...this.propertySelect,
       },
     });
   }
@@ -73,7 +95,7 @@ export class PropertyRepository {
       where: { id: propertyId, condominiumId },
       data: { deletedAt: new Date() },
       select: {
-        ...this.propertySelect
+        ...this.propertySelect,
       },
     });
   }

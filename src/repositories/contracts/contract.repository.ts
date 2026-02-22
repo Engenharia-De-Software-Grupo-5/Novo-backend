@@ -55,6 +55,89 @@ export class ContractRepository {
         id: true,
         name: true,
         cpf: true,
+        email: true,
+        birthDate: true,
+        maritalStatus: true,
+        monthlyIncome: true,
+        primaryPhone: true,
+        secondaryPhone: true,
+        status: true,
+        condominiumId: true,
+        spouse: {
+          select: {
+            id: true,
+            name: true,
+            birthDate: true,
+            cpf: true,
+            profession: true,
+            monthlyIncome: true,
+          },
+        },
+        professionalInfo: {
+          select: {
+            id: true,
+            companyName: true,
+            companyAddress: {
+              select: {
+                id: true,
+                street: true,
+                number: true,
+                city: true,
+                zip: true,
+                uf: true,
+                neighborhood: true,
+                complement: true,
+              },
+            },
+            companyPhone: true,
+            position: true,
+            monthsWorking: true,
+          },
+        },
+        additionalResidents: {
+          select: {
+            id: true,
+            name: true,
+            birthDate: true,
+            relationship: true,
+          },
+        },
+        emergencyContacts: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            relationship: true,
+          },
+        },
+        documents: {
+          select: {
+            id: true,
+            cpfFileId: true,
+            incomeProofId: true,
+          },
+        },
+        address: {
+          select: {
+            id: true,
+            street: true,
+            neighborhood: true,
+            number: true,
+            city: true,
+            zip: true,
+            uf: true,
+            complement: true,
+          },
+        },
+        bankingInfo: {
+          select: {
+            id: true,
+            bank: true,
+            accountNumber: true,
+            agency: true,
+            accountType: true,
+          },
+        },
       },
     },
   };
@@ -68,6 +151,7 @@ export class ContractRepository {
       select: this.selectFields,
     });
   }
+
   getById(contractId: string): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
       where: { id: contractId, deletedAt: null },
@@ -95,6 +179,7 @@ export class ContractRepository {
       select: this.selectFields,
     });
   }
+
   update(id: string, dto: ContractDto): Promise<ContractResponse> {
     const { file, ...dadosDoContrato } = dto;
     return this.prisma.contracts.update({
