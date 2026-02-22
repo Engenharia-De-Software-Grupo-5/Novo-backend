@@ -155,7 +155,10 @@ export class UserController {
     description: 'User successfully deleted',
     type: UserResponse,
   })
-  delete(@Param('id') userId: string): Promise<UserResponse> {
-    return this.userService.delete(userId);
+  delete(
+    @Param('id') userId: string,
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.userService.delete(userId, condominiumId);
   }
 }

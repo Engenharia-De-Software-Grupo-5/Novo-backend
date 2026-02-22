@@ -98,7 +98,7 @@ export class UserService {
     return this.userRepository.updatePassword(userId, newPassword);
   }
 
-  delete(userId: string): Promise<UserResponse> {
-    return this.userRepository.delete(userId);
+  delete(userId: string, condominiumId: string): Promise<UserResponse> {
+    return this.userRepository.delete(userId, condominiumId);
   }
 }
