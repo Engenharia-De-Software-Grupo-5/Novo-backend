@@ -5,11 +5,19 @@ import { PrismaService } from '../../src/common/database/prisma.service';
 import { ROLES_KEY } from '../../src/common/decorators';
 
 function createContext(user: any) {
+  const normalizedUser =
+    user === undefined || user === null
+      ? user
+      : {
+          condominium: [],
+          ...user,
+        };
+
   return {
     getClass: jest.fn(),
     getHandler: jest.fn(),
     switchToHttp: () => ({
-      getRequest: () => ({ user }),
+      getRequest: () => ({ user: normalizedUser }),
     }),
   } as any;
 }
@@ -63,7 +71,9 @@ describe('RolesGuard', () => {
       .mockReturnValueOnce([]);
 
     const guard = new RolesGuard(reflector, prisma);
-    const ctx = createContext({ id: 'u1' });
+
+
+    const ctx = createContext({ id: 'u1', condominium: [] });
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(
       new ForbiddenException('Token sem permissão definida.'),
@@ -78,7 +88,12 @@ describe('RolesGuard', () => {
     (prisma.permissions.findUnique as jest.Mock).mockResolvedValue(null);
 
     const guard = new RolesGuard(reflector, prisma);
-    const ctx = createContext({ id: 'u1', permission: 'p1' });
+
+    const ctx = createContext({
+      id: 'u1',
+      permission: 'p1',
+      condominium: ['condo-1'],
+    });
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(
       new ForbiddenException('Permissão inválida.'),
@@ -96,7 +111,12 @@ describe('RolesGuard', () => {
     });
 
     const guard = new RolesGuard(reflector, prisma);
-    const ctx = createContext({ id: 'u1', permission: 'p1' });
+
+    const ctx = createContext({
+      id: 'u1',
+      permission: 'p1',
+      condominium: ['condo-1'],
+    });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
 
@@ -119,7 +139,13 @@ describe('RolesGuard', () => {
     });
 
     const guard = new RolesGuard(reflector, prisma);
-    const ctx = createContext({ id: 'u1', permission: 'p1' });
+
+
+    const ctx = createContext({
+      id: 'u1',
+      permission: 'p1',
+      condominium: ['condo-1'],
+    });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
   });
@@ -135,7 +161,12 @@ describe('RolesGuard', () => {
     });
 
     const guard = new RolesGuard(reflector, prisma);
-    const ctx = createContext({ id: 'u1', permission: 'p1' });
+
+    const ctx = createContext({
+      id: 'u1',
+      permission: 'p1',
+      condominium: ['condo-1'],
+    });
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(
       new ForbiddenException('Você não tem acesso a esta funcionalidade.'),
