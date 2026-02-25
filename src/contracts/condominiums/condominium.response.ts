@@ -14,14 +14,14 @@ export class CondominiumResponse {
       example: 'Benvenuto',
     })
   name: string;
-  //   @ApiPropertyOptional({
-  //     description: 'Condominium description',
-  //     example: 'Condominium classe A',
-  //   })
-  // description?: string;
-  //   @ApiProperty({
-  //     description: 'Condominium address',
-  //     type: () => AddressResponse,
-  //   })
-  // address: AddressResponse;
+    @ApiPropertyOptional({
+      description: 'Condominium description',
+      example: 'Condominium classe A',
+    })
+  description?: string;
+    @ApiProperty({
+      description: 'Condominium address',
+      type: () => AddressResponse,
+    })
+  address: AddressResponse;
 }
