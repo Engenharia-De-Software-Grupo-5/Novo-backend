@@ -13,7 +13,6 @@ export class AuthService {
   ) {}
 
   login(user: AuthDataModel): LoginResponse {
-    console.log(user);
     const payload: AuthPayload = {
       sub: user.id,
       email: user.email,
