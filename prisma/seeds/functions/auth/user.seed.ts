@@ -16,6 +16,7 @@ export async function seedUsers(
       name: 'Admin User',
       cpf: '11111111111',
       password,
+      isAdminMaster: true,
       accesses: {
         create: [
           {
