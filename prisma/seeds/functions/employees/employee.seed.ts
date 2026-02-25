@@ -9,6 +9,10 @@ export async function seedEmployees(
             cpf: '12312312312',
             name: 'Oswaldo Fernandes',
             bankData: { create: {
+                bank: 'Banco do Brasil',
+                accountNumber: '123412789',
+                agency: '0002',
+                accountType: 'Corrente',
             },
             },
             role: 'doorman',
@@ -24,6 +28,10 @@ export async function seedEmployees(
             cpf: '98765432100',
             name: 'Maria Silva',
             bankData: { create: {
+                bank: 'Banco do Brasil',
+                accountNumber: '123456789',
+                agency: '0001',
+                accountType: 'Corrente',
             },
             },
             role: 'doorman',
