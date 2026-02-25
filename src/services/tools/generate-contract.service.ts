@@ -97,7 +97,7 @@ export class GenerateContractService {
 
         const pdfBuffer = await this.pdfGenerator.generate(processedMarkdown);
 
-        const timeStamp = new Date().getTime()
+        const timeStamp = Date.now()
         const fileName = `${contractId}_${timeStamp}.pdf`;
         const objectPath = `contracts/${fileName}`;
 

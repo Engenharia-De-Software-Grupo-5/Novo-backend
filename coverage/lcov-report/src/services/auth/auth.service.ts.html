@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">55.17% </span>
+                <span class="strong">22.58% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/29</span>
+                <span class='fraction'>7/31</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/4</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">56.52% </span>
+                <span class="strong">20% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/23</span>
+                <span class='fraction'>5/25</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -123,18 +123,19 @@
 <a name='L58'></a><a href='#L58'>58</a>
 <a name='L59'></a><a href='#L59'>59</a>
 <a name='L60'></a><a href='#L60'>60</a>
-<a name='L61'></a><a href='#L61'>61</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -144,7 +145,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -172,15 +174,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -192,9 +194,9 @@ import { AuthDataModel } from 'src/contracts/auth/auth-data.model';
 &nbsp;
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly jwtService: JwtService,
+<span class="fstat-no" title="function not covered" >  constructor(</span>
+    private readonly <span class="cstat-no" title="statement not covered" >authRepository: A</span>uthRepository,
+    private readonly <span class="cstat-no" title="statement not covered" >jwtService: J</span>wtService,
   ) {}
 &nbsp;
 <span class="fstat-no" title="function not covered" >  login(</span>user: AuthDataModel): LoginResponse {
@@ -204,7 +206,8 @@ export class AuthService {
       email: user.email,
       cpf: user.cpf,
       name: user.name,
-      permission: user.permission.id,
+      permission: user.accesses.map(<span class="fstat-no" title="function not covered" >(a</span>ccess) =&gt; <span class="cstat-no" title="statement not covered" >access.permission)</span>,
+      condominium: user.accesses.map(<span class="fstat-no" title="function not covered" >(a</span>ccess) =&gt; <span class="cstat-no" title="statement not covered" >access.condominium)</span>,
     };
 &nbsp;
     const jwtToken = <span class="cstat-no" title="statement not covered" >this.jwtService.sign(payload);</span>
@@ -231,16 +234,16 @@ export class AuthService {
 <span class="cstat-no" title="statement not covered" >    return { ...user, password: undefined };</span>
   }
 &nbsp;
-  async passwordResetEmail(email: string): Promise&lt;string&gt; {
-    const newPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+<span class="fstat-no" title="function not covered" >  async </span>passwordResetEmail(email: string): Promise&lt;string&gt; {
+    const newPassword = <span class="cstat-no" title="statement not covered" >Math.random().toString(36).slice(-8);</span>
+    const hashedPassword = <span class="cstat-no" title="statement not covered" >await bcrypt.hash(newPassword, 10);</span>
 &nbsp;
-    const user = await this.authRepository.getUserByEmail(email);
-    if (!user) throw new UnauthorizedException('User not found.');
+    const user = <span class="cstat-no" title="statement not covered" >await this.authRepository.getUserByEmail(email);</span>
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) <span class="cstat-no" title="statement not covered" >throw new UnauthorizedException('User not found.');</span></span>
 &nbsp;
-    await this.authRepository.updateUserPassword(user, hashedPassword);
+<span class="cstat-no" title="statement not covered" >    await this.authRepository.updateUserPassword(user, hashedPassword);</span>
 &nbsp;
-    return newPassword;
+<span class="cstat-no" title="statement not covered" >    return newPassword;</span>
   }
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -250,7 +253,7 @@ export class AuthService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-22T10:03:41.192Z
+                at 2026-02-25T20:38:21.247Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

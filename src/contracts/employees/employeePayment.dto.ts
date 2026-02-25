@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsDateString, Min, isNotEmpty, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNumber, IsDateString, Min, IsNotEmpty } from 'class-validator';
 import { PaymentType } from '@prisma/client';
 
 export class EmployeePaymentDto {

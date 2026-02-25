@@ -108,11 +108,6 @@ export class MinioClientService {
     expiry: number = 60 * 60,
   ): Promise<string> {
     try {
-      // return await this.minio.client.presignedGetObject(
-      //   this.bucketName,
-      //   fileName,
-      //   expiry,
-      // );
       return await this.publicMinioClient.presignedGetObject(
         this.bucketName,
         fileName,

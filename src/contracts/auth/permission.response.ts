@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsString, IsUUID } from 'class-validator';
 
 export class PermissionResponse {
   @ApiProperty({

@@ -1,10 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Multer } from 'multer';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { ContractRepository } from 'src/repositories/contracts/contract.repository';
 import { GenerateContractService } from '../tools/generate-contract.service';
-import { randomUUID } from 'node:crypto';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 
 @Injectable()
@@ -51,7 +49,7 @@ export class ContractService {
       const minioResponse = await this.minioService.uploadFile(
         file,
         ['pdf'],
-        response.id + '_' + new Date().getTime() + '.pdf',
+        response.id + '_' + Date.now() + '.pdf',
       );
       const result = await this.contractRepository.updateUrl(
         response.id,

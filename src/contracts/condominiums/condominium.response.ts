@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AddressResponse } from './address.response';
-import { PropertyResponse } from './property.response';
+
 
 export class CondominiumResponse {
    @ApiProperty({

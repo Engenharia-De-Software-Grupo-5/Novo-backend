@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>12/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -80,48 +80,48 @@
 <a name='L15'></a><a href='#L15'>15</a>
 <a name='L16'></a><a href='#L16'>16</a>
 <a name='L17'></a><a href='#L17'>17</a>
-<a name='L18'></a><a href='#L18'>18</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L18'></a><a href='#L18'>18</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import { Module } from '@nestjs/common';
-import { PropertyDocumentsController } from 'src/controllers/condominiums/property-documents.controller';
-import { PropertyInspectionsController } from 'src/controllers/condominiums/property-inspections.controller';
-import { PropertyController } from "src/controllers/condominiums/property.controller";
-import { PropertyDocumentsRepository } from 'src/repositories/condominiums/property-documents.repository';
-import { PropertyInspectionsRepository } from 'src/repositories/condominiums/property-inspections.repository';
-import { PropertyRepository } from "src/repositories/condominiums/property.repository";
-import { PropertyDocumentsService } from 'src/services/condominiums/property-documents.repository';
-import { PropertyInspectionsService } from 'src/services/condominiums/property-inspections.service';
-import { PropertyService } from "src/services/condominiums/property.service";
-import { MinioClientModule } from '../tools/minio-client.module';
+<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { Module } from '@nestjs/common';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyDocumentsController } from 'src/controllers/condominiums/property-documents.controller';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyInspectionsController } from 'src/controllers/condominiums/property-inspections.controller';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyController } from "src/controllers/condominiums/property.controller";</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyDocumentsRepository } from 'src/repositories/condominiums/property-documents.repository';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyInspectionsRepository } from 'src/repositories/condominiums/property-inspections.repository';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyRepository } from "src/repositories/condominiums/property.repository";</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyDocumentsService } from 'src/services/condominiums/property-documents.repository';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyInspectionsService } from 'src/services/condominiums/property-inspections.service';</span>
+<span class="cstat-no" title="statement not covered" >import { PropertyService } from "src/services/condominiums/property.service";</span>
+<span class="cstat-no" title="statement not covered" >import { MinioClientModule } from '../tools/minio-client.module';</span>
 &nbsp;
 @Module({
   imports: [MinioClientModule],
   controllers: [PropertyController, PropertyDocumentsController, PropertyInspectionsController],
   providers: [PropertyService, PropertyRepository, PropertyDocumentsRepository, PropertyInspectionsRepository, PropertyInspectionsService, PropertyDocumentsService],
 })
-export class PropertyModule {}</pre></td></tr></table></pre>
+export <span class="cstat-no" title="statement not covered" >class <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >PropertyModule </span>{}</span></span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-22T10:03:41.192Z
+                at 2026-02-25T20:38:21.247Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

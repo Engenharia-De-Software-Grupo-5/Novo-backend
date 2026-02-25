@@ -137,7 +137,7 @@ export class TenantController {
     description: 'Tenant successfully deleted',
     type: TenantResponse,
   })
-  delete(@Param('id') tenantId: string): Promise<TenantResponse> {
+  deleteById(@Param('id') tenantId: string): Promise<TenantResponse> {
     return this.tenantService.deleteById(tenantId);
   }
 }
