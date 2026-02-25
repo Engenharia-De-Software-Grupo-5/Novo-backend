@@ -6,10 +6,10 @@ import { AuthDataModel } from 'src/contracts/auth/auth-data.model';
 export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  getUserByEmailOrCpf(userLogin: string): Promise<AuthDataModel | null> {
+  getUserByEmail(userLogin: string): Promise<AuthDataModel | null> {
     return this.prisma.users.findFirst({
       where: {
-        OR: [{ email: userLogin }, { cpf: userLogin }],
+        email: userLogin,
         deletedAt: null,
       },
       include: {
@@ -24,7 +24,7 @@ export class AuthRepository {
     });
   }
 
-  async getUserByEmail(email: string): Promise<string | undefined> {
+  async getUserIdByEmail(email: string): Promise<string | undefined> {
     return (
       await this.prisma.users.findFirst({
         where: { email, deletedAt: null },
