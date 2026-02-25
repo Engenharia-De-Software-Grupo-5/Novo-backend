@@ -21,6 +21,14 @@ export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
+    description: 'Property name',
+    example: '',
+  })
+    name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
     description: 'Additional address information for the property, such as proximity to landmarks or specific location details within the condominium',
     example: 'Próximo à casa X, Rua Y, etc.',
   })

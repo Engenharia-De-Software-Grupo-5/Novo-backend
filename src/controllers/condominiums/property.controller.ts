@@ -23,7 +23,7 @@ import { PropertyService } from 'src/services/condominiums/property.service';
 
 @ApiTags('properties')
 @ApiBearerAuth('access-token')
-@Controller('condominiums/:condominiumId/properties')
+@Controller('condominios/:condId/imoveis')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
   @Get()
@@ -36,11 +36,11 @@ export class PropertyController {
     description: 'Successfully retrieved all properties',
     type: [PropertyResponse],
   })
-  getAll(@Param('condominiumId') condominiumId: string) {
+  getAll(@Param('condId') condominiumId: string) {
     return this.propertyService.getAll(condominiumId);
   }
 
-  @Get(':propertyId')
+  @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get property by ID',
@@ -50,7 +50,7 @@ export class PropertyController {
     description: 'Successfully retrieved the property',
     type: PropertyResponse,
   })
-  getById(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
+  getById(@Param('condId') condominiumId: string, @Param('id') propertyId: string) {
     return this.propertyService.getById(condominiumId, propertyId);
   }
 
@@ -65,11 +65,11 @@ export class PropertyController {
     description: 'Successfully created the property',
     type: PropertyResponse,
   })
-  create(@Param('condominiumId') condominiumId: string, @Body() dto: PropertyDto) {
+  create(@Param('condId') condominiumId: string, @Body() dto: PropertyDto) {
     return this.propertyService.create(condominiumId, dto);
   }
 
-  @Put(':propertyId')
+  @Put(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update a property',
@@ -80,11 +80,11 @@ export class PropertyController {
     description: 'Successfully updated the property', 
     type: PropertyResponse,
   })
-  update(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string, @Body() dto: PropertyDto) {
+  update(@Param('condId') condominiumId: string, @Param('id') propertyId: string, @Body() dto: PropertyDto) {
     return this.propertyService.update(condominiumId, propertyId, dto);
   }
 
-  @Delete(':propertyId')
+  @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a property',
@@ -94,7 +94,7 @@ export class PropertyController {
     description: 'Successfully deleted the property',
     type: PropertyResponse, 
   })
-  delete(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
+  delete(@Param('condId') condominiumId: string, @Param('id') propertyId: string) {
     return this.propertyService.delete(condominiumId, propertyId);
   }
 }
