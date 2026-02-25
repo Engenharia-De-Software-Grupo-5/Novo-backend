@@ -23,7 +23,7 @@ import { CondominiumService } from 'src/services/condominiums/condominium.servic
 
 @ApiTags('Condominiums')
 @ApiBearerAuth('access-token')
-@Controller('condominiums')
+@Controller('condominios')
 export class CondominiumController {
   constructor(private readonly condominiumService: CondominiumService) {}
 
@@ -41,7 +41,7 @@ export class CondominiumController {
     return this.condominiumService.getAll();
   }
 
-  @Get(':id')
+  @Get(':condId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get condominium by ID',
@@ -52,7 +52,7 @@ export class CondominiumController {
     description: 'Successfully retrieved condominium details',
     type: CondominiumResponse,
   })
-  getById(@Param('id') condominioId: string): Promise<CondominiumResponse> {
+  getById(@Param('condId') condominioId: string): Promise<CondominiumResponse> {
     return this.condominiumService.getById(condominioId);
   }
 
@@ -74,7 +74,7 @@ export class CondominiumController {
     return this.condominiumService.create(dto);
   }
 
-  @Put(':id')
+  @Put(':condId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update an existing condominium',
@@ -90,13 +90,13 @@ export class CondominiumController {
     type: CondominiumResponse,
   })
   update(
-    @Param('id') id: string,
+    @Param('condId') id: string,
     @Body() dto: CondominiumDto,
   ): Promise<CondominiumResponse> {
     return this.condominiumService.update(id, dto);
   }
 
-  @Delete(':id')
+  @Delete(':condId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a condominium',
@@ -106,7 +106,7 @@ export class CondominiumController {
     description: 'Condominium successfully deleted',
     type: CondominiumResponse,
   })
-  delete(@Param('id') condominiumId: string): Promise<CondominiumResponse> {
+  delete(@Param('condId') condominiumId: string): Promise<CondominiumResponse> {
     return this.condominiumService.delete(condominiumId);
   }
 }

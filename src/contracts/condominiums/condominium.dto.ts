@@ -17,20 +17,20 @@ export class CondominiumDto {
   })
   name: string;
 
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional({
-    description: 'Obrigatory field for the description of the condominium',
-    example: 'condominio classe A',
-  })
-  description: string;
+  // @IsString()
+  // @IsOptional()
+  // @ApiPropertyOptional({
+  //   description: 'Obrigatory field for the description of the condominium',
+  //   example: 'condominio classe A',
+  // })
+  // description: string;
 
-  @ValidateNested()
-  @Type(() => AddressDto)
-  @ApiProperty({
-    description: 'Obrigatory field for the address of the condominium',
-    type: () => AddressDto,
-  })
-  address: AddressDto;
+  // @ValidateNested()
+  // @Type(() => AddressDto)
+  // @ApiProperty({
+  //   description: 'Obrigatory field for the address of the condominium',
+  //   type: () => AddressDto,
+  // })
+  // address: AddressDto;
   }
 

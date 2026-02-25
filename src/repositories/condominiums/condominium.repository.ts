@@ -8,19 +8,19 @@ export class CondominiumRepository {
   private readonly condominiumSelect = {
     id: true,
     name: true,
-    description: true,
-    address: {
-      select: {
-        id: true,
-        zip: true,
-        neighborhood: true,
-        city: true,
-        complement: true,
-        number: true,
-        street: true,
-        uf: true,
-      },
-    },
+    // description: true,
+    // address: {
+    //   select: {
+    //     id: true,
+    //     zip: true,
+    //     neighborhood: true,
+    //     city: true,
+    //     complement: true,
+    //     number: true,
+    //     street: true,
+    //     uf: true,
+    //   },
+    // },
   };
 
   constructor(private readonly prisma: PrismaService) {}
@@ -49,14 +49,18 @@ export class CondominiumRepository {
 
   create(dto: CondominiumDto): Promise<CondominiumResponse> {
     return this.prisma.condominiums.create({
-      data: { ...dto, address: { create: dto.address }},
+      data: { ...dto, 
+        // address: { create: dto.address }
+      },
       select: this.condominiumSelect,
     });
   }
   update(id: string, dto: CondominiumDto): Promise<CondominiumResponse> {
     return this.prisma.condominiums.update({
       where: { id: id },
-      data: { ...dto, address: { update: { ...dto.address } }},
+      data: { ...dto, 
+        // address: { update: { ...dto.address } }
+      },
       select: this.condominiumSelect,
     });
   }

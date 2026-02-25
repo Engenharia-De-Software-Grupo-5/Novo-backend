@@ -21,7 +21,7 @@ model Expenses {
   condominiumId String? @db.Uuid
   propertyId    String? @db.Uuid
 
-  condominium Condominiums? @relation(fields: [condominiumId], references: [id])
+  // condominium Condominiums? @relation(fields: [condominiumId], references: [id])
   property    Properties?   @relation(fields: [propertyId], references: [id])
 
   expenseType   String
