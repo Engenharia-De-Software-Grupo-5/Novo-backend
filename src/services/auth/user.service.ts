@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { MailService } from '../tools/mail.service';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { UserPatchDto } from 'src/contracts/auth/user.patch.dto';
 
 @Injectable()
 export class UserService {
@@ -61,7 +62,7 @@ export class UserService {
         this.mailService.sendMail(
           userDto.email,
           'Credentials for your new account',
-          `To login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`,
+          `${userDto.message}\n\nTo login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`,
         );
       } catch (error) {
         throw new HttpException(
@@ -75,7 +76,7 @@ export class UserService {
 
   update(
     userId: string,
-    userDto: UserDto,
+    userDto: UserPatchDto,
     condominiumId: string,
   ): Promise<UserResponse> {
     return this.userRepository.update(userId, userDto, condominiumId);

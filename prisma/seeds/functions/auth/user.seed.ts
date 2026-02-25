@@ -14,7 +14,6 @@ export async function seedUsers(
     data: {
       email: 'admin@example.com',
       name: 'Admin User',
-      cpf: '11111111111',
       password,
       isAdminMaster: true,
       accesses: {
@@ -38,7 +37,6 @@ export async function seedUsers(
     data: {
       email: 'viniciusglaureano@gmail.com',
       name: 'Regular User',
-      cpf: '22222222222',
       password,
       accesses: {
         create: [

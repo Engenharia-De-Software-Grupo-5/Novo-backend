@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { UserDto, UserResponse } from 'src/contracts/auth';
+import { UserPatchDto } from 'src/contracts/auth/user.patch.dto';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
@@ -100,12 +101,13 @@ export class UserRepository {
   ): Promise<UserResponse> {
     return this.prisma.users.create({
       data: {
-        ...userDto,
+        name: userDto.name,
+        email: userDto.email,
         password,
         accesses: {
           create: {
-            condominiumsId: condominiumId,
-            permissionsId: userDto.permissionsId,
+            condominium: { connect: { id: condominiumId } },
+            permission: { connect: { name: userDto.role } },
             status: userDto.status,
           },
         },
@@ -124,7 +126,7 @@ export class UserRepository {
 
   update(
     userId: string,
-    userDto: UserDto,
+    userDto: UserPatchDto,
     condominiumId: string,
   ): Promise<UserResponse> {
     return this.prisma.users.update({
@@ -141,7 +143,7 @@ export class UserRepository {
             },
             data: {
               deletedAt: null,
-              permissionsId: userDto.permissionsId,
+              permission: { connect: { name: userDto.role } },
               status: userDto.status,
             },
           },
