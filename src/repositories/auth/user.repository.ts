@@ -132,7 +132,6 @@ export class UserRepository {
     return this.prisma.users.update({
       where: { id: userId, deletedAt: null },
       data: {
-        ...userDto,
         accesses: {
           update: {
             where: {
