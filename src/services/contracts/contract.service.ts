@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Multer } from 'multer';
-import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { ContractRepository } from 'src/repositories/contracts/contract.repository';
-import { GenerateContractService } from '../tools/generate-contract.service';
-import { randomUUID } from 'node:crypto';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
+import { GenerateContractService } from '../tools/generate-contract.service';
+import { ContractDto } from 'src/contracts/contracts/contract.dto';
 
 @Injectable()
 export class ContractService {
@@ -14,13 +14,19 @@ export class ContractService {
   constructor(
     private readonly minioService: MinioClientService,
     private readonly generateContract: GenerateContractService,
-    private readonly contractRepository: ContractRepository,
+    private readonly repo: ContractRepository,
   ) { }
   getAll(): Promise<ContractResponse[]> {
-    return this.contractRepository.getAll();
+    return this.repo.getAll();
+  }
+
+  listPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<ContractResponse>> {
+    return this.repo.getPaginated(data);
   }
   async getById(contratoId: string): Promise<ContractResponse> {
-    const result = await this.contractRepository.getById(contratoId);
+    const result = await this.repo.getById(contratoId);
     const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
     result.contractUrl = tempUrl;
     return result;
@@ -30,15 +36,15 @@ export class ContractService {
     dto: ContractDto,
     file?: Express.Multer.File,
   ): Promise<ContractResponse> {
-    const contratoExistente = await this.contractRepository.checkIfHas(dto);
+    const contratoExistente = await this.repo.checkIfHas(dto);
     if (contratoExistente) {
       throw new BadRequestException('This contract already exists');
     }
 
     if (dto.contractTemplateId) {
-      const response = await this.contractRepository.create(dto);
+      const response = await this.repo.create(dto);
       const urlPromise = await this.generateContract.execute(response.id, dto.content);
-      const result = await this.contractRepository.updateUrl(
+      const result = await this.repo.updateUrl(
         response.id,
         urlPromise.url,
       );
@@ -47,13 +53,13 @@ export class ContractService {
       result.contractUrl = tempUrl;
       return result;
     } else {
-      const response = await this.contractRepository.create(dto);
+      const response = await this.repo.create(dto);
       const minioResponse = await this.minioService.uploadFile(
         file,
         ['pdf'],
         response.id + '_' + new Date().getTime() + '.pdf',
       );
-      const result = await this.contractRepository.updateUrl(
+      const result = await this.repo.updateUrl(
         response.id,
         minioResponse.fileName,
       );
@@ -64,18 +70,18 @@ export class ContractService {
     }
   }
   update(id: string, dto: ContractDto): Promise<ContractResponse> {
-    return this.contractRepository.update(id, dto);
+    return this.repo.update(id, dto);
   }
 
   delete(contratoId: string): Promise<ContractResponse> {
-    return this.contractRepository.delete(contratoId);
+    return this.repo.delete(contratoId);
   }
 
   listByTenant(tenantId: string) {
-    return this.contractRepository.listByTenant(tenantId);
+    return this.repo.listByTenant(tenantId);
   }
 
   listByProperty(propertyId: string) {
-    return this.contractRepository.listByProperty(propertyId);
+    return this.repo.listByProperty(propertyId);
   }
 }

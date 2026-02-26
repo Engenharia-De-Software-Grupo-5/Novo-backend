@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
+import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
 
 type CreateExpenseInput = {
   targetType: ExpenseTargetType;
@@ -14,6 +19,49 @@ type CreateExpenseInput = {
 
 @Injectable()
 export class ExpenseRepository {
+  async getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<ExpenseResponse>> {
+    const where = buildDynamicWhere(
+      data,
+      { deletedAt: null },
+      {
+        enumFields: ['status'], 
+        customMappings: {
+          permissionName: (content) => ({
+            permission: { name: { contains: content, mode: 'insensitive' } },
+          }),
+        },
+      },
+    );
+
+    const [totalItems, items] = await this.prisma.$transaction([
+      this.prisma.expenses.count({
+        where,
+      }),
+      this.prisma.expenses.findMany({
+        where,
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+        take: data.limit,
+        skip: (data.page - 1) * data.limit,
+        orderBy: { id: 'asc' },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / data.limit),
+        page: data.page,
+        limit: data.limit,
+      },
+    };
+  }
   constructor(private readonly prisma: PrismaService) {}
 
   private async assertTargetExists(input: {

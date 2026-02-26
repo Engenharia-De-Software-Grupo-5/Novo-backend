@@ -1,10 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
+import { ContractResponse } from 'src/contracts/contracts/contract.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
 
 @Injectable()
 export class TenantRepository {
+  async getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<TenantResponse>> {
+    const where = buildDynamicWhere(
+      data,
+      { deletedAt: null },
+      {
+        enumFields: ['status'], 
+        customMappings: {
+          permissionName: (content) => ({
+            permission: { name: { contains: content, mode: 'insensitive' } },
+          }),
+        },
+      },
+    );
+
+    const [totalItems, items] = await this.prisma.$transaction([
+      this.prisma.tenants.count({
+        where,
+      }),
+      this.prisma.tenants.findMany({
+        where,
+        omit: {
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+        take: data.limit,
+        skip: (data.page - 1) * data.limit,
+        orderBy: { id: 'asc' },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / data.limit),
+        page: data.page,
+        limit: data.limit,
+      },
+    };
+  }
   private readonly tenantSelect = {
     id: true,
     name: true,
