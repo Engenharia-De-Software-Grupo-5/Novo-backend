@@ -36,12 +36,12 @@ import { PreviewContractService } from 'src/services/contracts/preview.contract.
 
 @ApiTags('Contracts')
 @ApiBearerAuth('access-token')
-@Controller('contracts')
+@Controller('condominios/:condId/contratos')
 export class ContractController {
   constructor(
     private readonly contractService: ContractService,
     private readonly previewContractService: PreviewContractService,
-  ) {}
+  ) { }
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -53,8 +53,8 @@ export class ContractController {
     description: 'Successfully retrieved all contracts',
     type: [ContractResponse],
   })
-  getAll(): Promise<ContractResponse[]> {
-    return this.contractService.getAll();
+  getAll(@Param('condId') condominiumId: string): Promise<ContractResponse[]> {
+    return this.contractService.getAll(condominiumId);
   }
 
   @Get(':id')
@@ -68,8 +68,11 @@ export class ContractController {
     description: 'Successfully retrieved contract details',
     type: ContractResponse,
   })
-  getById(@Param('id') ContratoId: string): Promise<ContractResponse> {
-    return this.contractService.getById(ContratoId);
+  getById(
+    @Param('condId') condominiumId: string,
+    @Param('id') contractId: string
+  ): Promise<ContractResponse> {
+    return this.contractService.getById(condominiumId, contractId);
   }
 
   @Post()
@@ -96,31 +99,14 @@ export class ContractController {
   })
   @HttpCode(HttpStatus.CREATED)
   async createWithFile(
+    @Param('condId') condominiumId: string,
     @Body() dto: ContractDto,
     @UploadedFile() file?: Express.Multer.File, // O '?' já indica que é opcional
   ) {
     // Se o arquivo não for enviado, 'file' será undefined.
     // Seu service deve estar preparado para lidar com file sendo undefined.
-    return this.contractService.create(dto, file);
+    return this.contractService.create(condominiumId, dto, file);
   }
-
-  // @Post()
-  // @HttpCode(HttpStatus.CREATED)
-  // @ApiOperation({
-  //   summary: 'Create a new contract',
-  //   description: 'Register a new contract in the system.',
-  // })
-  // @ApiBody({
-  //   description: 'contract data to be registered',
-  //   type: ContractDto,
-  // })
-  // @ApiCreatedResponse({
-  //   description: 'contract successfully created',
-  //   type: ContractResponse,
-  // })
-  // create(@Body() dto: ContractDto): Promise<ContractResponse> {
-  //   return this.contractService.create(dto);
-  // }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
@@ -138,10 +124,11 @@ export class ContractController {
     type: ContractResponse,
   })
   update(
-    @Param('id') id: string,
+    @Param('condId') condominiumId: string,
+    @Param('id') contractId: string,
     @Body() dto: ContractDto,
   ): Promise<ContractResponse> {
-    return this.contractService.update(id, dto);
+    return this.contractService.update(condominiumId, contractId, dto);
   }
 
   @Delete(':id')
@@ -154,33 +141,12 @@ export class ContractController {
     description: 'contract successfully deleted',
     type: ContractResponse,
   })
-  delete(@Param('id') ContractId: string): Promise<ContractResponse> {
-    return this.contractService.delete(ContractId);
+  delete(
+    @Param('condId') condominiumId: string,
+    @Param('id') ContractId: string,
+  ): Promise<ContractResponse> {
+    return this.contractService.delete(condominiumId, ContractId);
   }
-
-  // @Post()
-  // @ApiConsumes('multipart/form-data')
-  // @ApiOperation({ summary: 'Upload a contract (PDF)' })
-  // @ApiBody({
-  //   schema: {
-  //     type: 'object',
-  //     required: ['file'],
-  //     properties: { file: { type: 'string', format: 'binary' } },
-  //   },
-  // })
-  // @UseInterceptors(FileInterceptor('file'))
-  // @HttpCode(HttpStatus.OK)
-  // async upload(@UploadedFile() file?: Express.Multer.File) {
-  //   if (!file) throw new BadRequestException('Uploaded file is required.');
-  //   return this.contractService.upload(file);
-  // }
-
-  // @Get(':id/download')
-  // @ApiOperation({ summary: 'Get download URL (presigned)' })
-  // @HttpCode(HttpStatus.OK)
-  // download(@Param('id', new ParseUUIDPipe()) id: string) {
-  //   return this.contractService.getDownloadUrl(id);
-  // }
 
   @Post('preview')
   @HttpCode(HttpStatus.OK)
@@ -188,7 +154,9 @@ export class ContractController {
     summary: 'Preview contract before creation',
     description: 'Generate a temporary HTML preview of the contract',
   })
-  async preview(@Body() dto: PreviewContractDto) {
-    return this.previewContractService.execute(dto);
+  async preview(
+    @Param('condId') condominiumId: string,
+    @Body() dto: PreviewContractDto) {
+    return this.previewContractService.execute(condominiumId, dto);
   }
 }

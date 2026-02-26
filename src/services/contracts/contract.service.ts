@@ -16,29 +16,31 @@ export class ContractService {
     private readonly generateContract: GenerateContractService,
     private readonly contractRepository: ContractRepository,
   ) { }
-  getAll(): Promise<ContractResponse[]> {
-    return this.contractRepository.getAll();
+  getAll(condominiumId: string): Promise<ContractResponse[]> {
+    return this.contractRepository.getAll(condominiumId);
   }
-  async getById(contratoId: string): Promise<ContractResponse> {
-    const result = await this.contractRepository.getById(contratoId);
+  async getById(condominiumId: string, contratoId: string): Promise<ContractResponse> {
+    const result = await this.contractRepository.getById(condominiumId, contratoId);
     const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
     result.contractUrl = tempUrl;
     return result;
   }
 
   async create(
+    condominiumId: string,
     dto: ContractDto,
     file?: Express.Multer.File,
   ): Promise<ContractResponse> {
-    const contratoExistente = await this.contractRepository.checkIfHas(dto);
+    const contratoExistente = await this.contractRepository.checkIfHas(condominiumId, dto);
     if (contratoExistente) {
       throw new BadRequestException('This contract already exists');
     }
 
     if (dto.contractTemplateId) {
-      const response = await this.contractRepository.create(dto);
+      const response = await this.contractRepository.create(condominiumId, dto);
       const urlPromise = await this.generateContract.execute(response.id, dto.content);
       const result = await this.contractRepository.updateUrl(
+        condominiumId,
         response.id,
         urlPromise.url,
       );
@@ -47,13 +49,14 @@ export class ContractService {
       result.contractUrl = tempUrl;
       return result;
     } else {
-      const response = await this.contractRepository.create(dto);
+      const response = await this.contractRepository.create(condominiumId, dto);
       const minioResponse = await this.minioService.uploadFile(
         file,
         ['pdf'],
         response.id + '_' + new Date().getTime() + '.pdf',
       );
       const result = await this.contractRepository.updateUrl(
+        condominiumId,
         response.id,
         minioResponse.fileName,
       );
@@ -63,19 +66,19 @@ export class ContractService {
       return result;
     }
   }
-  update(id: string, dto: ContractDto): Promise<ContractResponse> {
-    return this.contractRepository.update(id, dto);
+  update(condominiumId: string, id: string, dto: ContractDto): Promise<ContractResponse> {
+    return this.contractRepository.update(condominiumId, id, dto);
   }
 
-  delete(contratoId: string): Promise<ContractResponse> {
-    return this.contractRepository.delete(contratoId);
+  delete(condominiumId: string, contratoId: string): Promise<ContractResponse> {
+    return this.contractRepository.delete(condominiumId, contratoId);
   }
 
-  listByTenant(tenantId: string) {
-    return this.contractRepository.listByTenant(tenantId);
+  listByTenant(condominiumId, tenantId: string) {
+    return this.contractRepository.listByTenant(condominiumId, tenantId);
   }
 
-  listByProperty(propertyId: string) {
-    return this.contractRepository.listByProperty(propertyId);
+  listByProperty(condominiumId, propertyId: string) {
+    return this.contractRepository.listByProperty(condominiumId, propertyId);
   }
 }
