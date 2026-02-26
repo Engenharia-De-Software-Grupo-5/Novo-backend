@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">45.45% </span>
+                <span class="strong">90.9% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>5/11</span>
+                <span class='fraction'>10/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>5/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">88.88% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/9</span>
+                <span class='fraction'>8/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -135,17 +135,17 @@
 <a name='L70'></a><a href='#L70'>70</a>
 <a name='L71'></a><a href='#L71'>71</a>
 <a name='L72'></a><a href='#L72'>72</a>
-<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
+<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -157,7 +157,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -177,7 +177,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -202,7 +202,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -214,10 +214,10 @@ import { ContractTemplateResponse } from "src/contracts/contract.templates/contr
 &nbsp;
 @Injectable()
 export class ContractTemplateRepository {
-<span class="fstat-no" title="function not covered" >  constructor(private readonly <span class="cstat-no" title="statement not covered" >p</span>risma: P</span>rismaService) { }
+  constructor(private readonly prisma: PrismaService) { }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  getById(</span>contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.contractTemplates.findUnique({</span>
+  getById(contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
+    return this.prisma.contractTemplates.findUnique({
       where: { id: contractTemplateId, deletedAt: null },
       select: {
         id: true,
@@ -228,11 +228,11 @@ export class ContractTemplateRepository {
     })
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  getAll(</span>name?: string): Promise&lt;ContractTemplateResponse[]&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.contractTemplates.findMany({</span>
+  getAll(name?: string): Promise&lt;ContractTemplateResponse[]&gt; {
+    return this.prisma.contractTemplates.findMany({
       where: {
         deletedAt: null,
-        ...(name &amp;&amp; {
+        ...(name &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >{</span>
           name: {
             contains: name,
             mode: 'insensitive'
@@ -248,8 +248,8 @@ export class ContractTemplateRepository {
     })
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  create(</span>dto: ContractTemplateDto): Promise&lt;ContractTemplateResponse&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.contractTemplates.create({</span>
+  create(dto: ContractTemplateDto): Promise&lt;ContractTemplateResponse&gt; {
+    return this.prisma.contractTemplates.create({
       data: { name: dto.name, description: dto.description, template: dto.template },
       select: {
         id: true,
@@ -273,8 +273,8 @@ export class ContractTemplateRepository {
     })
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  delete(</span>contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.prisma.contractTemplates.update({</span>
+  delete(contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
+    return this.prisma.contractTemplates.update({
       where: { id: contractTemplateId },
       data: { deletedAt: new Date() }
     })
@@ -286,7 +286,7 @@ export class ContractTemplateRepository {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-25T20:38:21.247Z
+                at 2026-02-26T18:17:10.644Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
