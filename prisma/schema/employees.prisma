@@ -18,8 +18,8 @@ model Employees {
   id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cpf               String              @unique
   name              String
+  bankDataId        String              @unique @db.Uuid
   bankData          BanksData           @relation(fields: [bankDataId], references: [id])
-  bankDataId        String              @db.Uuid
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   deletedAt         DateTime?
@@ -38,11 +38,17 @@ model Employees {
 }
 
 model BanksData {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  deletedAt DateTime?
-  employees Employees[]
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  bank          String
+  accountType   String
+  accountNumber String
+  agency        String
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+  employees     Employees?
 
   @@map("banksdata")
 }

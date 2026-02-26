@@ -10,7 +10,7 @@ import { seedTenants } from './functions/tenants/tenant.seed';
 const prisma = new PrismaClient();
 
 async function main() {
-  const { permissionAdmin, permissionContractManager } =
+  const { permissionAdmin, permissionFinanceiro, permissionRH } =
     await seedPermissions(prisma);
   const { contractTemplate1, contractTemplate2 } =
     await seedContractTemplates(prisma);
@@ -26,7 +26,7 @@ async function main() {
   const { admin, user } = await seedUsers(
     prisma,
     permissionAdmin.id,
-    permissionContractManager.id,
+    permissionFinanceiro.id,
     condominiumA.id,
     condominiumB.id,
   );
