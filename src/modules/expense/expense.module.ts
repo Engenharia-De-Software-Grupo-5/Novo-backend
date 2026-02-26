@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MinioClientModule } from 'src/modules/tools/minio-client.module';
 
-import { ExpenseController } from 'src/controllers/expenses/expense.controller';
+import { ExpenseController } from 'src/controllers/condominiums/expense.controller';
 import { ExpenseInvoiceController } from 'src/controllers/expenses/expense-invoice.controller';
 
 import { ExpenseService } from 'src/services/expenses/expense.service';
