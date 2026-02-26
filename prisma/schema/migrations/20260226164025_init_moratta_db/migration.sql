@@ -234,6 +234,8 @@ CREATE TABLE "contracts" (
     "contractUrl" TEXT,
     "description" TEXT,
     "content" TEXT,
+    "startDate" TEXT NOT NULL,
+    "dueDate" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -247,6 +249,7 @@ CREATE TABLE "contracttemplates" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "template" TEXT NOT NULL,
+    "condominiumId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -531,6 +534,9 @@ CREATE UNIQUE INDEX "contracts_tenantId_propertyId_key" ON "contracts"("tenantId
 CREATE UNIQUE INDEX "contracttemplates_name_key" ON "contracttemplates"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "contracttemplates_condominiumId_key" ON "contracttemplates"("condominiumId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
 
 -- CreateIndex
@@ -604,6 +610,9 @@ ALTER TABLE "contracts" ADD CONSTRAINT "contracts_propertyId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "contracts" ADD CONSTRAINT "contracts_contractTemplateId_fkey" FOREIGN KEY ("contractTemplateId") REFERENCES "contracttemplates"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "contracttemplates" ADD CONSTRAINT "contracttemplates_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

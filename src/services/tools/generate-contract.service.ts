@@ -16,9 +16,9 @@ export class GenerateContractService {
         private readonly minioService: MinioClientService,
     ) { }
 
-    async execute(contractId: string, manualContent?: string): Promise<{ url: string }> {
+    async execute(condominiumId: string, contractId: string, manualContent?: string): Promise<{ url: string }> {
 
-        const contract = await this.contractsRepository.getById(contractId);
+        const contract = await this.contractsRepository.getById(condominiumId, contractId);
         if (!contract) {
             throw new NotFoundException('Contrato não encontrado');
         }
@@ -45,7 +45,7 @@ export class GenerateContractService {
 
         const templateData = {
             imovel: {
-                endereco: `${property.address}, ${address.street}, ${address.number} - ${address.city}/${address.uf}`,
+                endereco: `${property.propertyAddress.street}, ${property.propertyAddress.number} - ${address.city}/${address.uf}`,
             },
 
             condominio: {
@@ -57,9 +57,9 @@ export class GenerateContractService {
             propriedade: {
                 numero: property.unityNumber,
                 tipo: property.unityType,
-                bloco: property.block,
-                andar: property.floor,
-                area_total: property.totalArea,
+                bloco: property.propertyAddress.block,
+                andar: property.propertyAddress.floor,
+                area_total: property.propertyAddress.totalArea,
                 situacao: property.propertySituation,
                 observacoes: property.observations,
             },

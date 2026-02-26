@@ -14,8 +14,8 @@ export class PreviewContractService {
         private readonly templateEngine: TemplateEngineService,
     ) { }
 
-    async execute(dto: PreviewContractDto) {
-        const template = await this.templateRepository.getById(dto.templateId);
+    async execute(condominiumId: string, dto: PreviewContractDto) {
+        const template = await this.templateRepository.getById(condominiumId, dto.templateId);
 
         if (!template) {
             throw new NotFoundException('Template not found');

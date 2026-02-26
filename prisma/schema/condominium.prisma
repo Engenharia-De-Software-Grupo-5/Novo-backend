@@ -1,15 +1,16 @@
 model Condominiums {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String       @unique
-  description String?
-  address     Addresses?   @relation(fields: [addressId], references: [id])
-  addressId   String       @db.Uuid
-  properties  Properties[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
-  expenses    Expenses[]
-  accesses    Access[]
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String              @unique
+  description       String?
+  address           Addresses?          @relation(fields: [addressId], references: [id])
+  addressId         String              @db.Uuid
+  properties        Properties[]
+  contractTemplates ContractTemplates[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  expenses          Expenses[]
+  accesses          Access[]
 
   @@map("condominiums")
 }
