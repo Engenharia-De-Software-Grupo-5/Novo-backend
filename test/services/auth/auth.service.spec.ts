@@ -1,158 +1,148 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
+import { AuthService } from 'src/services/auth/auth.service';
+import * as bcrypt from 'bcrypt';
 
-import { EmployeeService } from 'src/services/employees/employee.service';
-import { EmployeeRepository } from 'src/repositories/employees/employee.repository';
+jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
+}));
 
-describe('EmployeeService', () => {
-  let service: EmployeeService;
-  let repo: jest.Mocked<EmployeeRepository>;
-
-  const mockRepo: jest.Mocked<EmployeeRepository> = {
-    getAll: jest.fn(),
-    getById: jest.fn(),
-    getByCpf: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    updateByCpf: jest.fn(),
-    delete: jest.fn(),
-    deleteByCpf: jest.fn(),
-  } as any;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EmployeeService,
-        { provide: EmployeeRepository, useValue: mockRepo },
-      ],
-    }).compile();
-
-    service = module.get(EmployeeService);
-    repo = module.get(EmployeeRepository);
-
-    jest.clearAllMocks();
+describe('AuthService', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
   });
 
-  describe('getAll', () => {
-    it('should return employees', async () => {
-      const employees = [{ id: '1', cpf: '123' }] as any;
-      repo.getAll.mockResolvedValue(employees);
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-      const result = await service.getAll();
+  const makeService = () => {
+    const authRepository = {
+      getUserByEmailOrCpf: jest.fn(),
+    };
 
-      expect(repo.getAll).toHaveBeenCalledTimes(1);
-      expect(result).toBe(employees);
+    const jwtService = {
+      sign: jest.fn(),
+      signAsync: jest.fn(),
+    };
+
+    const service = new AuthService(authRepository as any, jwtService as any);
+
+    return { service, authRepository, jwtService };
+  };
+
+  describe('validateUser', () => {
+    it('should return user (without password) if password matches', async () => {
+      const { service, authRepository } = makeService();
+
+      const userFromRepo = {
+        id: '1',
+        email: 'test@test.com',
+        cpf: '12345678900',
+        password: 'hashed',
+        name: 'Test',
+        accesses: [],
+      };
+
+      authRepository.getUserByEmailOrCpf.mockResolvedValue(userFromRepo);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.validateUser('test@test.com', '123');
+
+      expect(authRepository.getUserByEmailOrCpf).toHaveBeenCalledWith('test@test.com');
+      expect(bcrypt.compare).toHaveBeenCalledWith('123', 'hashed');
+
+      expect(result).toEqual({
+        id: '1',
+        email: 'test@test.com',
+        cpf: '12345678900',
+        name: 'Test',
+        accesses: [],
+      });
+    });
+
+    it('should normalize cpf (remove . and -) before calling repository', async () => {
+      const { service, authRepository } = makeService();
+
+      authRepository.getUserByEmailOrCpf.mockResolvedValue(null);
+
+      await expect(service.validateUser('123.456.789-00', '123')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+
+      expect(authRepository.getUserByEmailOrCpf).toHaveBeenCalledWith('12345678900');
+    });
+
+    it('should throw UnauthorizedException if user does not exist', async () => {
+      const { service, authRepository } = makeService();
+
+      authRepository.getUserByEmailOrCpf.mockResolvedValue(null);
+
+      await expect(service.validateUser('test@test.com', '123')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException if password does not match', async () => {
+      const { service, authRepository } = makeService();
+
+      const userFromRepo = {
+        id: '1',
+        email: 'test@test.com',
+        cpf: '12345678900',
+        password: 'hashed',
+        name: 'Test',
+        accesses: [],
+      };
+
+      authRepository.getUserByEmailOrCpf.mockResolvedValue(userFromRepo);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.validateUser('test@test.com', 'wrong')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
     });
   });
 
-  describe('getById', () => {
-    it('should return employee by id', async () => {
-      const employee = { id: '1', cpf: '123' } as any;
-      repo.getById.mockResolvedValue(employee);
+  describe('login', () => {
+    it('should sign payload correctly and return access_token', async () => {
+      const { service, jwtService } = makeService();
 
-      const result = await service.getById('1');
+      jwtService.sign.mockReturnValue('jwt-token');
 
-      expect(repo.getById).toHaveBeenCalledTimes(1);
-      expect(repo.getById).toHaveBeenCalledWith('1');
-      expect(result).toBe(employee);
-    });
-  });
+      const user = {
+        id: '1',
+        email: 'test@test.com',
+        cpf: '12345678900',
+        name: 'Test User',
+        accesses: [
+          { permission: { id: 'p1', name: 'ADMIN' }, condominium: { id: 'c1', name: 'C1' } },
+          { permission: { id: 'p2', name: 'MANAGER' }, condominium: { id: 'c2', name: 'C2' } },
+        ],
+      };
 
-  describe('getByCpf', () => {
-    it('should return employee by cpf', async () => {
-      const employee = { id: '1', cpf: '123' } as any;
-      repo.getByCpf.mockResolvedValue(employee);
+      const result: any = await service.login(user as any);
 
-      const result = await service.getByCpf('123');
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: user.id,
+        email: user.email,
+        cpf: user.cpf,
+        name: user.name,
+        permission: user.accesses.map((a) => a.permission),
+        condominium: user.accesses.map((a) => a.condominium),
+      });
 
-      expect(repo.getByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.getByCpf).toHaveBeenCalledWith('123');
-      expect(result).toBe(employee);
-    });
-  });
+  
+      expect(result).toEqual(
+        expect.objectContaining({
+          access_token: 'jwt-token',
+        }),
+      );
 
-  describe('create', () => {
-    it('should create employee when cpf does not exist', async () => {
-      const dto = { cpf: '123', name: 'A' } as any;
-      repo.getByCpf.mockResolvedValue(null);
-      repo.create.mockResolvedValue({ id: '1', ...dto } as any);
+   
+      expect(result.name).toBe('Test User');
 
-      const result = await service.create(dto);
-
-      expect(repo.getByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.getByCpf).toHaveBeenCalledWith('123');
-
-      expect(repo.create).toHaveBeenCalledTimes(1);
-      expect(repo.create).toHaveBeenCalledWith(dto);
-
-      expect(result).toEqual({ id: '1', ...dto });
-    });
-
-    it('should throw BadRequestException when cpf already exists', async () => {
-      const dto = { cpf: '123', name: 'A' } as any;
-      repo.getByCpf.mockResolvedValue({ id: 'existing', cpf: '123' } as any);
-
-      await expect(service.create(dto)).rejects.toThrow(BadRequestException);
-
-      expect(repo.getByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.getByCpf).toHaveBeenCalledWith('123');
-
-      // garante que NÃO tentou criar
-      expect(repo.create).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('update', () => {
-    it('should update employee by id', async () => {
-      const dto = { cpf: '123', name: 'Novo' } as any;
-      const updated = { id: '1', ...dto } as any;
-      repo.update.mockResolvedValue(updated);
-
-      const result = await service.update('1', dto);
-
-      expect(repo.update).toHaveBeenCalledTimes(1);
-      expect(repo.update).toHaveBeenCalledWith('1', dto);
-      expect(result).toBe(updated);
-    });
-  });
-
-  describe('updateByCpf', () => {
-    it('should update employee by cpf', async () => {
-      const dto = { cpf: '123', name: 'Novo' } as any;
-      const updated = { id: '1', ...dto } as any;
-      repo.updateByCpf.mockResolvedValue(updated);
-
-      const result = await service.updateByCpf('123', dto);
-
-      expect(repo.updateByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.updateByCpf).toHaveBeenCalledWith('123', dto);
-      expect(result).toBe(updated);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete employee by id', async () => {
-      const deleted = { id: '1', cpf: '123' } as any;
-      repo.delete.mockResolvedValue(deleted);
-
-      const result = await service.delete('1');
-
-      expect(repo.delete).toHaveBeenCalledTimes(1);
-      expect(repo.delete).toHaveBeenCalledWith('1');
-      expect(result).toBe(deleted);
-    });
-  });
-
-  describe('deleteByCpf', () => {
-    it('should delete employee by cpf', async () => {
-      const deleted = { id: '1', cpf: '123' } as any;
-      repo.deleteByCpf.mockResolvedValue(deleted);
-
-      const result = await service.deleteByCpf('123');
-
-      expect(repo.deleteByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.deleteByCpf).toHaveBeenCalledWith('123');
-      expect(result).toBe(deleted);
+ 
+      expect(result.user).toBeUndefined();
     });
   });
 });
