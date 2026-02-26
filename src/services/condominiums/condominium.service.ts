@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CondominiumDto } from 'src/contracts/condominiums/condominium.dto';
 import { CondominiumResponse } from 'src/contracts/condominiums/condominium.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { CondominiumRepository } from 'src/repositories/condominiums/condominium.repository';
 import { UserService } from '../auth/user.service';
 import { AuthPayload, UserDto } from 'src/contracts/auth';
@@ -12,6 +14,13 @@ export class CondominiumService {
   getAll(): Promise<CondominiumResponse[]> {
     return this.condominiumRepository.getAll();
   }
+
+  getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<CondominiumResponse>> {
+    return this.condominiumRepository.getPaginated(data);
+  }
+  
   getById(condominiumId: string): Promise<CondominiumResponse> {
     return this.condominiumRepository.getById(condominiumId);
   }

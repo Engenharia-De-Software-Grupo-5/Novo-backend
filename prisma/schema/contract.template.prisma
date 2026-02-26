@@ -1,12 +1,15 @@
 model ContractTemplates {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String    @unique
-  description String?
-  template    String    @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-  contract Contracts[]
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String       @unique
+  description   String?
+  template      String       @db.Text
+  condominium   Condominiums @relation(fields: [condominiumId], references: [id])
+  condominiumId String       @db.Uuid
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  contract      Contracts[]
 
+  @@unique([condominiumId])
   @@map("contracttemplates")
 }

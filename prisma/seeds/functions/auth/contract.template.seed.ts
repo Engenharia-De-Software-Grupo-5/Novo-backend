@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
 export async function seedContractTemplates(
-    prisma: PrismaClient,
+    prisma: PrismaClient, condominiumId: string
 ) {
     const contractTemplate1 = await prisma.contractTemplates.create({
         data: {
+            condominiumId: condominiumId,
             name: 'Contrato de Locação Residencial 2026',
             description: 'Modelo padrão para locação de imóvel residencial',
             template: `
@@ -30,6 +31,7 @@ export async function seedContractTemplates(
 
     const contractTemplate2 = await prisma.contractTemplates.create({
         data: {
+            condominiumId: condominiumId,
             name: 'Contrato de Prestação de Serviços 2026',
             description: 'Modelo padrão para contratação de serviços profissionais',
             template: `

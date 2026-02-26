@@ -7,19 +7,40 @@ export async function seedProperties(
 
     const property1 = await prisma.properties.create({
         data: { 
+            name: 'Property 1',
             identifier: '123456789',
-            address: 'Monitas Street, 123',
+            propertyAddress: { create: 
+                {
+                    street: '123 Main St',
+                    city: 'CityA',
+                    neighborhood: 'NeighborhoodA',
+                    number: 123,
+                    uf: 'UF',
+                    zip: '12345-678',
+
+                },
+            },
             unityNumber: '101',
-            condominiumId: condominiumId,
-        },
+            condominium: {connect: {id: condominiumId}},
+        }
     });
 
     const property2 = await prisma.properties.create({
-        data: { 
+        data: {
+            name: 'Property 2',
             identifier: '987654321',
-            address: 'Monitas Street, 456',
+            propertyAddress: { create: 
+                {
+                    street: '123 Main St',
+                    city: 'CityA',
+                    neighborhood: 'NeighborhoodA',
+                    number: 123,
+                    uf: 'UF',
+                    zip: '12345-678',
+                },
+            },
             unityNumber: '202',
-            condominiumId: condominiumId,
+            condominium: {connect: {id: condominiumId}},
         },
     });
 

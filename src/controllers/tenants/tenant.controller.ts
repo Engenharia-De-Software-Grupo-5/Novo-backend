@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,6 +18,9 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
 import { TenantService } from 'src/services/tenants/tenant.service';
@@ -41,6 +45,23 @@ export class TenantController {
   getAll(): Promise<TenantResponse[]> {
     return this.tenantService.getAll();
   }
+
+  @Get('paginated')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+      summary: 'Get contracts filtered and paginated',
+      description: 'Get contracts filtered and paginated',
+    })
+    @ApiOkResponse({
+      description: 'Success',
+      schema: PaginatedResponseSchema(TenantResponse),
+    })
+    getPaginated(
+      @Query() data: PaginationDto,
+    ): Promise<PaginatedResult<TenantResponse>> {
+      return this.tenantService.getPaginated(data);
+    }
+  
 
   @Get(':cpf')
   @HttpCode(HttpStatus.OK)

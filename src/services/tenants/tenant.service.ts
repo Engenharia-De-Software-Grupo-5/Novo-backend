@@ -1,10 +1,18 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
 import { TenantRepository } from 'src/repositories/tenants/tenant.repository';
 
 @Injectable()
 export class TenantService {
+  getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<TenantResponse>> {
+    return this.tenantRepository.getPaginated(data);
+  }
+
   constructor(private readonly tenantRepository: TenantRepository) {}
   getAll(): Promise<TenantResponse[]> {
     return this.tenantRepository.getAll();
