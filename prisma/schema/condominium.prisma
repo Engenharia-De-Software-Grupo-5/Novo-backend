@@ -2,7 +2,7 @@ model Condominiums {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String       @unique
   description String?
-  address     Addresses    @relation(fields: [addressId], references: [id])
+  address     Addresses?   @relation(fields: [addressId], references: [id])
   addressId   String       @db.Uuid
   properties  Properties[]
   createdAt   DateTime     @default(now())
@@ -26,17 +26,42 @@ model Addresses {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   deletedAt        DateTime?
-  condominiums     Condominiums[]
+  // condominiums     Condominiums[]
   tenants          Tenants[]
   professionalInfo ProfessionalInfo[]
+  condominiums     Condominiums[]
 
   @@map("addresses")
+}
+
+model PropertyAddress {
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  zip          String
+  street       String
+  neighborhood String
+  city         String
+  uf           String
+  number       Int
+  totalArea    Float?
+  block        String?
+  floor        Int?
+  complement   String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+  // condominiums     Condominiums[]
+  // tenants          Tenants[]
+  // professionalInfo ProfessionalInfo[]
+  properties   Properties[]
+
+  @@map("propertyaddress")
 }
 
 model Properties {
   id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   identifier        String                @unique
-  address           String
+  // address           String
+  propertyAddress   PropertyAddress       @relation(fields: [propertyAddressId], references: [id])
   unityNumber       String
   unityType         UnityType             @default(APARTMENT)
   block             String?
@@ -55,6 +80,7 @@ model Properties {
   inspections       PropertyInspections[]
   documents         PropertyDocuments[]
   charges           Charges[]
+  propertyAddressId String                @db.Uuid
 
   @@map("properties")
 }
