@@ -16,7 +16,8 @@ enum ExpensePaymentMethod {
 model Expenses {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  targetType ExpenseTargetType
+  description String
+  targetType  ExpenseTargetType
 
   condominiumId String? @db.Uuid
   propertyId    String? @db.Uuid
@@ -47,7 +48,6 @@ model Invoices {
   objectName   String @unique
   originalName String
   mimeType     String
-  extension    String
   size         Int
 
   createdAt DateTime  @default(now())
