@@ -15,11 +15,9 @@ export async function seedEmployees(
                 accountType: 'Corrente',
             },
             },
-            role: 'doorman',
-            contractType: 'CLT',
-            hireDate: new Date('2025-02-03T00:00:00.000Z'),
-            baseSalary: 10,
-            workload: 40,
+            role: 'PORTEIRO',
+            admissionDate: new Date('2025-02-03T00:00:00.000Z'),
+            birthDate: new Date('1990-01-01T00:00:00.000Z'),
         },
     });
 
@@ -34,11 +32,10 @@ export async function seedEmployees(
                 accountType: 'Corrente',
             },
             },
-            role: 'doorman',
+            role: 'PORTEIRO',
             contractType: 'CLT',
-            hireDate: new Date('2025-02-03T00:00:00.000Z'),
-            baseSalary: 10,
-            workload: 40,
+            admissionDate: new Date('2025-02-03T00:00:00.000Z'),
+            birthDate: new Date('1990-01-01T00:00:00.000Z'),
         },
     });
             
