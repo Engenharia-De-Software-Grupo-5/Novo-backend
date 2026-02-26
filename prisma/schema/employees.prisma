@@ -7,29 +7,38 @@ enum ContractType {
 }
 
 enum EmployeeStatus {
-  ACTIVE
-  INACTIVE
-  TERMINATED
-  ON_LEAVE
-  VACATION
+  ATIVO
+  INATIVO
+  PENDENTE
+}
+
+enum EmployeeRoles {
+  GERENTE
+  PORTEIRO
+  ZELADOR
+  FAXINEIRO
 }
 
 model Employees {
   id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cpf               String              @unique
   name              String
-  bankDataId        String              @unique @db.Uuid
-  bankData          BanksData           @relation(fields: [bankDataId], references: [id])
+  email             String?
+  bankDataId        String?              @unique @db.Uuid
+  bankData          BanksData?           @relation(fields: [bankDataId], references: [id])
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   deletedAt         DateTime?
-  role              String
-  contractType      ContractType
-  hireDate          DateTime
+  role              EmployeeRoles
+  contractType      ContractType?
+  admissionDate     DateTime?
+  birthDate         DateTime
+  address           String?
+  phone             String?
   terminationDate   DateTime?
-  baseSalary        Float
-  workload          Int
-  status            EmployeeStatus      @default(ACTIVE)
+  baseSalary        Float?
+  workload          Int?
+  status            EmployeeStatus      @default(ATIVO)
   employeeContracts EmployeeContracts[]
   employeePayments  EmployeePayments[]
   employeeBenefits  EmployeeBenefits[]

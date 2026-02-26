@@ -11,6 +11,10 @@ export class EmployeeRepository {
     id: true,
     cpf: true,
     name: true,
+    email: true,
+    phone: true,
+    address: true,
+    birthDate: true,
     bankData:{
       select: {
         id: true,
@@ -22,7 +26,7 @@ export class EmployeeRepository {
     },
     role: true,
     contractType: true,
-    hireDate: true,
+    admissionDate: true,
     baseSalary: true, 
     workload: true,      
     status: true,
@@ -37,14 +41,14 @@ export class EmployeeRepository {
       select: this.employeeSelect,
     });
   }
-  getById(employeeId: string): Promise<EmployeeResponse> {
+  getById(employeeId: string): Promise<EmployeeResponse | null> {
     return this.prisma.employees.findUnique({
       where: { id: employeeId, deletedAt: null },
       select: this.employeeSelect,
     });
   }
 
-  getByCpf(cpf: string): Promise<EmployeeResponse> {
+  getByCpf(cpf: string): Promise<EmployeeResponse | null> {
     return this.prisma.employees.findUnique({
       where: { cpf, deletedAt: null},
       select: this.employeeSelect,
@@ -53,59 +57,83 @@ export class EmployeeRepository {
 
   async create(dto: EmployeeDto): Promise<EmployeeResponse> {
     const { bankData, ...rest } = dto;
+
     return this.prisma.employees.upsert({
       where: {
         cpf: dto.cpf,
       },
+
       update: {
         ...rest,
-        bankData: {
+        ...(bankData && {
+          bankData: {
             upsert: {
-                update: { ...bankData },
-                create: {
-                  bank: bankData.bank,
-                  accountType: bankData.accountType,
-                  accountNumber: bankData.accountNumber,
-                  agency: bankData.agency,
-                }
-            }
-        },
+              update: { ...bankData },
+              create: { ...bankData },
+            },
+          },
+        }),
         deletedAt: null,
       },
+
       create: {
         ...rest,
-        bankData: {
-          create: {
-            bank: bankData.bank,
-            accountType: bankData.accountType,
-            accountNumber: bankData.accountNumber,
-            agency: bankData.agency,
-          }
-        }
+        ...(bankData && {
+          bankData: {
+            create: { ...bankData },
+          },
+        }),
       },
+
       select: this.employeeSelect,
-    })as Promise<EmployeeResponse>;
+    });
   }
 
   update(id: string, dto: EmployeeDto): Promise<EmployeeResponse> {
+    const { bankData, ...rest } = dto;
+
     return this.prisma.employees.update({
       where: { id: id },
-      data: { ...dto, bankData: {update: {...dto.bankData}}, deletedAt: null},
+      data: {
+        ...rest,
+        ...(bankData && {
+          bankData: {
+            upsert: {
+              update: { ...bankData },
+              create: { ...bankData }
+            }
+          }
+        }),
+        deletedAt: null
+      },
       select: this.employeeSelect,
     });
   }
 
   updateByCpf(cpf: string, dto: EmployeeDto): Promise<EmployeeResponse> {
+    const { bankData, ...rest } = dto;
+    
     return this.prisma.employees.update({
       where: { cpf },
-      data: { ...dto, bankData: {update: {...dto.bankData}}, deletedAt: null},
+      data: {
+        ...rest,
+        ...(bankData && {
+          bankData: {
+            upsert: {
+              update: { ...bankData },
+              create: { ...bankData }
+            }
+          }
+        }),
+        deletedAt: null
+      },
       select: this.employeeSelect,
     });
   }
 
   delete(employeeId: string): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
-      where: { id: employeeId, deletedAt: null },
+      where: { id: employeeId },
       data: { deletedAt: new Date() },
       select: this.employeeSelect,
     });
@@ -113,7 +141,7 @@ export class EmployeeRepository {
 
   deleteByCpf(cpf: string): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
-      where: { cpf, deletedAt: null },
+      where: { cpf },
       data: { deletedAt: new Date() },
       select: this.employeeSelect,
     });
