@@ -33,7 +33,7 @@ export class EmployeeService {
       dto.cpf,
     );
 
-    if (!!employeeExistente) {
+    if (employeeExistente) {
       throw new BadRequestException('This CPF already exists in the database.');
     }
 

@@ -1,11 +1,13 @@
-import { UserStatus } from '@prisma/client';
-import { PermissionResponse } from './permission.response';
+import { ApiProperty } from '@nestjs/swagger';
+import { AccessData } from './auth-data.model';
 
 export class UserResponse {
   id: string;
   name: string;
   email: string;
-  cpf?: string;
-  status: UserStatus;
-  permission: PermissionResponse;
+  @ApiProperty({
+    description: 'user accesses',
+    type: () => AccessData,
+  })
+  accesses: AccessData[];
 }

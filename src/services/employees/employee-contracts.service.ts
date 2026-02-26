@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { EmployeeContractsRepository } from 'src/repositories/employees/employee-contracts.repository';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 

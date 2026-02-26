@@ -1,6 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PermissionResponse } from './permission.response';
 
+export class CondominiumSimpleResponse {
+  @ApiProperty({
+    description: 'Permission ID (UUID)',
+    example: 'ad2d0c94-27d0-4562-8a2f-4c7e674d8b9d',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Permission name',
+    example: 'admin',
+  })
+  name: string;
+}
+
+export class AccessData {
+  @ApiProperty({
+    description: 'user permission',
+    type: () => PermissionResponse,
+  })
+  permission: PermissionResponse;
+
+  @ApiProperty({
+    description: 'user permission',
+    type: () => CondominiumSimpleResponse,
+  })
+  condominium: CondominiumSimpleResponse;
+}
+
 export class AuthDataModel {
   @ApiProperty({
     description: 'User ID (UUID)',
@@ -21,20 +49,20 @@ export class AuthDataModel {
   password: string;
 
   @ApiProperty({
+    description: 'Define se o usuário é um administrador master',
+    example: false,
+  })
+  isAdminMaster: boolean;
+
+  @ApiProperty({
     description: 'User email',
     example: 'joao@example.com',
   })
   email: string;
 
   @ApiProperty({
-    description: 'User cpf',
-    example: '11111111111',
+    description: 'user accesses',
+    type: () => AccessData,
   })
-  cpf: string;
-
-  @ApiProperty({
-    description: 'user permission',
-    type: () => PermissionResponse,
-  })
-  permission: PermissionResponse;
+  accesses: AccessData[];
 }

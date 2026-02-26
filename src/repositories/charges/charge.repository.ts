@@ -135,11 +135,11 @@ export class ChargesRepository {
     const updated = await this.prisma.charges.update({
       where: { id: chargeId },
       data: {
-        ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
-        ...(dto.dueDate !== undefined ? { dueDate: new Date(dto.dueDate) } : {}),
-        ...(dto.paymentMethod !== undefined ? { paymentMethod: dto.paymentMethod } : {}),
-        ...(dto.fineRate !== undefined ? { fineRate: dto.fineRate } : {}),
-        ...(dto.monthlyRate !== undefined ? { monthlyRate: dto.monthlyRate } : {}),
+        ...(dto.amount === undefined ? {} : { amount: dto.amount }),
+        ...(dto.dueDate === undefined ? {} : { dueDate: new Date(dto.dueDate) }),
+        ...(dto.paymentMethod === undefined ? {} : { paymentMethod: dto.paymentMethod }),
+        ...(dto.fineRate === undefined ? {} : { fineRate: dto.fineRate }),
+        ...(dto.monthlyRate === undefined ? {} : { monthlyRate: dto.monthlyRate }),
       },
     });
 

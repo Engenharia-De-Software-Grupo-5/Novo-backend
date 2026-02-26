@@ -7,28 +7,16 @@ import { ContractsRepository } from 'src/repositories/contracts/contract.reposit
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 
 @Injectable()
-export class ContractsService {
+export class ContractService {
   private readonly allowedExtensions = ['pdf'];
 
   constructor(
-    private readonly repo: ContractsRepository,
-    private readonly minio: MinioClientService,
-  ) {}
-
-  async upload(file: Express.Multer.File) {
-    const ext = (file.originalname.split('.').pop() || '').toLowerCase();
-    if (ext !== 'pdf') throw new UnsupportedMediaTypeException('Only PDF files are allowed.');
-
-    const objectName = `contracts/${randomUUID()}.pdf`;
-    const { fileName } = await this.minio.uploadFile(file, this.allowedExtensions, objectName);
-
-    return this.repo.create({
-      objectName: fileName,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      extension: 'pdf',
-      size: file.size,
-    });
+    private readonly minioService: MinioClientService,
+    private readonly generateContract: GenerateContractService,
+    private readonly contractRepository: ContractRepository,
+  ) { }
+  getAll(): Promise<ContractResponse[]> {
+    return this.contractRepository.getAll();
   }
 
   listPaginated(
@@ -40,42 +28,63 @@ export class ContractsService {
   list(tenantCpf?: string) {
     return this.repo.list({ tenantCpf });
   }
-
-  async findOne(contractId: string) {
-    const c = await this.repo.getById(contractId);
-    if (!c) throw new NotFoundException('Contract not found.');
-    const url = await this.minio.getFileUrl(c.objectName);
-    return { ...c, url };
+  async getById(contratoId: string): Promise<ContractResponse> {
+    const result = await this.contractRepository.getById(contratoId);
+    const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+    result.contractUrl = tempUrl;
+    return result;
   }
 
-  async getDownloadUrl(contractId: string) {
-    const c = await this.repo.getById(contractId);
-    if (!c) throw new NotFoundException('Contract not found.');
-    const url = await this.minio.getFileUrl(c.objectName);
-    return { url };
+  async create(
+    dto: ContractDto,
+    file?: Express.Multer.File,
+  ): Promise<ContractResponse> {
+    const contratoExistente = await this.contractRepository.checkIfHas(dto);
+    if (contratoExistente) {
+      throw new BadRequestException('This contract already exists');
+    }
+
+    if (dto.contractTemplateId) {
+      const response = await this.contractRepository.create(dto);
+      const urlPromise = await this.generateContract.execute(response.id, dto.content);
+      const result = await this.contractRepository.updateUrl(
+        response.id,
+        urlPromise.url,
+      );
+
+      const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+      result.contractUrl = tempUrl;
+      return result;
+    } else {
+      const response = await this.contractRepository.create(dto);
+      const minioResponse = await this.minioService.uploadFile(
+        file,
+        ['pdf'],
+        response.id + '_' + new Date().getTime() + '.pdf',
+      );
+      const result = await this.contractRepository.updateUrl(
+        response.id,
+        minioResponse.fileName,
+      );
+
+      const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+      result.contractUrl = tempUrl;
+      return result;
+    }
+  }
+  update(id: string, dto: ContractDto): Promise<ContractResponse> {
+    return this.contractRepository.update(id, dto);
   }
 
-  async remove(contractId: string) {
-    const c = await this.repo.getById(contractId);
-    if (!c) throw new NotFoundException('Contract not found.');
-
-    try { await this.minio.deleteFile(c.objectName); } catch {}
-    await this.repo.softDelete(contractId);
-  }
-
-  linkLease(contractId: string, propertyId: string, tenantId: string) {
-    return this.repo.linkLease(contractId, propertyId, tenantId);
-  }
-
-  unlinkLease(contractId: string, propertyId: string, tenantId: string) {
-    return this.repo.unlinkLease(contractId, propertyId, tenantId);
+  delete(contratoId: string): Promise<ContractResponse> {
+    return this.contractRepository.delete(contratoId);
   }
 
   listByTenant(tenantId: string) {
-    return this.repo.listByTenant(tenantId);
+    return this.contractRepository.listByTenant(tenantId);
   }
 
   listByProperty(propertyId: string) {
-    return this.repo.listByProperty(propertyId);
+    return this.contractRepository.listByProperty(propertyId);
   }
 }

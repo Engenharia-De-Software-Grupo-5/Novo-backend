@@ -7,7 +7,7 @@ export class LoginDto {
   @SkipUppercase()
   @ApiProperty({
     description: 'User email or CPF',
-    example: 'admin@example.com or 111.111.111-11',
+    example: 'admin@example.com',
   })
   userLogin: string;
 

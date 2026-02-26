@@ -141,7 +141,7 @@ export class TenantRepository {
     }
   };
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   getAll(): Promise<TenantResponse[]> {
     return this.prisma.tenants.findMany({

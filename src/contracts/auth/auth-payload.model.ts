@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsNumber,
   IsOptional,
   IsString,
@@ -9,6 +10,8 @@ import {
   Min,
 } from 'class-validator';
 import { SkipUppercase } from 'src/common/decorators';
+import { PermissionResponse } from './permission.response';
+import { CondominiumSimpleResponse } from './auth-data.model';
 
 export class AuthPayload {
   @IsUUID()
@@ -29,27 +32,33 @@ export class AuthPayload {
   @IsString()
   @SkipUppercase()
   @ApiProperty({
-    description: 'User cpf',
-    example: '11111111111',
-  })
-  cpf: string;
-
-  @IsString()
-  @SkipUppercase()
-  @ApiProperty({
     description: 'User name',
     example: 'john123',
   })
   name: string;
 
-  @IsOptional()
+  @IsBoolean()
+  @ApiProperty({
+    description: 'Define se o usuário é um administrador master',
+    example: false,
+  })
+  isAdminMaster: boolean;
+
   @IsString()
   @SkipUppercase()
   @ApiProperty({
-    description: 'Permission id',
-    example: 'c376f0d2-8eaa-4f88-9f2f-52f8dff8794a',
+    description: 'Permissions',
+    type: [PermissionResponse],
   })
-  permission?: string;
+  permission: PermissionResponse[];
+
+  @IsString()
+  @SkipUppercase()
+  @ApiProperty({
+    description: 'Condominiums',
+    type: [CondominiumSimpleResponse],
+  })
+  condominium: CondominiumSimpleResponse[];
 
   @IsOptional()
   @IsNumber()

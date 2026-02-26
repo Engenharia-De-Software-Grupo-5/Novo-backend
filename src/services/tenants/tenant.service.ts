@@ -40,7 +40,7 @@ export class TenantService {
     const tenantExistente = await this.tenantRepository.getByCpf(
       dto.cpf,
     );
-    if (!!tenantExistente) {
+    if (tenantExistente) {
       throw new BadRequestException('This tenant CPF already exists in the database.');
     }
 

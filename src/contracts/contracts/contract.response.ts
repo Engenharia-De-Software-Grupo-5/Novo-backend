@@ -1,21 +1,42 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import { PropertyResponse } from '../condominiums/property.response';
+import { TenantResponse } from '../tenants/tenant.response';
+import { ContractTemplateResponse } from '../contract.templates/contract.template.response';
 
 export class ContractResponse {
-  @ApiProperty({ description: 'UUID of the contract', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({
+    description: 'unique contract identifier',
+    example: '123',
+  })
   id: string;
 
-  @ApiProperty({description: 'Object name of the contract file', example: 'contracts/2023/09/15/123e4567-e89b-12d3-a456-426614174000.pdf'})
-  objectName: string;
+  @ApiProperty({
+    description: 'Tenant object who detains a property',
+    type: () => TenantResponse,
+  })
+  tenant: TenantResponse;
 
-  @ApiProperty({description: 'Original name of the contract file', example: 'contract.pdf'})
-  originalName: string;
+  @ApiProperty({
+    description: 'additional description about this contract',
+    example: 'Sample content',
+  })
+  description?: string;
 
-  @ApiProperty({description: 'MIME type of the contract file', example: 'application/pdf'})
-  mimeType: string;
+  @ApiProperty({
+    description: 'property associated with this contract',
+    type: () => PropertyResponse,
+  })
+  property: PropertyResponse;
 
-  @ApiProperty({description: 'File extension of the contract', example: 'pdf'})
-  extension: string;
+  @ApiProperty({
+    description: 'Template associated with this contract',
+    type: () => ContractTemplateResponse,
+  })
+  contractTemplate: ContractTemplateResponse;
 
-  @ApiProperty({ description: 'Size of the contract file in bytes', example: 102400 })
-  size: number;
+  @ApiProperty({
+    description: 'Contract URL',
+    example: 'https://.../.../...',
+  })
+  contractUrl: string;
 }

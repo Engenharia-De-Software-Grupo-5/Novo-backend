@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { PropertyDto } from "src/contracts/condominiums/property.dto";
 import { PropertyResponse } from "src/contracts/condominiums/property.response";
 import { PaginatedResult } from "src/contracts/pagination/paginated.result";

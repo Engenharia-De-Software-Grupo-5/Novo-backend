@@ -30,7 +30,7 @@ export class ChargePaymentsRepository {
   }
 
   private isOverdue(dueDate: Date) {
-    return new Date().getTime() > dueDate.getTime();
+    return Date.now() > dueDate.getTime();
   }
 
   /**
@@ -167,6 +167,28 @@ export class ChargePaymentsRepository {
       throw new ConflictException('Charge is canceled.');
     }
 
+    let proofData: any;
+    
+    if (data.proof === null) {
+      proofData = {
+        proofObjectName: null,
+        proofOriginalName: null,
+        proofMimeType: null,
+        proofExtension: null,
+        proofSize: null,
+      };
+    } else if (data.proof) {
+      proofData = {
+        proofObjectName: data.proof.objectName,
+        proofOriginalName: data.proof.originalName,
+        proofMimeType: data.proof.mimeType,
+        proofExtension: data.proof.extension,
+        proofSize: data.proof.size,
+      };
+    } else {
+      proofData = {};
+    }
+
     const updated = await this.prisma.payments.update({
       where: { id: prev.id },
       data: {
@@ -182,23 +204,7 @@ export class ChargePaymentsRepository {
         interestPaid: data.calc.interestPaid,
         totalPaid: data.calc.totalPaid,
 
-        ...(data.proof === null
-          ? {
-              proofObjectName: null,
-              proofOriginalName: null,
-              proofMimeType: null,
-              proofExtension: null,
-              proofSize: null,
-            }
-          : data.proof
-          ? {
-              proofObjectName: data.proof.objectName,
-              proofOriginalName: data.proof.originalName,
-              proofMimeType: data.proof.mimeType,
-              proofExtension: data.proof.extension,
-              proofSize: data.proof.size,
-            }
-          : {}),
+        ...proofData,
       },
     });
 

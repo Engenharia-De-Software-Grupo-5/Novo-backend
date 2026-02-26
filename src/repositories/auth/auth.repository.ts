@@ -4,22 +4,27 @@ import { AuthDataModel } from 'src/contracts/auth/auth-data.model';
 
 @Injectable()
 export class AuthRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  getUserByEmailOrCpf(userLogin: string): Promise<AuthDataModel | null> {
+  getUserByEmail(userLogin: string): Promise<AuthDataModel | null> {
     return this.prisma.users.findFirst({
       where: {
-        OR: [{ email: userLogin }, { cpf: userLogin }],
+        email: userLogin,
         deletedAt: null,
       },
       include: {
-        permission: { select: { id: true, name: true, functionalities: true } },
+        accesses: {
+          select: {
+            permission: { select: { id: true, name: true } },
+            condominium: { select: { id: true, name: true } },
+          },
+        },
       },
-      omit: { permissionsId: true, createdAt: true, updatedAt: true },
+      omit: { createdAt: true, updatedAt: true },
     });
   }
 
-  async getUserByEmail(email: string): Promise<string | undefined> {
+  async getUserIdByEmail(email: string): Promise<string | undefined> {
     return (
       await this.prisma.users.findFirst({
         where: { email, deletedAt: null },

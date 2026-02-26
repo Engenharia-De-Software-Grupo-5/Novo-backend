@@ -60,7 +60,15 @@ export class EmployeeRepository {
     id: true,
     cpf: true,
     name: true,
-    bankData: true,
+    bankData:{
+      select: {
+        id: true,
+        bank: true,
+        accountNumber: true,
+        agency: true,
+        accountType: true,
+      }
+    },
     role: true,
     contractType: true,
     hireDate: true,
@@ -69,7 +77,7 @@ export class EmployeeRepository {
     status: true,
   }
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // getAll, getById, create, update, delete
   getAll(): Promise<EmployeeResponse[]> {
@@ -100,22 +108,38 @@ export class EmployeeRepository {
       },
       update: {
         ...rest,
+        bankData: {
+            upsert: {
+                update: { ...bankData },
+                create: {
+                  bank: bankData.bank,
+                  accountType: bankData.accountType,
+                  accountNumber: bankData.accountNumber,
+                  agency: bankData.agency,
+                }
+            }
+        },
         deletedAt: null,
       },
       create: {
         ...rest,
         bankData: {
-          create: {} 
+          create: {
+            bank: bankData.bank,
+            accountType: bankData.accountType,
+            accountNumber: bankData.accountNumber,
+            agency: bankData.agency,
+          }
         }
       },
       select: this.employeeSelect,
-    });
+    })as Promise<EmployeeResponse>;
   }
 
   update(id: string, dto: EmployeeDto): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
       where: { id: id },
-      data: { ...dto, deletedAt: null},
+      data: { ...dto, bankData: {update: {...dto.bankData}}, deletedAt: null},
       select: this.employeeSelect,
     });
   }
@@ -123,7 +147,7 @@ export class EmployeeRepository {
   updateByCpf(cpf: string, dto: EmployeeDto): Promise<EmployeeResponse> {
     return this.prisma.employees.update({
       where: { cpf },
-      data: { ...dto, deletedAt: null},
+      data: { ...dto, bankData: {update: {...dto.bankData}}, deletedAt: null},
       select: this.employeeSelect,
     });
   }

@@ -33,7 +33,6 @@ describe('AuthService', () => {
 
     service = module.get(AuthService);
     repo = module.get(AuthRepository);
-    jwt = module.get(JwtService);
   });
 
   afterEach(() => jest.clearAllMocks());

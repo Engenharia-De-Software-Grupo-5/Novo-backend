@@ -8,18 +8,18 @@ import { AuthDataModel } from 'src/contracts/auth/auth-data.model';
 @Injectable()
 export class AuthService {
   constructor(
-    private authRepository: AuthRepository,
+    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   login(user: AuthDataModel): LoginResponse {
-    console.log(user);
     const payload: AuthPayload = {
       sub: user.id,
       email: user.email,
-      cpf: user.cpf,
       name: user.name,
-      permission: user.permission.id,
+      isAdminMaster: user.isAdminMaster,
+      permission: user.accesses.map((access) => access.permission),
+      condominium: user.accesses.map((access) => access.condominium),
     };
 
     const jwtToken = this.jwtService.sign(payload);
@@ -35,17 +35,13 @@ export class AuthService {
     recievedPassword: string,
   ): Promise<AuthDataModel> {
     let user: AuthDataModel | null;
-    try {
-      if (!userLogin.includes('@')) userLogin = userLogin.replace(/[.-]/g, '');
+    user = await this.authRepository.getUserByEmail(userLogin);
+    if (user == null)
+      throw new UnauthorizedException('Incorrect email and/or password.');
 
-      user = await this.authRepository.getUserByEmailOrCpf(userLogin);
-      if (user == null) throw new UnauthorizedException();
-
-      const isMatch = await bcrypt.compare(recievedPassword, user.password);
-      if (!isMatch) throw new UnauthorizedException();
-    } catch (error) {
-      throw new UnauthorizedException('Incorrect email/cpf and/or password.');
-    }
+    const isMatch = await bcrypt.compare(recievedPassword, user.password);
+    if (!isMatch)
+      throw new UnauthorizedException('Incorrect email and/or password.');
 
     return { ...user, password: undefined };
   }
@@ -54,7 +50,7 @@ export class AuthService {
     const newPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const user = await this.authRepository.getUserByEmail(email);
+    const user = await this.authRepository.getUserIdByEmail(email);
     if (!user) throw new UnauthorizedException('User not found.');
 
     await this.authRepository.updateUserPassword(user, hashedPassword);

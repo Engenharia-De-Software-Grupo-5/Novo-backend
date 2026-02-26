@@ -71,24 +71,9 @@ export class CondominiumRepository {
         uf: true,
       },
     },
-    properties: {
-      where: { deletedAt: null },
-      select: {
-        id: true,
-        identifier: true,
-        address: true,
-        totalArea: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        propertySituation: true,
-        observations: true,
-      },
-    },
   };
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // getAll, getById, create, update, delete
   getAll(): Promise<CondominiumResponse[]> {

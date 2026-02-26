@@ -82,9 +82,9 @@ describe('EmployeeBenefitsController', () => {
     const updated = { id, ...dto };
     service.update.mockResolvedValue(updated as any);
 
-    const result = await controller.update(employeeId, id, dto as any);
+    const result = await controller.update(id, employeeId, dto as any);
 
-    expect(service.update).toHaveBeenCalledWith(employeeId, id, dto);
+    expect(service.update).toHaveBeenCalledWith(id, employeeId, dto);
     expect(result).toEqual(updated);
   });
 
@@ -94,9 +94,9 @@ describe('EmployeeBenefitsController', () => {
 
     service.remove.mockResolvedValue({ message: 'Registro removido com sucesso.' } as any);
 
-    const result = await controller.remove(employeeId, id);
+    const result = await controller.remove(id, employeeId);
 
-    expect(service.remove).toHaveBeenCalledWith(employeeId, id);
+    expect(service.remove).toHaveBeenCalledWith(id, employeeId);
     expect(result).toBeUndefined();
   });
 

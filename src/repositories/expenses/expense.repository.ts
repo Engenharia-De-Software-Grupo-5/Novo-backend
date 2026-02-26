@@ -17,8 +17,6 @@ type CreateExpenseInput = {
   paymentMethod: ExpensePaymentMethod;
 };
 
-type UpdateExpenseInput = CreateExpenseInput;
-
 @Injectable()
 export class ExpenseRepository {
   async getPaginated(
@@ -138,7 +136,7 @@ export class ExpenseRepository {
     return exp;
   }
 
-  async update(id: string, input: UpdateExpenseInput) {
+  async update(id: string, input: CreateExpenseInput) {
     await this.findByIdOrThrow(id);
 
     const target = await this.assertTargetExists(input);

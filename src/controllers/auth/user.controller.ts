@@ -14,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -24,10 +25,11 @@ import { UserService } from 'src/services/auth/user.service';
 import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { UserPatchDto } from 'src/contracts/auth/user.patch.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
-@Controller('users')
+@Controller('condominiums/:condominiumId/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -41,8 +43,10 @@ export class UserController {
     description: 'Successfully retrieved all users',
     type: [UserResponse],
   })
-  getAll(): Promise<UserResponse[]> {
-    return this.userService.getAll();
+  getAll(
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<UserResponse[]> {
+    return this.userService.getAll(condominiumId);
   }
 
   @Get('paginated')
@@ -56,9 +60,10 @@ export class UserController {
     schema: PaginatedResponseSchema(UserResponse),
   })
   getUserPaginated(
+    @Param('condominiumId') condominiumId: string,
     @Query() data: PaginationDto,
   ): Promise<PaginatedResult<UserResponse>> {
-    return this.userService.getUserPaginated(data);
+    return this.userService.getUserPaginated(data, condominiumId);
   }
 
   @Get(':id')
@@ -71,8 +76,11 @@ export class UserController {
     description: 'Successfully retrieved user details',
     type: UserResponse,
   })
-  getById(@Param('id') userId: string): Promise<UserResponse> {
-    return this.userService.getById(userId);
+  getById(
+    @Param('id') userId: string,
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.userService.getById(userId, condominiumId);
   }
 
   @Post()
@@ -89,11 +97,14 @@ export class UserController {
     description: 'User successfully created',
     type: UserResponse,
   })
-  create(@Body() dto: UserDto): Promise<UserResponse> {
-    return this.userService.create(dto);
+  create(
+    @Body() dto: UserDto,
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.userService.create(dto, condominiumId);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update an existing user',
@@ -101,14 +112,18 @@ export class UserController {
   })
   @ApiBody({
     description: 'Updated user data',
-    type: UserDto,
+    type: UserPatchDto,
   })
   @ApiOkResponse({
     description: 'User successfully updated',
     type: UserResponse,
   })
-  update(@Param('id') id: string, @Body() dto: UserDto): Promise<UserResponse> {
-    return this.userService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UserPatchDto,
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.userService.update(id, dto, condominiumId);
   }
 
   @Put(':id/password')
@@ -142,7 +157,10 @@ export class UserController {
     description: 'User successfully deleted',
     type: UserResponse,
   })
-  delete(@Param('id') userId: string): Promise<UserResponse> {
-    return this.userService.delete(userId);
+  delete(
+    @Param('id') userId: string,
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<UserResponse> {
+    return this.userService.delete(userId, condominiumId);
   }
 }

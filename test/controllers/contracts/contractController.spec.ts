@@ -57,7 +57,7 @@ describe('ContractsController', () => {
   });
 
   it('should throw BadRequestException when upload has no file', async () => {
-    await expect(controller.upload(undefined)).rejects.toBeInstanceOf(
+    await expect(controller.upload()).rejects.toBeInstanceOf(
       BadRequestException,
     );
   });
@@ -65,7 +65,7 @@ describe('ContractsController', () => {
   it('should list contracts (no filter)', async () => {
     service.list.mockResolvedValue([{ id: 'c-1' }] as any);
 
-    const res = await controller.list(undefined);
+    const res = await controller.list();
 
     expect(service.list).toHaveBeenCalledWith(undefined);
     expect(res).toEqual([{ id: 'c-1' }]);
