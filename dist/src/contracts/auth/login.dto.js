@@ -23,7 +23,7 @@ __decorate([
     (0, decorators_1.SkipUppercase)(),
     (0, swagger_1.ApiProperty)({
         description: 'User email or CPF',
-        example: 'admin@example.com or 111.111.111-11',
+        example: 'admin@example.com',
     }),
     __metadata("design:type", String)
 ], LoginDto.prototype, "userLogin", void 0);

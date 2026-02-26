@@ -32,13 +32,14 @@ let AppController = class AppController {
         return this.appService.getHello();
     }
     getMe(user) {
-        const { sub: id, email, name, permission, cpf } = user;
+        const { sub: id, email, name, permission, condominium, isAdminMaster, } = user;
         return {
             id,
             email,
             name,
             permission,
-            cpf,
+            condominium,
+            isAdminMaster,
         };
     }
     async uploadFile(file) {

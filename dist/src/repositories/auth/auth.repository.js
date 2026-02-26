@@ -17,19 +17,24 @@ let AuthRepository = class AuthRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    getUserByEmailOrCpf(userLogin) {
+    getUserByEmail(userLogin) {
         return this.prisma.users.findFirst({
             where: {
-                OR: [{ email: userLogin }, { cpf: userLogin }],
+                email: userLogin,
                 deletedAt: null,
             },
             include: {
-                permission: { select: { id: true, name: true, functionalities: true } },
+                accesses: {
+                    select: {
+                        permission: { select: { id: true, name: true } },
+                        condominium: { select: { id: true, name: true } },
+                    },
+                },
             },
-            omit: { permissionsId: true, createdAt: true, updatedAt: true },
+            omit: { createdAt: true, updatedAt: true },
         });
     }
-    async getUserByEmail(email) {
+    async getUserIdByEmail(email) {
         return (await this.prisma.users.findFirst({
             where: { email, deletedAt: null },
             select: { id: true },

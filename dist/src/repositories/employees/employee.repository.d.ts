@@ -4,9 +4,9 @@ import { EmployeeResponse } from 'src/contracts/employees/employee.response';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 export declare class EmployeeRepository {
-    private prisma;
-    getPaginated(data: PaginationDto): Promise<PaginatedResult<EmployeeResponse>>;
+    private readonly prisma;
     private readonly employeeSelect;
+    getPaginated(data: PaginationDto): Promise<PaginatedResult<EmployeeResponse>>;
     constructor(prisma: PrismaService);
     getAll(): Promise<EmployeeResponse[]>;
     getById(employeeId: string): Promise<EmployeeResponse>;

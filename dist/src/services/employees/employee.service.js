@@ -31,7 +31,7 @@ let EmployeeService = class EmployeeService {
     }
     async create(dto) {
         const employeeExistente = await this.employeeRepository.getByCpf(dto.cpf);
-        if (!!employeeExistente) {
+        if (employeeExistente) {
             throw new common_1.BadRequestException('This CPF already exists in the database.');
         }
         return this.employeeRepository.create(dto);

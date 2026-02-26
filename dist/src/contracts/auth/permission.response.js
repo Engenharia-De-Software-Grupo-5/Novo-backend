@@ -14,7 +14,6 @@ const swagger_1 = require("@nestjs/swagger");
 class PermissionResponse {
     id;
     name;
-    functionalities;
 }
 exports.PermissionResponse = PermissionResponse;
 __decorate([
@@ -31,11 +30,4 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], PermissionResponse.prototype, "name", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'List of screen identifiers this permission grants access to',
-        example: ['contractsGET', 'contractsPOST'],
-    }),
-    __metadata("design:type", Array)
-], PermissionResponse.prototype, "functionalities", void 0);
 //# sourceMappingURL=permission.response.js.map

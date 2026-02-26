@@ -8,6 +8,27 @@ import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 
 @Injectable()
 export class EmployeeRepository {
+  private readonly employeeSelect = {
+    id: true,
+    cpf: true,
+    name: true,
+    bankData: {
+      select: {
+        id: true,
+        bank: true,
+        accountNumber: true,
+        agency: true,
+        accountType: true,
+      }
+    },
+    role: true,
+    contractType: true,
+    hireDate: true,
+    baseSalary: true, 
+    workload: true,      
+    status: true,
+  }
+
   async getPaginated(
     data: PaginationDto,
   ): Promise<PaginatedResult<EmployeeResponse>> {
@@ -30,14 +51,7 @@ export class EmployeeRepository {
       }),
       this.prisma.employees.findMany({
         where,
-        include: {
-          bankData: true,
-        },
-        omit: {
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
+        select: this.employeeSelect,
         take: data.limit,
         skip: (data.page - 1) * data.limit,
         orderBy: { id: 'asc' },
@@ -53,28 +67,6 @@ export class EmployeeRepository {
         limit: data.limit,
       },
     };
-  }
-  
-
-  private readonly employeeSelect = {
-    id: true,
-    cpf: true,
-    name: true,
-    bankData:{
-      select: {
-        id: true,
-        bank: true,
-        accountNumber: true,
-        agency: true,
-        accountType: true,
-      }
-    },
-    role: true,
-    contractType: true,
-    hireDate: true,
-    baseSalary: true, 
-    workload: true,      
-    status: true,
   }
 
   constructor(private readonly prisma: PrismaService) {}
@@ -102,7 +94,7 @@ export class EmployeeRepository {
 
   async create(dto: EmployeeDto): Promise<EmployeeResponse> {
     const { bankData, ...rest } = dto;
-    return this.prisma.employees.upsert({
+    const result = await this.prisma.employees.upsert({
       where: {
         cpf: dto.cpf,
       },
@@ -110,7 +102,12 @@ export class EmployeeRepository {
         ...rest,
         bankData: {
             upsert: {
-                update: { ...bankData },
+                update: { 
+                  bank: bankData.bank,
+                  accountType: bankData.accountType,
+                  accountNumber: bankData.accountNumber,
+                  agency: bankData.agency,
+                },
                 create: {
                   bank: bankData.bank,
                   accountType: bankData.accountType,
@@ -133,7 +130,8 @@ export class EmployeeRepository {
         }
       },
       select: this.employeeSelect,
-    })as Promise<EmployeeResponse>;
+    });
+    return result as unknown as EmployeeResponse;
   }
 
   update(id: string, dto: EmployeeDto): Promise<EmployeeResponse> {

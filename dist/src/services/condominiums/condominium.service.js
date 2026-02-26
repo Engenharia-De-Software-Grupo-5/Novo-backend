@@ -28,7 +28,7 @@ let CondominiumService = class CondominiumService {
     }
     async create(dto) {
         const condominioExistente = await this.condominiumRepository.getByName(dto.name);
-        if (!!condominioExistente) {
+        if (condominioExistente) {
             throw new common_1.BadRequestException('This condominium name already exists in the database.');
         }
         return this.condominiumRepository.create(dto);

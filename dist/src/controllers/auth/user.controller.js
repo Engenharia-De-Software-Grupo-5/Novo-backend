@@ -20,31 +20,32 @@ const user_password_dto_1 = require("../../contracts/auth/user-password.dto");
 const user_service_1 = require("../../services/auth/user.service");
 const swagger_paginated_schema_1 = require("../../contracts/pagination/swagger.paginated.schema");
 const pagination_dto_1 = require("../../contracts/pagination/pagination.dto");
+const user_patch_dto_1 = require("../../contracts/auth/user.patch.dto");
 let UserController = class UserController {
     userService;
     constructor(userService) {
         this.userService = userService;
     }
-    getAll() {
-        return this.userService.getAll();
+    getAll(condominiumId) {
+        return this.userService.getAll(condominiumId);
     }
-    getUserPaginated(data) {
-        return this.userService.getUserPaginated(data);
+    getUserPaginated(condominiumId, data) {
+        return this.userService.getUserPaginated(data, condominiumId);
     }
-    getById(userId) {
-        return this.userService.getById(userId);
+    getById(userId, condominiumId) {
+        return this.userService.getById(userId, condominiumId);
     }
-    create(dto) {
-        return this.userService.create(dto);
+    create(dto, condominiumId) {
+        return this.userService.create(dto, condominiumId);
     }
-    update(id, dto) {
-        return this.userService.update(id, dto);
+    update(id, dto, condominiumId) {
+        return this.userService.update(id, dto, condominiumId);
     }
     updatePassword(id, dto) {
         return this.userService.updatePassword(id, dto);
     }
-    delete(userId) {
-        return this.userService.delete(userId);
+    delete(userId, condominiumId) {
+        return this.userService.delete(userId, condominiumId);
     }
 };
 exports.UserController = UserController;
@@ -59,8 +60,9 @@ __decorate([
         description: 'Successfully retrieved all users',
         type: [auth_1.UserResponse],
     }),
+    __param(0, (0, common_1.Param)('condominiumId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getAll", null);
 __decorate([
@@ -74,9 +76,10 @@ __decorate([
         description: 'Success',
         schema: (0, swagger_paginated_schema_1.PaginatedResponseSchema)(auth_1.UserResponse),
     }),
-    __param(0, (0, common_1.Query)()),
+    __param(0, (0, common_1.Param)('condominiumId')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [pagination_dto_1.PaginationDto]),
+    __metadata("design:paramtypes", [String, pagination_dto_1.PaginationDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUserPaginated", null);
 __decorate([
@@ -91,8 +94,9 @@ __decorate([
         type: auth_1.UserResponse,
     }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)('condominiumId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getById", null);
 __decorate([
@@ -111,12 +115,13 @@ __decorate([
         type: auth_1.UserResponse,
     }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)('condominiumId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [auth_1.UserDto]),
+    __metadata("design:paramtypes", [auth_1.UserDto, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "create", null);
 __decorate([
-    (0, common_1.Put)(':id'),
+    (0, common_1.Patch)(':id'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({
         summary: 'Update an existing user',
@@ -124,7 +129,7 @@ __decorate([
     }),
     (0, swagger_1.ApiBody)({
         description: 'Updated user data',
-        type: auth_1.UserDto,
+        type: user_patch_dto_1.UserPatchDto,
     }),
     (0, swagger_1.ApiOkResponse)({
         description: 'User successfully updated',
@@ -132,8 +137,9 @@ __decorate([
     }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Param)('condominiumId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, auth_1.UserDto]),
+    __metadata("design:paramtypes", [String, user_patch_dto_1.UserPatchDto, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "update", null);
 __decorate([
@@ -169,14 +175,15 @@ __decorate([
         type: auth_1.UserResponse,
     }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)('condominiumId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "delete", null);
 exports.UserController = UserController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.Controller)('users'),
+    (0, common_1.Controller)('condominiums/:condominiumId/users'),
     __metadata("design:paramtypes", [user_service_1.UserService])
 ], UserController);
 //# sourceMappingURL=user.controller.js.map

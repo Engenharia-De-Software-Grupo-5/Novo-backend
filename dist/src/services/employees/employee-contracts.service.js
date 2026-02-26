@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmployeeContractsService = void 0;
 const common_1 = require("@nestjs/common");
-const crypto_1 = require("crypto");
+const node_crypto_1 = require("node:crypto");
 const employee_contracts_repository_1 = require("../../repositories/employees/employee-contracts.repository");
 const minio_client_service_1 = require("../tools/minio-client.service");
 let EmployeeContractsService = class EmployeeContractsService {
@@ -30,7 +30,7 @@ let EmployeeContractsService = class EmployeeContractsService {
         if (extension !== 'pdf') {
             throw new common_1.UnsupportedMediaTypeException('Only PDF files are allowed.');
         }
-        const objectName = `employees/${employeeId}/contracts/${(0, crypto_1.randomUUID)()}.pdf`;
+        const objectName = `employees/${employeeId}/contracts/${(0, node_crypto_1.randomUUID)()}.pdf`;
         const { fileName } = await this.minio.uploadFile(file, this.allowedExtensions, objectName);
         return this.repo.create({
             employeeId,

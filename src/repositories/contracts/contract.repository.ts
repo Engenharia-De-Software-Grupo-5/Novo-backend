@@ -1,12 +1,153 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
+import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 
 @Injectable()
-export class ContractsRepository {
+export class ContractRepository {
+  private readonly selectFields = {
+    id: true,
+    contractUrl: true,
+    description: true,
+    property: {
+      select: {
+        id: true,
+        identifier: true,
+        address: true,
+        unityNumber: true,
+        unityType: true,
+        block: true,
+        floor: true,
+        totalArea: true,
+        propertySituation: true,
+        observations: true,
+        condominium: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            address: {
+              select: {
+                id: true,
+                zip: true,
+                neighborhood: true,
+                city: true,
+                complement: true,
+                number: true,
+                street: true,
+                uf: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    contractTemplate: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        template: true,
+      },
+    },
+    tenant: {
+      select: {
+        id: true,
+        name: true,
+        cpf: true,
+        email: true,
+        birthDate: true,
+        maritalStatus: true,
+        monthlyIncome: true,
+        primaryPhone: true,
+        secondaryPhone: true,
+        status: true,
+        condominiumId: true,
+        spouse: {
+          select: {
+            id: true,
+            name: true,
+            birthDate: true,
+            cpf: true,
+            profession: true,
+            monthlyIncome: true,
+          },
+        },
+        professionalInfo: {
+          select: {
+            id: true,
+            companyName: true,
+            companyAddress: {
+              select: {
+                id: true,
+                street: true,
+                number: true,
+                city: true,
+                zip: true,
+                uf: true,
+                neighborhood: true,
+                complement: true,
+              },
+            },
+            companyPhone: true,
+            position: true,
+            monthsWorking: true,
+          },
+        },
+        additionalResidents: {
+          select: {
+            id: true,
+            name: true,
+            birthDate: true,
+            relationship: true,
+          },
+        },
+        emergencyContacts: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            relationship: true,
+          },
+        },
+        documents: {
+          select: {
+            id: true,
+            cpfFileId: true,
+            incomeProofId: true,
+          },
+        },
+        address: {
+          select: {
+            id: true,
+            street: true,
+            neighborhood: true,
+            number: true,
+            city: true,
+            zip: true,
+            uf: true,
+            complement: true,
+          },
+        },
+        bankingInfo: {
+          select: {
+            id: true,
+            bank: true,
+            accountNumber: true,
+            agency: true,
+            accountType: true,
+          },
+        },
+      },
+    },
+    content: true
+  };
+
+  constructor(private prisma: PrismaService) { }
+
   async getPaginated(
     data: PaginationDto,
   ): Promise<PaginatedResult<ContractResponse>> {
@@ -29,11 +170,7 @@ export class ContractsRepository {
       }),
       this.prisma.contracts.findMany({
         where,
-        omit: {
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
+        select: this.selectFields,
         take: data.limit,
         skip: (data.page - 1) * data.limit,
         orderBy: { id: 'asc' },
@@ -50,9 +187,6 @@ export class ContractsRepository {
       },
     };
   }
-  constructor(private readonly prisma: PrismaService) {}
-
-  constructor(private prisma: PrismaService) { }
 
   // getAll, getById, create, update, delete
   getAll(): Promise<ContractResponse[]> {

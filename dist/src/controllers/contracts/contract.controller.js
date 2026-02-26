@@ -12,89 +12,62 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContractsController = void 0;
+exports.ContractController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const roles_guard_1 = require("../../common/guards/roles.guard");
+const contract_dto_1 = require("../../contracts/contracts/contract.dto");
 const contract_response_1 = require("../../contracts/contracts/contract.response");
+const preview_contract_dto_1 = require("../../contracts/contracts/preview.contract.dto");
 const pagination_dto_1 = require("../../contracts/pagination/pagination.dto");
 const swagger_paginated_schema_1 = require("../../contracts/pagination/swagger.paginated.schema");
 const contract_service_1 = require("../../services/contracts/contract.service");
-let ContractsController = class ContractsController {
-    service;
-    constructor(service) {
-        this.service = service;
+const preview_contract_service_1 = require("../../services/contracts/preview.contract.service");
+let ContractController = class ContractController {
+    contractService;
+    previewContractService;
+    constructor(contractService, previewContractService) {
+        this.contractService = contractService;
+        this.previewContractService = previewContractService;
     }
-    async upload(file) {
-        if (!file)
-            throw new common_1.BadRequestException('Uploaded file is required.');
-        return this.service.upload(file);
-    }
-    list(tenantCpf) {
-        return this.service.list(tenantCpf);
+    getAll() {
+        return this.contractService.getAll();
     }
     getPaginated(data) {
-        return this.service.listPaginated(data);
+        return this.contractService.listPaginated(data);
     }
-    findOne(id) {
-        return this.service.findOne(id);
+    getById(ContratoId) {
+        return this.contractService.getById(ContratoId);
     }
-    download(id) {
-        return this.service.getDownloadUrl(id);
+    async createWithFile(dto, file) {
+        return this.contractService.create(dto, file);
     }
-    async remove(id) {
-        await this.service.remove(id);
+    update(id, dto) {
+        return this.contractService.update(id, dto);
     }
-    linkLease(id, tenantId, propertyId) {
-        return this.service.linkLease(id, propertyId, tenantId);
+    delete(ContractId) {
+        return this.contractService.delete(ContractId);
     }
-    async unlinkLease(id, tenantId, propertyId) {
-        await this.service.unlinkLease(id, propertyId, tenantId);
-    }
-    listByTenant(tenantId) {
-        return this.service.listByTenant(tenantId);
-    }
-    listByProperty(propertyId) {
-        return this.service.listByProperty(propertyId);
+    async preview(dto) {
+        return this.previewContractService.execute(dto);
     }
 };
-exports.ContractsController = ContractsController;
-__decorate([
-    (0, common_1.Post)(),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiOperation)({ summary: 'Upload a contract (PDF)' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['file'],
-            properties: { file: { type: 'string', format: 'binary' } },
-        },
-    }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.UploadedFile)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], ContractsController.prototype, "upload", null);
+exports.ContractController = ContractController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List contracts' }),
-    (0, swagger_1.ApiQuery)({
-        name: 'tenantCpf',
-        required: false,
-        type: String,
-        description: 'Filter contracts by tenant CPF (11 digits)',
-        example: '11111111111',
-    }),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.Query)('tenantCpf')),
+    (0, swagger_1.ApiOperation)({
+        summary: 'List all contracts',
+        description: 'Retrieve all contracts registered in the system.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Successfully retrieved all contracts',
+        type: [contract_response_1.ContractResponse],
+    }),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ContractsController.prototype, "list", null);
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ContractController.prototype, "getAll", null);
 __decorate([
     (0, common_1.Get)('paginated'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
@@ -110,99 +83,106 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_dto_1.PaginationDto]),
     __metadata("design:returntype", Promise)
-], ContractsController.prototype, "getPaginated", null);
+], ContractController.prototype, "getPaginated", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get contract details (includes presigned url)' }),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get contract by ID',
+        description: 'Retrieve details of a specific contract identified by its ID.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Successfully retrieved contract details',
+        type: contract_response_1.ContractResponse,
+    }),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ContractsController.prototype, "findOne", null);
+    __metadata("design:returntype", Promise)
+], ContractController.prototype, "getById", null);
 __decorate([
-    (0, common_1.Get)(':id/download'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get download URL (presigned)' }),
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create contract with (optional) PDF upload' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    nullable: true,
+                },
+                tenantId: { type: 'string' },
+                propertyId: { type: 'string' },
+                contractTemplateId: { type: 'string' },
+                description: { type: 'string' },
+            },
+            required: ['tenantId', 'propertyId', 'contractTemplateId'],
+        },
+    }),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ContractsController.prototype, "download", null);
+    __metadata("design:paramtypes", [contract_dto_1.ContractDto, Object]),
+    __metadata("design:returntype", Promise)
+], ContractController.prototype, "createWithFile", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Update an existing contract',
+        description: 'Update the data of an existing contract identified by its ID.',
+    }),
+    (0, swagger_1.ApiBody)({
+        description: 'Updated contract data',
+        type: contract_dto_1.ContractDto,
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'contract successfully updated',
+        type: contract_response_1.ContractResponse,
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, contract_dto_1.ContractDto]),
+    __metadata("design:returntype", Promise)
+], ContractController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Delete contract' }),
-    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Delete a contract',
+        description: 'Perform a soft delete of a contract identified by its ID.',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'contract successfully deleted',
+        type: contract_response_1.ContractResponse,
+    }),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], ContractsController.prototype, "remove", null);
+], ContractController.prototype, "delete", null);
 __decorate([
-    (0, common_1.Post)(':id/leases'),
-    (0, swagger_1.ApiOperation)({ summary: 'Link contract to a lease (tenant + property)' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['tenantId', 'propertyId'],
-            properties: {
-                tenantId: { type: 'string', format: 'uuid' },
-                propertyId: { type: 'string', format: 'uuid' },
-            },
-        },
-    }),
+    (0, common_1.Post)('preview'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
-    __param(1, (0, common_1.Body)('tenantId', new common_1.ParseUUIDPipe())),
-    __param(2, (0, common_1.Body)('propertyId', new common_1.ParseUUIDPipe())),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", void 0)
-], ContractsController.prototype, "linkLease", null);
-__decorate([
-    (0, common_1.Delete)(':id/leases'),
-    (0, swagger_1.ApiOperation)({ summary: 'Unlink contract from a lease (tenant + property)' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['tenantId', 'propertyId'],
-            properties: {
-                tenantId: { type: 'string', format: 'uuid' },
-                propertyId: { type: 'string', format: 'uuid' },
-            },
-        },
+    (0, swagger_1.ApiOperation)({
+        summary: 'Preview contract before creation',
+        description: 'Generate a temporary HTML preview of the contract',
     }),
-    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
-    __param(1, (0, common_1.Body)('tenantId', new common_1.ParseUUIDPipe())),
-    __param(2, (0, common_1.Body)('propertyId', new common_1.ParseUUIDPipe())),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [preview_contract_dto_1.PreviewContractDto]),
     __metadata("design:returntype", Promise)
-], ContractsController.prototype, "unlinkLease", null);
-__decorate([
-    (0, common_1.Get)('/by-tenant/:tenantId'),
-    (0, swagger_1.ApiOperation)({ summary: 'List contracts linked to tenant' }),
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.Param)('tenantId', new common_1.ParseUUIDPipe())),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ContractsController.prototype, "listByTenant", null);
-__decorate([
-    (0, common_1.Get)('/by-property/:propertyId'),
-    (0, swagger_1.ApiOperation)({ summary: 'List contracts linked to property (via leases)' }),
-    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    __param(0, (0, common_1.Param)('propertyId', new common_1.ParseUUIDPipe())),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ContractsController.prototype, "listByProperty", null);
-exports.ContractsController = ContractsController = __decorate([
+], ContractController.prototype, "preview", null);
+exports.ContractController = ContractController = __decorate([
     (0, swagger_1.ApiTags)('Contracts'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
     (0, common_1.Controller)('contracts'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [contract_service_1.ContractsService])
-], ContractsController);
+    __metadata("design:paramtypes", [contract_service_1.ContractService,
+        preview_contract_service_1.PreviewContractService])
+], ContractController);
 //# sourceMappingURL=contract.controller.js.map

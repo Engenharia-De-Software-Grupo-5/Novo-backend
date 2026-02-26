@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var AuthController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const swagger_1 = require("@nestjs/swagger");
@@ -22,9 +23,10 @@ const auth_1 = require("../../contracts/auth");
 const auth_request_model_1 = require("../../contracts/auth/auth-request.model");
 const reset_password_dto_1 = require("../../contracts/auth/reset-password.dto");
 const mail_service_1 = require("../../services/tools/mail.service");
-let AuthController = class AuthController {
+let AuthController = AuthController_1 = class AuthController {
     authService;
     mailService;
+    logger = new common_1.Logger(AuthController_1.name);
     constructor(authService, mailService) {
         this.authService = authService;
         this.mailService = mailService;
@@ -38,6 +40,7 @@ let AuthController = class AuthController {
             this.mailService.sendMail(authResetPasswordDto.email, 'Password Reset', `Your new password is: ${password}`);
         }
         catch (error) {
+            this.logger.error(`Password reset failed for email: ${authResetPasswordDto.email}`, error);
             throw new common_1.HttpException('User not found.', common_1.HttpStatus.UNAUTHORIZED);
         }
     }
@@ -85,7 +88,7 @@ __decorate([
     __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "passwordResetEmail", null);
-exports.AuthController = AuthController = __decorate([
+exports.AuthController = AuthController = AuthController_1 = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

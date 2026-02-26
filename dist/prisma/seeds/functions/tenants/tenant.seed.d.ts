@@ -3,14 +3,14 @@ export declare function seedTenants(prisma: PrismaClient): Promise<{
     tenantA: {
         id: string;
         email: string;
-        cpf: string;
         name: string;
-        status: import(".prisma/client").$Enums.TenantStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.TenantStatus;
         addressId: string;
         condominiumId: string;
+        cpf: string;
         birthDate: Date;
         maritalStatus: string;
         monthlyIncome: number;
@@ -20,14 +20,14 @@ export declare function seedTenants(prisma: PrismaClient): Promise<{
     tenantB: {
         id: string;
         email: string;
-        cpf: string;
         name: string;
-        status: import(".prisma/client").$Enums.TenantStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.TenantStatus;
         addressId: string;
         condominiumId: string;
+        cpf: string;
         birthDate: Date;
         maritalStatus: string;
         monthlyIncome: number;

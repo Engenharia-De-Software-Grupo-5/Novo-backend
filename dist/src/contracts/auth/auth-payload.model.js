@@ -14,12 +14,15 @@ const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const decorators_1 = require("../../common/decorators");
+const permission_response_1 = require("./permission.response");
+const auth_data_model_1 = require("./auth-data.model");
 class AuthPayload {
     sub;
     email;
-    cpf;
     name;
+    isAdminMaster;
     permission;
+    condominium;
     iat;
     exp;
 }
@@ -45,30 +48,37 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, decorators_1.SkipUppercase)(),
     (0, swagger_1.ApiProperty)({
-        description: 'User cpf',
-        example: '11111111111',
-    }),
-    __metadata("design:type", String)
-], AuthPayload.prototype, "cpf", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    (0, decorators_1.SkipUppercase)(),
-    (0, swagger_1.ApiProperty)({
         description: 'User name',
         example: 'john123',
     }),
     __metadata("design:type", String)
 ], AuthPayload.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Define se o usuário é um administrador master',
+        example: false,
+    }),
+    __metadata("design:type", Boolean)
+], AuthPayload.prototype, "isAdminMaster", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     (0, decorators_1.SkipUppercase)(),
     (0, swagger_1.ApiProperty)({
-        description: 'Permission id',
-        example: 'c376f0d2-8eaa-4f88-9f2f-52f8dff8794a',
+        description: 'Permissions',
+        type: [permission_response_1.PermissionResponse],
     }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], AuthPayload.prototype, "permission", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, decorators_1.SkipUppercase)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Condominiums',
+        type: [auth_data_model_1.CondominiumSimpleResponse],
+    }),
+    __metadata("design:type", Array)
+], AuthPayload.prototype, "condominium", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),

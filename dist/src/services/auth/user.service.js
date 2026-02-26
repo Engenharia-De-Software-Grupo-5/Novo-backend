@@ -21,29 +21,37 @@ let UserService = class UserService {
         this.userRepository = userRepository;
         this.mailService = mailService;
     }
-    getAll() {
-        return this.userRepository.getAll();
+    getAll(condominiumId) {
+        return this.userRepository.getAll(condominiumId);
     }
-    getById(userId) {
+    getById(userId, condominiumId) {
         return this.userRepository.getById(userId);
     }
-    getUserPaginated(data) {
+    getUserPaginated(data, condominiumId) {
         return this.userRepository.getUserPaginated(data);
     }
-    async create(userDto) {
-        const newPassword = Math.random().toString(36).slice(-8);
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const result = await this.userRepository.create(userDto, hashedPassword);
-        try {
-            this.mailService.sendMail(userDto.email, 'Credentials for your new account', `To login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`);
+    async create(userDto, condominiumId) {
+        const existingUser = await this.userRepository.findByEmail(userDto.email);
+        if (existingUser) {
+            if (existingUser.accesses.some((access) => access.condominium.id === condominiumId)) {
+                return this.userRepository.update(existingUser.id, userDto, condominiumId);
+            }
         }
-        catch (error) {
-            throw new common_1.HttpException('Failed to send email.', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        else {
+            const newPassword = Math.random().toString(36).slice(-8);
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            const result = await this.userRepository.create(userDto, hashedPassword, condominiumId);
+            try {
+                this.mailService.sendMail(userDto.email, 'Credentials for your new account', `${userDto.message}\n\nTo login, use this email: ${userDto.email}\nYour new password is: ${newPassword}\nPlease change it after your first login.`);
+            }
+            catch (error) {
+                throw new common_1.HttpException('Failed to send email.', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return result;
         }
-        return result;
     }
-    update(userId, userDto) {
-        return this.userRepository.update(userId, userDto);
+    update(userId, userDto, condominiumId) {
+        return this.userRepository.update(userId, userDto, condominiumId);
     }
     async updatePassword(userId, userPasswordDto) {
         const user = await this.userRepository.getByIdWithPassword(userId);
@@ -55,8 +63,8 @@ let UserService = class UserService {
         const newPassword = await bcrypt.hash(userPasswordDto.newPassword, 10);
         return this.userRepository.updatePassword(userId, newPassword);
     }
-    delete(userId) {
-        return this.userRepository.delete(userId);
+    delete(userId, condominiumId) {
+        return this.userRepository.delete(userId, condominiumId);
     }
 };
 exports.UserService = UserService;

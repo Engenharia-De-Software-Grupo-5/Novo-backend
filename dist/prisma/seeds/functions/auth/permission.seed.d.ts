@@ -8,7 +8,15 @@ export declare function seedPermissions(prisma: PrismaClient): Promise<{
         deletedAt: Date | null;
         functionalities: string[];
     };
-    permissionContractManager: {
+    permissionFinanceiro: {
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+        functionalities: string[];
+    };
+    permissionRH: {
         id: string;
         name: string;
         createdAt: Date;

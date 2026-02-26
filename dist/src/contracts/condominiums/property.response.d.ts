@@ -1,4 +1,5 @@
 import { PropertySituation, UnityType } from "@prisma/client";
+import { CondominiumResponse } from "./condominium.response";
 export declare class PropertyResponse {
     id: string;
     identifier: string;
@@ -10,4 +11,5 @@ export declare class PropertyResponse {
     totalArea?: number;
     propertySituation: PropertySituation;
     observations?: string;
+    condominium: CondominiumResponse;
 }

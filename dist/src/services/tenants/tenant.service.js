@@ -39,7 +39,7 @@ let TenantService = class TenantService {
     }
     async create(dto) {
         const tenantExistente = await this.tenantRepository.getByCpf(dto.cpf);
-        if (!!tenantExistente) {
+        if (tenantExistente) {
             throw new common_1.BadRequestException('This tenant CPF already exists in the database.');
         }
         return this.tenantRepository.create(dto);

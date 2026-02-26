@@ -6,6 +6,7 @@ import { MailService } from 'src/services/tools/mail.service';
 export declare class AuthController {
     private readonly authService;
     private readonly mailService;
+    private readonly logger;
     constructor(authService: AuthService, mailService: MailService);
     login(req: AuthRequestModel): LoginResponse;
     passwordResetEmail(authResetPasswordDto: ResetPasswordDto): Promise<void>;

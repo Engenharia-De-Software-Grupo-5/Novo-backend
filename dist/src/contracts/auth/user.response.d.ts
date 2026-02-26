@@ -1,10 +1,7 @@
-import { UserStatus } from '@prisma/client';
-import { PermissionResponse } from './permission.response';
+import { AccessData } from './auth-data.model';
 export declare class UserResponse {
     id: string;
     name: string;
     email: string;
-    cpf?: string;
-    status: UserStatus;
-    permission: PermissionResponse;
+    accesses: AccessData[];
 }

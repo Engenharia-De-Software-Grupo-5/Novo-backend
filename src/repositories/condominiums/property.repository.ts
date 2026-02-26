@@ -8,6 +8,30 @@ import { buildDynamicWhere } from "src/contracts/pagination/prisma.utils";
 
 @Injectable()
 export class PropertyRepository {
+
+  private readonly propertySelect = {
+    id: true,
+    identifier: true,
+    name: true,
+    description: true,
+    address: true,
+    unityNumber: true,
+    unityType: true,
+    block: true,
+    floor: true,
+    totalArea: true,
+    propertySituation: true,
+    observations: true,
+    condominium: {
+      select: {
+        id: true,
+        name: true,
+        cnpj: true,
+        address: true,
+      }
+    },
+  };
+
   async getPaginated(
     condominiumId: string,
     data: PaginationDto,
@@ -31,11 +55,7 @@ export class PropertyRepository {
       }),
       this.prisma.properties.findMany({
         where,
-        omit: {
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
+        select: this.propertySelect,
         take: data.limit,
         skip: (data.page - 1) * data.limit,
         orderBy: { identifier: 'asc' },
@@ -53,25 +73,6 @@ export class PropertyRepository {
     };
   }
   constructor(private prisma: PrismaService) {}
-    private readonly propertySelect = {
-        id: true,
-        name: true,
-        description: true,
-        address: {
-          select: {
-            id: true,
-            zip: true,
-            neighborhood: true,
-            city: true,
-            complement: true,
-            number: true,
-            street: true,
-            uf: true,
-          },
-        },
-      },
-    },
-  };
 
   // getAll, getById, create, update, delete
   getAll(condominiumId: string): Promise<PropertyResponse[]> {

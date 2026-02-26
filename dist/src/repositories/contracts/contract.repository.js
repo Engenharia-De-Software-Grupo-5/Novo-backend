@@ -9,12 +9,152 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContractsRepository = void 0;
+exports.ContractRepository = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/database/prisma.service");
 const prisma_utils_1 = require("../../contracts/pagination/prisma.utils");
-let ContractsRepository = class ContractsRepository {
+let ContractRepository = class ContractRepository {
     prisma;
+    selectFields = {
+        id: true,
+        contractUrl: true,
+        description: true,
+        property: {
+            select: {
+                id: true,
+                identifier: true,
+                address: true,
+                unityNumber: true,
+                unityType: true,
+                block: true,
+                floor: true,
+                totalArea: true,
+                propertySituation: true,
+                observations: true,
+                condominium: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        address: {
+                            select: {
+                                id: true,
+                                zip: true,
+                                neighborhood: true,
+                                city: true,
+                                complement: true,
+                                number: true,
+                                street: true,
+                                uf: true,
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        contractTemplate: {
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                template: true,
+            },
+        },
+        tenant: {
+            select: {
+                id: true,
+                name: true,
+                cpf: true,
+                email: true,
+                birthDate: true,
+                maritalStatus: true,
+                monthlyIncome: true,
+                primaryPhone: true,
+                secondaryPhone: true,
+                status: true,
+                condominiumId: true,
+                spouse: {
+                    select: {
+                        id: true,
+                        name: true,
+                        birthDate: true,
+                        cpf: true,
+                        profession: true,
+                        monthlyIncome: true,
+                    },
+                },
+                professionalInfo: {
+                    select: {
+                        id: true,
+                        companyName: true,
+                        companyAddress: {
+                            select: {
+                                id: true,
+                                street: true,
+                                number: true,
+                                city: true,
+                                zip: true,
+                                uf: true,
+                                neighborhood: true,
+                                complement: true,
+                            },
+                        },
+                        companyPhone: true,
+                        position: true,
+                        monthsWorking: true,
+                    },
+                },
+                additionalResidents: {
+                    select: {
+                        id: true,
+                        name: true,
+                        birthDate: true,
+                        relationship: true,
+                    },
+                },
+                emergencyContacts: {
+                    select: {
+                        id: true,
+                        name: true,
+                        phone: true,
+                        relationship: true,
+                    },
+                },
+                documents: {
+                    select: {
+                        id: true,
+                        cpfFileId: true,
+                        incomeProofId: true,
+                    },
+                },
+                address: {
+                    select: {
+                        id: true,
+                        street: true,
+                        neighborhood: true,
+                        number: true,
+                        city: true,
+                        zip: true,
+                        uf: true,
+                        complement: true,
+                    },
+                },
+                bankingInfo: {
+                    select: {
+                        id: true,
+                        bank: true,
+                        accountNumber: true,
+                        agency: true,
+                        accountType: true,
+                    },
+                },
+            },
+        },
+        content: true
+    };
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
     async getPaginated(data) {
         const where = (0, prisma_utils_1.buildDynamicWhere)(data, { deletedAt: null }, {
             enumFields: ['status'],
@@ -30,11 +170,7 @@ let ContractsRepository = class ContractsRepository {
             }),
             this.prisma.contracts.findMany({
                 where,
-                omit: {
-                    createdAt: true,
-                    updatedAt: true,
-                    deletedAt: true,
-                },
+                select: this.selectFields,
                 take: data.limit,
                 skip: (data.page - 1) * data.limit,
                 orderBy: { id: 'asc' },
@@ -50,106 +186,74 @@ let ContractsRepository = class ContractsRepository {
             },
         };
     }
-    constructor(prisma) {
-        this.prisma = prisma;
+    getAll() {
+        return this.prisma.contracts.findMany({
+            where: { deletedAt: null },
+            select: this.selectFields,
+        });
     }
     getById(contractId) {
-        return this.prisma.contracts.findFirst({
+        return this.prisma.contracts.findUnique({
             where: { id: contractId, deletedAt: null },
+            select: this.selectFields,
         });
     }
-    async assertContract(contractId) {
-        const c = await this.getById(contractId);
-        if (!c)
-            throw new common_1.NotFoundException('Contract not found.');
-        return c;
-    }
-    create(data) {
-        return this.prisma.contracts.create({ data });
-    }
-    list(params) {
-        return this.prisma.contracts.findMany({
+    checkIfHas(dto) {
+        return this.prisma.contracts.findUnique({
             where: {
-                deletedAt: null,
-                ...(params?.tenantCpf
-                    ? {
-                        leases: {
-                            some: {
-                                tenant: { cpf: params.tenantCpf, deletedAt: null },
-                            },
-                        },
-                    }
-                    : {}),
+                tenantId_propertyId: {
+                    tenantId: dto.tenantId,
+                    propertyId: dto.propertyId,
+                },
             },
-            orderBy: { createdAt: 'desc' },
+            select: this.selectFields,
         });
     }
-    async softDelete(contractId) {
-        await this.assertContract(contractId);
+    create(dto) {
+        const { file, ...dadosDoContrato } = dto;
+        return this.prisma.contracts.create({
+            data: { ...dadosDoContrato },
+            select: this.selectFields,
+        });
+    }
+    update(id, dto) {
+        const { file, ...dadosDoContrato } = dto;
         return this.prisma.contracts.update({
-            where: { id: contractId },
+            where: { id: id },
+            data: { ...dadosDoContrato },
+            select: this.selectFields,
+        });
+    }
+    updateUrl(id, url) {
+        return this.prisma.contracts.update({
+            where: { id: id },
+            data: { contractUrl: url },
+            select: this.selectFields,
+        });
+    }
+    delete(contratoId) {
+        return this.prisma.contracts.update({
+            where: { id: contratoId },
             data: { deletedAt: new Date() },
+            select: this.selectFields,
         });
-    }
-    async assertProperty(propertyId) {
-        const p = await this.prisma.properties.findFirst({
-            where: { id: propertyId, deletedAt: null },
-            select: { id: true },
-        });
-        if (!p)
-            throw new common_1.NotFoundException('Property not found.');
-        return p;
-    }
-    async assertTenant(tenantId) {
-        const t = await this.prisma.tenants.findFirst({
-            where: { id: tenantId, deletedAt: null },
-            select: { id: true },
-        });
-        if (!t)
-            throw new common_1.NotFoundException('Tenant not found.');
-        return t;
-    }
-    async linkLease(contractId, propertyId, tenantId) {
-        await this.assertContract(contractId);
-        await this.assertProperty(propertyId);
-        await this.assertTenant(tenantId);
-        try {
-            return await this.prisma.propertyTenantContractLinks.create({
-                data: { contractId, propertyId, tenantId },
-            });
-        }
-        catch (e) {
-            throw new common_1.ConflictException('Lease link already exists.');
-        }
-    }
-    async unlinkLease(contractId, propertyId, tenantId) {
-        await this.assertContract(contractId);
-        await this.assertProperty(propertyId);
-        await this.assertTenant(tenantId);
-        const link = await this.prisma.propertyTenantContractLinks.findFirst({
-            where: { contractId, propertyId, tenantId },
-            select: { id: true },
-        });
-        if (!link)
-            throw new common_1.NotFoundException('Lease link not found.');
-        return this.prisma.propertyTenantContractLinks.delete({ where: { id: link.id } });
     }
     listByTenant(tenantId) {
         return this.prisma.contracts.findMany({
-            where: { deletedAt: null, leases: { some: { tenantId } } },
+            where: { deletedAt: null, tenant: { id: tenantId } },
             orderBy: { createdAt: 'desc' },
         });
     }
     listByProperty(propertyId) {
         return this.prisma.contracts.findMany({
-            where: { deletedAt: null, leases: { some: { propertyId } } },
+            where: { deletedAt: null, property: { id: propertyId } },
             orderBy: { createdAt: 'desc' },
         });
     }
 };
-exports.ContractsRepository = ContractsRepository;
-exports.ContractsRepository = ContractsRepository = __decorate([
+exports.ContractRepository = ContractRepository;
+exports.ContractRepository = ContractRepository = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
-], ContractsRepository);
+], ContractRepository);
 //# sourceMappingURL=contract.repository.js.map

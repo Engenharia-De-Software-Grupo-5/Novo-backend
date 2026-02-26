@@ -11,12 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthJwtResponse = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const permission_response_1 = require("./permission.response");
+const auth_data_model_1 = require("./auth-data.model");
 let AuthJwtResponse = class AuthJwtResponse {
     id;
     email;
-    cpf;
     name;
+    isAdminMaster;
     permission;
+    condominium;
 };
 exports.AuthJwtResponse = AuthJwtResponse;
 __decorate([
@@ -35,13 +38,6 @@ __decorate([
 ], AuthJwtResponse.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'User cpf',
-        example: '11111111111',
-    }),
-    __metadata("design:type", String)
-], AuthJwtResponse.prototype, "cpf", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
         description: 'User name',
         example: 'john123',
     }),
@@ -49,11 +45,25 @@ __decorate([
 ], AuthJwtResponse.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Permission name',
-        example: 'ADMIN',
+        description: 'Define se o usuário é um administrador master',
+        example: false,
     }),
-    __metadata("design:type", String)
+    __metadata("design:type", Boolean)
+], AuthJwtResponse.prototype, "isAdminMaster", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Permission name',
+        type: [permission_response_1.PermissionResponse],
+    }),
+    __metadata("design:type", Array)
 ], AuthJwtResponse.prototype, "permission", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Permission name',
+        type: [auth_data_model_1.CondominiumSimpleResponse],
+    }),
+    __metadata("design:type", Array)
+], AuthJwtResponse.prototype, "condominium", void 0);
 exports.AuthJwtResponse = AuthJwtResponse = __decorate([
     (0, swagger_1.ApiSchema)()
 ], AuthJwtResponse);

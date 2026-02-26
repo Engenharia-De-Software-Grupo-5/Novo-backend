@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PropertyResponse = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const client_1 = require("@prisma/client");
+const condominium_response_1 = require("./condominium.response");
 class PropertyResponse {
     id;
     identifier;
@@ -23,6 +24,7 @@ class PropertyResponse {
     totalArea;
     propertySituation;
     observations;
+    condominium;
 }
 exports.PropertyResponse = PropertyResponse;
 __decorate([
@@ -95,4 +97,11 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], PropertyResponse.prototype, "observations", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Additional observations about the property',
+        example: 'This is a corner unit with great natural light.',
+    }),
+    __metadata("design:type", condominium_response_1.CondominiumResponse)
+], PropertyResponse.prototype, "condominium", void 0);
 //# sourceMappingURL=property.response.js.map

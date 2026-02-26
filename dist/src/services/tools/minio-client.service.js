@@ -89,6 +89,17 @@ let MinioClientService = MinioClientService_1 = class MinioClientService {
             throw new Error(`Não foi possível remover o arquivo: ${error.message}`);
         }
     }
+    async uploadFileBuffer(buffer, fileName, mimeType) {
+        const metaData = { 'Content-Type': mimeType };
+        try {
+            await this.minio.client.putObject(this.bucketName, fileName, buffer, buffer.length, metaData);
+            return { fileName };
+        }
+        catch (error) {
+            this.logger.error(error);
+            throw new common_1.InternalServerErrorException('Falha no upload do arquivo para o MinIO.');
+        }
+    }
 };
 exports.MinioClientService = MinioClientService;
 exports.MinioClientService = MinioClientService = MinioClientService_1 = __decorate([

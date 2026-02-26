@@ -37,18 +37,8 @@ let RolesGuard = class RolesGuard {
         if (!user) {
             throw new common_1.ForbiddenException('Token inválido.');
         }
-        if (!user.permission) {
+        if (user.condominium.length == 0) {
             throw new common_1.ForbiddenException('Token sem permissão definida.');
-        }
-        const permission = await this.prisma.permissions.findUnique({
-            where: { id: user.permission },
-        });
-        if (!permission || !permission.functionalities) {
-            throw new common_1.ForbiddenException('Permissão inválida.');
-        }
-        const hasAccess = requiredFunctionalities.some((functionalitiy) => permission.functionalities.includes(functionalitiy));
-        if (!hasAccess && !permission.functionalities.includes('ALL')) {
-            throw new common_1.ForbiddenException('Você não tem acesso a esta funcionalidade.');
         }
         return true;
     }

@@ -10,10 +10,10 @@ export declare class ChargesService {
     constructor(repo: ChargesRepository);
     create(dto: ChargeDto): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.ChargeStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.ChargeStatus;
         propertyId: string;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         tenantId: string;
@@ -29,10 +29,10 @@ export declare class ChargesService {
         status?: ChargeStatus;
     }): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.ChargeStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.ChargeStatus;
         propertyId: string;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         tenantId: string;
@@ -66,10 +66,10 @@ export declare class ChargesService {
         }[];
     } & {
         id: string;
-        status: import(".prisma/client").$Enums.ChargeStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.ChargeStatus;
         propertyId: string;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         tenantId: string;
@@ -80,10 +80,10 @@ export declare class ChargesService {
     }>;
     update(chargeId: string, dto: UpdateChargeDto): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.ChargeStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.ChargeStatus;
         propertyId: string;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         tenantId: string;
@@ -94,10 +94,10 @@ export declare class ChargesService {
     }>;
     cancel(chargeId: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.ChargeStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.ChargeStatus;
         propertyId: string;
         paymentMethod: import(".prisma/client").$Enums.PaymentMethod;
         tenantId: string;

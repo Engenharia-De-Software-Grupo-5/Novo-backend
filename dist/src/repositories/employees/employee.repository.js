@@ -15,6 +15,26 @@ const prisma_service_1 = require("../../common/database/prisma.service");
 const prisma_utils_1 = require("../../contracts/pagination/prisma.utils");
 let EmployeeRepository = class EmployeeRepository {
     prisma;
+    employeeSelect = {
+        id: true,
+        cpf: true,
+        name: true,
+        bankData: {
+            select: {
+                id: true,
+                bank: true,
+                accountNumber: true,
+                agency: true,
+                accountType: true,
+            }
+        },
+        role: true,
+        contractType: true,
+        hireDate: true,
+        baseSalary: true,
+        workload: true,
+        status: true,
+    };
     async getPaginated(data) {
         const where = (0, prisma_utils_1.buildDynamicWhere)(data, { deletedAt: null }, {
             enumFields: ['status'],
@@ -30,14 +50,7 @@ let EmployeeRepository = class EmployeeRepository {
             }),
             this.prisma.employees.findMany({
                 where,
-                include: {
-                    bankData: true,
-                },
-                omit: {
-                    createdAt: true,
-                    updatedAt: true,
-                    deletedAt: true,
-                },
+                select: this.employeeSelect,
                 take: data.limit,
                 skip: (data.page - 1) * data.limit,
                 orderBy: { id: 'asc' },
@@ -53,18 +66,6 @@ let EmployeeRepository = class EmployeeRepository {
             },
         };
     }
-    employeeSelect = {
-        id: true,
-        cpf: true,
-        name: true,
-        bankData: true,
-        role: true,
-        contractType: true,
-        hireDate: true,
-        baseSalary: true,
-        workload: true,
-        status: true,
-    };
     constructor(prisma) {
         this.prisma = prisma;
     }
@@ -88,34 +89,56 @@ let EmployeeRepository = class EmployeeRepository {
     }
     async create(dto) {
         const { bankData, ...rest } = dto;
-        return this.prisma.employees.upsert({
+        const result = await this.prisma.employees.upsert({
             where: {
                 cpf: dto.cpf,
             },
             update: {
                 ...rest,
+                bankData: {
+                    upsert: {
+                        update: {
+                            bank: bankData.bank,
+                            accountType: bankData.accountType,
+                            accountNumber: bankData.accountNumber,
+                            agency: bankData.agency,
+                        },
+                        create: {
+                            bank: bankData.bank,
+                            accountType: bankData.accountType,
+                            accountNumber: bankData.accountNumber,
+                            agency: bankData.agency,
+                        }
+                    }
+                },
                 deletedAt: null,
             },
             create: {
                 ...rest,
                 bankData: {
-                    create: {}
+                    create: {
+                        bank: bankData.bank,
+                        accountType: bankData.accountType,
+                        accountNumber: bankData.accountNumber,
+                        agency: bankData.agency,
+                    }
                 }
             },
             select: this.employeeSelect,
         });
+        return result;
     }
     update(id, dto) {
         return this.prisma.employees.update({
             where: { id: id },
-            data: { ...dto, deletedAt: null },
+            data: { ...dto, bankData: { update: { ...dto.bankData } }, deletedAt: null },
             select: this.employeeSelect,
         });
     }
     updateByCpf(cpf, dto) {
         return this.prisma.employees.update({
             where: { cpf },
-            data: { ...dto, deletedAt: null },
+            data: { ...dto, bankData: { update: { ...dto.bankData } }, deletedAt: null },
             select: this.employeeSelect,
         });
     }

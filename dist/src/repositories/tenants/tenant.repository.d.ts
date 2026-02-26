@@ -4,7 +4,7 @@ import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
 export declare class TenantRepository {
-    private prisma;
+    private readonly prisma;
     getPaginated(data: PaginationDto): Promise<PaginatedResult<TenantResponse>>;
     private readonly tenantSelect;
     constructor(prisma: PrismaService);

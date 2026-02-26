@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PropertyInspectionsService = void 0;
 const common_1 = require("@nestjs/common");
-const crypto_1 = require("crypto");
+const node_crypto_1 = require("node:crypto");
 const minio_client_service_1 = require("../tools/minio-client.service");
 const property_inspections_repository_1 = require("../../repositories/condominiums/property-inspections.repository");
 let PropertyInspectionsService = class PropertyInspectionsService {
@@ -25,7 +25,7 @@ let PropertyInspectionsService = class PropertyInspectionsService {
     async upload(condominiumId, propertyId, file) {
         await this.repo.assertPropertyOwned(condominiumId, propertyId);
         const extension = (file.originalname.split('.').pop() || '').toLowerCase();
-        const objectName = `condominiums/${condominiumId}/properties/${propertyId}/inspections/${(0, crypto_1.randomUUID)()}.${extension}`;
+        const objectName = `condominiums/${condominiumId}/properties/${propertyId}/inspections/${(0, node_crypto_1.randomUUID)()}.${extension}`;
         const { fileName } = await this.minio.uploadFile(file, this.allowedExtensions, objectName);
         return this.repo.create({
             condominiumId,

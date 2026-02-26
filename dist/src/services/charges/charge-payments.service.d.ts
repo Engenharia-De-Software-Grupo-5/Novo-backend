@@ -8,7 +8,7 @@ export declare class ChargePaymentsService {
     private readonly minio;
     private readonly calculator;
     constructor(repo: ChargePaymentsRepository, minio: MinioClientService, calculator: InterestCalculatorService);
-    private allowedProofExt;
+    private readonly allowedProofExt;
     private ensureFile;
     private compute;
     create(chargeId: string, dto: CreateChargePaymentDto, file?: Express.Multer.File): Promise<{

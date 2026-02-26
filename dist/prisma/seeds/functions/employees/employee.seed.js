@@ -6,7 +6,12 @@ async function seedEmployees(prisma) {
         data: {
             cpf: '12312312312',
             name: 'Oswaldo Fernandes',
-            bankData: { create: {},
+            bankData: { create: {
+                    bank: 'Banco do Brasil',
+                    accountNumber: '123412789',
+                    agency: '0002',
+                    accountType: 'Corrente',
+                },
             },
             role: 'doorman',
             contractType: 'CLT',
@@ -19,7 +24,12 @@ async function seedEmployees(prisma) {
         data: {
             cpf: '98765432100',
             name: 'Maria Silva',
-            bankData: { create: {},
+            bankData: { create: {
+                    bank: 'Banco do Brasil',
+                    accountNumber: '123456789',
+                    agency: '0001',
+                    accountType: 'Corrente',
+                },
             },
             role: 'doorman',
             contractType: 'CLT',

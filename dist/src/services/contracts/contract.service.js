@@ -9,68 +9,60 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContractsService = void 0;
+exports.ContractService = void 0;
 const common_1 = require("@nestjs/common");
-const crypto_1 = require("crypto");
 const contract_repository_1 = require("../../repositories/contracts/contract.repository");
 const minio_client_service_1 = require("../tools/minio-client.service");
-let ContractsService = class ContractsService {
+const generate_contract_service_1 = require("../tools/generate-contract.service");
+let ContractService = class ContractService {
+    minioService;
+    generateContract;
     repo;
-    minio;
     allowedExtensions = ['pdf'];
-    constructor(repo, minio) {
+    constructor(minioService, generateContract, repo) {
+        this.minioService = minioService;
+        this.generateContract = generateContract;
         this.repo = repo;
-        this.minio = minio;
     }
-    async upload(file) {
-        const ext = (file.originalname.split('.').pop() || '').toLowerCase();
-        if (ext !== 'pdf')
-            throw new common_1.UnsupportedMediaTypeException('Only PDF files are allowed.');
-        const objectName = `contracts/${(0, crypto_1.randomUUID)()}.pdf`;
-        const { fileName } = await this.minio.uploadFile(file, this.allowedExtensions, objectName);
-        return this.repo.create({
-            objectName: fileName,
-            originalName: file.originalname,
-            mimeType: file.mimetype,
-            extension: 'pdf',
-            size: file.size,
-        });
+    getAll() {
+        return this.repo.getAll();
     }
     listPaginated(data) {
         return this.repo.getPaginated(data);
     }
-    list(tenantCpf) {
-        return this.repo.list({ tenantCpf });
+    async getById(contratoId) {
+        const result = await this.repo.getById(contratoId);
+        const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+        result.contractUrl = tempUrl;
+        return result;
     }
-    async findOne(contractId) {
-        const c = await this.repo.getById(contractId);
-        if (!c)
-            throw new common_1.NotFoundException('Contract not found.');
-        const url = await this.minio.getFileUrl(c.objectName);
-        return { ...c, url };
-    }
-    async getDownloadUrl(contractId) {
-        const c = await this.repo.getById(contractId);
-        if (!c)
-            throw new common_1.NotFoundException('Contract not found.');
-        const url = await this.minio.getFileUrl(c.objectName);
-        return { url };
-    }
-    async remove(contractId) {
-        const c = await this.repo.getById(contractId);
-        if (!c)
-            throw new common_1.NotFoundException('Contract not found.');
-        try {
-            await this.minio.deleteFile(c.objectName);
+    async create(dto, file) {
+        const contratoExistente = await this.repo.checkIfHas(dto);
+        if (contratoExistente) {
+            throw new common_1.BadRequestException('This contract already exists');
         }
-        catch { }
-        await this.repo.softDelete(contractId);
+        if (dto.contractTemplateId) {
+            const response = await this.repo.create(dto);
+            const urlPromise = await this.generateContract.execute(response.id, dto.content);
+            const result = await this.repo.updateUrl(response.id, urlPromise.url);
+            const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+            result.contractUrl = tempUrl;
+            return result;
+        }
+        else {
+            const response = await this.repo.create(dto);
+            const minioResponse = await this.minioService.uploadFile(file, ['pdf'], response.id + '_' + new Date().getTime() + '.pdf');
+            const result = await this.repo.updateUrl(response.id, minioResponse.fileName);
+            const tempUrl = await this.minioService.getFileUrl(result.contractUrl);
+            result.contractUrl = tempUrl;
+            return result;
+        }
     }
-    linkLease(contractId, propertyId, tenantId) {
-        return this.repo.linkLease(contractId, propertyId, tenantId);
+    update(id, dto) {
+        return this.repo.update(id, dto);
     }
-    unlinkLease(contractId, propertyId, tenantId) {
-        return this.repo.unlinkLease(contractId, propertyId, tenantId);
+    delete(contratoId) {
+        return this.repo.delete(contratoId);
     }
     listByTenant(tenantId) {
         return this.repo.listByTenant(tenantId);
@@ -79,10 +71,11 @@ let ContractsService = class ContractsService {
         return this.repo.listByProperty(propertyId);
     }
 };
-exports.ContractsService = ContractsService;
-exports.ContractsService = ContractsService = __decorate([
+exports.ContractService = ContractService;
+exports.ContractService = ContractService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [contract_repository_1.ContractsRepository,
-        minio_client_service_1.MinioClientService])
-], ContractsService);
+    __metadata("design:paramtypes", [minio_client_service_1.MinioClientService,
+        generate_contract_service_1.GenerateContractService,
+        contract_repository_1.ContractRepository])
+], ContractService);
 //# sourceMappingURL=contract.service.js.map

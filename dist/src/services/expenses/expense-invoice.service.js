@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpenseInvoiceService = void 0;
 const common_1 = require("@nestjs/common");
-const crypto_1 = require("crypto");
+const node_crypto_1 = require("node:crypto");
 const minio_client_service_1 = require("../tools/minio-client.service");
 const expense_invoice_repository_1 = require("../../repositories/expenses/expense-invoice.repository");
 let ExpenseInvoiceService = class ExpenseInvoiceService {
@@ -24,7 +24,7 @@ let ExpenseInvoiceService = class ExpenseInvoiceService {
     }
     async upload(expenseId, file) {
         const ext = (file.originalname.split('.').pop() || '').toLowerCase();
-        const objectName = `expenses/${expenseId}/invoices/${(0, crypto_1.randomUUID)()}.${ext}`;
+        const objectName = `expenses/${expenseId}/invoices/${(0, node_crypto_1.randomUUID)()}.${ext}`;
         const { fileName } = await this.minio.uploadFile(file, this.allowed, objectName);
         return this.repo.create({
             expenseId,

@@ -11,37 +11,58 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContractResponse = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const property_response_1 = require("../condominiums/property.response");
+const tenant_response_1 = require("../tenants/tenant.response");
+const contract_template_response_1 = require("../contract.templates/contract.template.response");
 class ContractResponse {
     id;
-    objectName;
-    originalName;
-    mimeType;
-    extension;
-    size;
+    tenant;
+    description;
+    property;
+    contractTemplate;
+    contractUrl;
 }
 exports.ContractResponse = ContractResponse;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'UUID of the contract', example: '123e4567-e89b-12d3-a456-426614174000' }),
+    (0, swagger_1.ApiProperty)({
+        description: 'unique contract identifier',
+        example: '123',
+    }),
     __metadata("design:type", String)
 ], ContractResponse.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Object name of the contract file', example: 'contracts/2023/09/15/123e4567-e89b-12d3-a456-426614174000.pdf' }),
-    __metadata("design:type", String)
-], ContractResponse.prototype, "objectName", void 0);
+    (0, swagger_1.ApiProperty)({
+        description: 'Tenant object who detains a property',
+        type: () => tenant_response_1.TenantResponse,
+    }),
+    __metadata("design:type", tenant_response_1.TenantResponse)
+], ContractResponse.prototype, "tenant", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Original name of the contract file', example: 'contract.pdf' }),
+    (0, swagger_1.ApiProperty)({
+        description: 'additional description about this contract',
+        example: 'Sample content',
+    }),
     __metadata("design:type", String)
-], ContractResponse.prototype, "originalName", void 0);
+], ContractResponse.prototype, "description", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'MIME type of the contract file', example: 'application/pdf' }),
+    (0, swagger_1.ApiProperty)({
+        description: 'property associated with this contract',
+        type: () => property_response_1.PropertyResponse,
+    }),
+    __metadata("design:type", property_response_1.PropertyResponse)
+], ContractResponse.prototype, "property", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Template associated with this contract',
+        type: () => contract_template_response_1.ContractTemplateResponse,
+    }),
+    __metadata("design:type", contract_template_response_1.ContractTemplateResponse)
+], ContractResponse.prototype, "contractTemplate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Contract URL',
+        example: 'https://.../.../...',
+    }),
     __metadata("design:type", String)
-], ContractResponse.prototype, "mimeType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'File extension of the contract', example: 'pdf' }),
-    __metadata("design:type", String)
-], ContractResponse.prototype, "extension", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Size of the contract file in bytes', example: 102400 }),
-    __metadata("design:type", Number)
-], ContractResponse.prototype, "size", void 0);
+], ContractResponse.prototype, "contractUrl", void 0);
 //# sourceMappingURL=contract.response.js.map

@@ -12,7 +12,6 @@ type CreateExpenseInput = {
     expenseDate: Date;
     paymentMethod: ExpensePaymentMethod;
 };
-type UpdateExpenseInput = CreateExpenseInput;
 export declare class ExpenseRepository {
     private readonly prisma;
     getPaginated(data: PaginationDto): Promise<PaginatedResult<ExpenseResponse>>;
@@ -83,7 +82,7 @@ export declare class ExpenseRepository {
         expenseDate: Date;
         paymentMethod: import(".prisma/client").$Enums.ExpensePaymentMethod;
     }>;
-    update(id: string, input: UpdateExpenseInput): Promise<{
+    update(id: string, input: CreateExpenseInput): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;

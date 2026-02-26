@@ -12,13 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CondominiumResponse = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const address_response_1 = require("./address.response");
-const property_response_1 = require("./property.response");
 class CondominiumResponse {
     id;
     name;
     description;
     address;
-    properties;
 }
 exports.CondominiumResponse = CondominiumResponse;
 __decorate([
@@ -49,12 +47,4 @@ __decorate([
     }),
     __metadata("design:type", address_response_1.AddressResponse)
 ], CondominiumResponse.prototype, "address", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'List of properties in the condominium',
-        type: () => property_response_1.PropertyResponse,
-        isArray: true,
-    }),
-    __metadata("design:type", Array)
-], CondominiumResponse.prototype, "properties", void 0);
 //# sourceMappingURL=condominium.response.js.map

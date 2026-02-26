@@ -5,12 +5,12 @@ export declare class EmployeeBenefitsRepository {
     constructor(prisma: PrismaService);
     findEmployeeById(employeeId: string): import(".prisma/client").Prisma.Prisma__EmployeesClient<{
         id: string;
-        cpf: string;
         name: string;
-        status: import(".prisma/client").$Enums.EmployeeStatus;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
+        status: import(".prisma/client").$Enums.EmployeeStatus;
+        cpf: string;
         role: string;
         contractType: import(".prisma/client").$Enums.ContractType;
         hireDate: Date;

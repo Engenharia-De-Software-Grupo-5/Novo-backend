@@ -1,114 +1,42 @@
 import { PrismaService } from 'src/common/database/prisma.service';
+import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
-export declare class ContractsRepository {
-    private readonly prisma;
-    getPaginated(data: PaginationDto): Promise<PaginatedResult<ContractResponse>>;
+export declare class ContractRepository {
+    private prisma;
+    private readonly selectFields;
     constructor(prisma: PrismaService);
-    getById(contractId: string): import(".prisma/client").Prisma.Prisma__ContractsClient<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
-    }, null, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    assertContract(contractId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
-    }>;
-    create(data: {
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
-    }): import(".prisma/client").Prisma.Prisma__ContractsClient<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    list(params?: {
-        tenantCpf?: string;
-    }): import(".prisma/client").Prisma.PrismaPromise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
-    }[]>;
-    softDelete(contractId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
-    }>;
-    assertProperty(propertyId: string): Promise<{
-        id: string;
-    }>;
-    assertTenant(tenantId: string): Promise<{
-        id: string;
-    }>;
-    linkLease(contractId: string, propertyId: string, tenantId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        contractId: string;
-        propertyId: string;
-        tenantId: string;
-    }>;
-    unlinkLease(contractId: string, propertyId: string, tenantId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        contractId: string;
-        propertyId: string;
-        tenantId: string;
-    }>;
+    getPaginated(data: PaginationDto): Promise<PaginatedResult<ContractResponse>>;
+    getAll(): Promise<ContractResponse[]>;
+    getById(contractId: string): Promise<ContractResponse>;
+    checkIfHas(dto: ContractDto): Promise<ContractResponse>;
+    create(dto: ContractDto): Promise<ContractResponse>;
+    update(id: string, dto: ContractDto): Promise<ContractResponse>;
+    updateUrl(id: string, url: string): Promise<ContractResponse>;
+    delete(contratoId: string): Promise<ContractResponse>;
     listByTenant(tenantId: string): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
+        description: string | null;
+        content: string | null;
+        propertyId: string;
+        contractUrl: string | null;
+        tenantId: string;
+        contractTemplateId: string | null;
     }[]>;
     listByProperty(propertyId: string): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
-        objectName: string;
-        originalName: string;
-        mimeType: string;
-        extension: string;
-        size: number;
+        description: string | null;
+        content: string | null;
+        propertyId: string;
+        contractUrl: string | null;
+        tenantId: string;
+        contractTemplateId: string | null;
     }[]>;
 }

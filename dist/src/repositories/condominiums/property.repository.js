@@ -15,6 +15,28 @@ const prisma_service_1 = require("../../common/database/prisma.service");
 const prisma_utils_1 = require("../../contracts/pagination/prisma.utils");
 let PropertyRepository = class PropertyRepository {
     prisma;
+    propertySelect = {
+        id: true,
+        identifier: true,
+        name: true,
+        description: true,
+        address: true,
+        unityNumber: true,
+        unityType: true,
+        block: true,
+        floor: true,
+        totalArea: true,
+        propertySituation: true,
+        observations: true,
+        condominium: {
+            select: {
+                id: true,
+                name: true,
+                cnpj: true,
+                address: true,
+            }
+        },
+    };
     async getPaginated(condominiumId, data) {
         const where = (0, prisma_utils_1.buildDynamicWhere)(data, { deletedAt: null, condominiumId }, {
             enumFields: ['status'],
@@ -30,11 +52,7 @@ let PropertyRepository = class PropertyRepository {
             }),
             this.prisma.properties.findMany({
                 where,
-                omit: {
-                    createdAt: true,
-                    updatedAt: true,
-                    deletedAt: true,
-                },
+                select: this.propertySelect,
                 take: data.limit,
                 skip: (data.page - 1) * data.limit,
                 orderBy: { identifier: 'asc' },
@@ -53,23 +71,11 @@ let PropertyRepository = class PropertyRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    propertySelect = {
-        id: true,
-        identifier: true,
-        address: true,
-        unityNumber: true,
-        unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
-        propertySituation: true,
-        observations: true,
-    };
     getAll(condominiumId) {
         return this.prisma.properties.findMany({
             where: { deletedAt: null, condominiumId },
             select: {
-                ...this.propertySelect
+                ...this.propertySelect,
             },
         });
     }
@@ -77,7 +83,7 @@ let PropertyRepository = class PropertyRepository {
         return this.prisma.properties.findFirst({
             where: { id: propertyId, deletedAt: null, condominiumId },
             select: {
-                ...this.propertySelect
+                ...this.propertySelect,
             },
         });
     }
@@ -85,7 +91,7 @@ let PropertyRepository = class PropertyRepository {
         return this.prisma.properties.findUnique({
             where: { identifier, condominiumId, deletedAt: null },
             select: {
-                ...this.propertySelect
+                ...this.propertySelect,
             },
         });
     }
@@ -93,7 +99,7 @@ let PropertyRepository = class PropertyRepository {
         return this.prisma.properties.create({
             data: { ...dto, condominiumId },
             select: {
-                ...this.propertySelect
+                ...this.propertySelect,
             },
         });
     }
@@ -102,7 +108,7 @@ let PropertyRepository = class PropertyRepository {
             where: { id: propertyId, condominiumId, deletedAt: null },
             data: { ...dto },
             select: {
-                ...this.propertySelect
+                ...this.propertySelect,
             },
         });
     }
@@ -111,7 +117,7 @@ let PropertyRepository = class PropertyRepository {
             where: { id: propertyId, condominiumId },
             data: { deletedAt: new Date() },
             select: {
-                ...this.propertySelect
+                ...this.propertySelect,
             },
         });
     }

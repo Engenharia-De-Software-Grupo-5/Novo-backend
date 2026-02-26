@@ -18,4 +18,7 @@ export declare class MinioClientService {
     listFiles(): Promise<FileInfo[]>;
     getFileUrl(fileName: string, expiry?: number): Promise<string>;
     deleteFile(fileName: string): Promise<void>;
+    uploadFileBuffer(buffer: Buffer, fileName: string, mimeType: string): Promise<{
+        fileName: string;
+    }>;
 }
