@@ -5,7 +5,6 @@ export class UserResponse {
   id: string;
   name: string;
   email: string;
-  cpf?: string;
   @ApiProperty({
     description: 'user accesses',
     type: () => AccessData,

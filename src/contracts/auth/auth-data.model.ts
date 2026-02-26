@@ -49,16 +49,16 @@ export class AuthDataModel {
   password: string;
 
   @ApiProperty({
+    description: 'Define se o usuário é um administrador master',
+    example: false,
+  })
+  isAdminMaster: boolean;
+
+  @ApiProperty({
     description: 'User email',
     example: 'joao@example.com',
   })
   email: string;
-
-  @ApiProperty({
-    description: 'User cpf',
-    example: '11111111111',
-  })
-  cpf: string;
 
   @ApiProperty({
     description: 'user accesses',
