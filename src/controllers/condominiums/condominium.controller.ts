@@ -17,6 +17,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators';
+import { AuthPayload } from 'src/contracts/auth';
 import { CondominiumDto } from 'src/contracts/condominiums/condominium.dto';
 import { CondominiumResponse } from 'src/contracts/condominiums/condominium.response';
 import { CondominiumService } from 'src/services/condominiums/condominium.service';
@@ -70,8 +72,8 @@ export class CondominiumController {
     description: 'Condominium successfully created',
     type: CondominiumResponse,
   })
-  create(@Body() dto: CondominiumDto): Promise<CondominiumResponse> {
-    return this.condominiumService.create(dto);
+  create(@Body() dto: CondominiumDto, @CurrentUser()user:AuthPayload): Promise<CondominiumResponse> {
+    return this.condominiumService.create(dto, user);
   }
 
   @Put(':id')

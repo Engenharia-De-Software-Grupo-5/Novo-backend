@@ -9,7 +9,21 @@ export class PropertyRepository {
   private readonly propertySelect = {
     id: true,
     identifier: true,
-    address: true,
+    propertyAddress:{
+          select:{
+            block:true,
+            city:true,
+            complement:true,
+            floor:true,
+            id:true,
+            neighborhood:true,
+            number:true,
+            street:true,
+            uf:true,
+            totalArea:true,
+            zip:true
+          }
+        },
     unityNumber: true,
     unityType: true,
     block: true,
@@ -43,10 +57,11 @@ export class PropertyRepository {
     return this.prisma.properties.findMany({
       where: { deletedAt: null, condominiumId },
       select: {
-        ...this.propertySelect,
-      },
-    });
+        ...this.propertySelect
+      }
+      })
   }
+
   getById(
     condominiumId: string,
     propertyId: string,
@@ -70,12 +85,18 @@ export class PropertyRepository {
     });
   }
   create(condominiumId: string, dto: PropertyDto): Promise<PropertyResponse> {
+    const { address, ...propertyData } = dto;
+
     return this.prisma.properties.create({
-      data: { ...dto, condominiumId },
-      select: {
-        ...this.propertySelect,
+      data: {
+        ...propertyData,
+        condominium: { connect: { id: condominiumId } },
+        propertyAddress: {
+          create: { ...address } 
+        }
       },
-    });
+      select: this.propertySelect,
+    }) as Promise<PropertyResponse>
   }
   update(
     condominiumId: string,
