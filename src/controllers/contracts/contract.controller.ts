@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,12 +6,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   Put,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,17 +17,16 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ContractDto } from 'src/contracts/contracts/contract.dto';
 import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { PreviewContractDto } from 'src/contracts/contracts/preview.contract.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { ContractService } from 'src/services/contracts/contract.service';
 import { PreviewContractService } from 'src/services/contracts/preview.contract.service';
 
@@ -55,6 +51,22 @@ export class ContractController {
   })
   getAll(): Promise<ContractResponse[]> {
     return this.contractService.getAll();
+  }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get contracts filtered and paginated',
+    description: 'Get contracts filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(ContractResponse),
+  })
+  getPaginated(
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<ContractResponse>> {
+    return this.contractService.listPaginated(data);
   }
 
   @Get(':id')
