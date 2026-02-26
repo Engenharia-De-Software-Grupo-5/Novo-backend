@@ -94,7 +94,13 @@
       "^src/(.*)$": "<rootDir>/src/$1"
     },
     "collectCoverageFrom": [
-      "src/**/*.{ts,js}"
+      "src/**/*.{ts,js}",
+
+    "!src/**/*.module.ts",
+
+
+    "!src/contracts/**/*.ts",
+    "src/contracts/pagination/prisma.utils.ts"
     ],
     "coverageDirectory": "<rootDir>/coverage",
     "coverageReporters": [
