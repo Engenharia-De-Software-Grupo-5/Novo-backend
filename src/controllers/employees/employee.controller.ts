@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -19,6 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { EmployeeDto } from 'src/contracts/employees/employee.dto';
 import { EmployeeResponse } from 'src/contracts/employees/employee.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { EmployeeService } from 'src/services/employees/employee.service';
 
 @ApiTags('Employees')
@@ -39,6 +43,22 @@ export class EmployeeController {
   })
   getAll(): Promise<EmployeeResponse[]> {
     return this.employeeService.getAll();
+  }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get employees filtered and paginated',
+    description: 'Get employees filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(EmployeeResponse),
+  })
+  getPaginated(
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<EmployeeResponse>> {
+    return this.employeeService.getPaginated(data);
   }
 
   @Get(':cpf')

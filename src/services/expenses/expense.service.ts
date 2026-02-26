@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ExpenseRepository } from 'src/repositories/expenses/expense.repository';
 import { ExpenseDto } from 'src/contracts/expenses/expense.dto';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
 
 @Injectable()
 export class ExpenseService {
@@ -15,6 +18,12 @@ export class ExpenseService {
 
   list() {
     return this.repo.findAll();
+  }
+
+  listPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<ExpenseResponse>> {
+    return this.repo.getPaginated(data);
   }
 
   findOne(id: string) {

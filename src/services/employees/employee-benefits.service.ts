@@ -1,6 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { EmployeeBenefitDto } from 'src/contracts/employees/employeeBenefit.dto';
+import { EmployeeBenefitResponse } from 'src/contracts/employees/employeeBenefit.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 
 
 @Injectable()
@@ -26,6 +29,36 @@ export class EmployeeBenefitsService {
         value: dto.value,
       },
     });
+  }
+
+  async listPaginated(
+    employeeId: string,
+    pagination: PaginationDto,
+  ): Promise<PaginatedResult<EmployeeBenefitResponse>> {
+
+    const employee = await this.prisma.employees.findFirst({
+      where: { id: employeeId, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!employee) throw new NotFoundException('Employee not found.');
+
+    const items = await this.prisma.employeeBenefits.findMany({
+      where: { employeeId, deletedAt: null },
+      orderBy: { referenceYear: 'desc' },
+      skip: (pagination.page - 1) * pagination.limit,
+      take: pagination.limit,
+    });
+
+    return {
+      items,
+      meta: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalItems: 0,
+        totalPages: 0
+      },
+    };
   }
 
   async list(employeeId: string) {

@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString, IsDateString, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsDateString, Min, IsDate } from 'class-validator';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 
-export class ExpenseDto {
+export class ExpenseResponse {
   @ApiProperty({ description: 'Expense target type', enum: ExpenseTargetType, example: ExpenseTargetType.CONDOMINIUM })
   @IsEnum(ExpenseTargetType)
   targetType: ExpenseTargetType;
@@ -22,8 +22,8 @@ export class ExpenseDto {
   value: number;
 
   @ApiProperty({ description: 'Expense date', example: '2026-02-18' })
-  @IsDateString()
-  expenseDate: string;
+  @IsDate()
+  expenseDate: Date;
 
   @ApiProperty({ enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
   @IsEnum(ExpensePaymentMethod)
