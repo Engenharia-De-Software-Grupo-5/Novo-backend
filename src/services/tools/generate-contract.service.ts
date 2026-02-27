@@ -109,4 +109,39 @@ export class GenerateContractService {
 
         return { url: url.fileName };
     }
+
+    private async generatePdfFromData(
+        content: string,
+        templateData: any,
+        fileName: string,
+    ): Promise<{ url: string }> {
+
+        const processedMarkdown = this.templateEngine.parse(
+            content,
+            templateData,
+        );
+
+        const pdfBuffer = await this.pdfGenerator.generate(processedMarkdown);
+
+        const objectPath = `contracts/${fileName}`;
+
+        const upload = await this.minioService.uploadFileBuffer(
+            pdfBuffer,
+            objectPath,
+            'application/pdf'
+        );
+
+        return { url: upload.fileName };
+    }
+
+    async executePreview(
+        content: string,
+        templateData: any,
+        condominiumId: string,
+    ): Promise<{ url: string }> {
+
+        const fileName = `preview_${condominiumId}_${Date.now()}.pdf`;
+
+        return this.generatePdfFromData(content, templateData, fileName);
+    }
 }
