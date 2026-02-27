@@ -4,11 +4,11 @@ import { ChargeStatus } from '@prisma/client';
 
 @Injectable()
 export class ChargePaymentsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
-  async assertCharge(chargeId: string) {
+  async assertCharge(condominiumId: string, chargeId: string) {
     const charge = await this.prisma.charges.findFirst({
-      where: { id: chargeId, deletedAt: null },
+      where: { id: chargeId, deletedAt: null, property: { condominiumId } },
       select: {
         id: true,
         amount: true,
@@ -21,9 +21,9 @@ export class ChargePaymentsRepository {
     return charge;
   }
 
-  async assertPayment(chargeId: string, paymentId: string) {
+  async assertPayment(condominiumId: string, chargeId: string, paymentId: string) {
     const payment = await this.prisma.payments.findFirst({
-      where: { id: paymentId, chargeId, deletedAt: null },
+      where: { id: paymentId, chargeId, deletedAt: null, charge: { property: { condominiumId } } },
     });
     if (!payment) throw new NotFoundException('Payment not found.');
     return payment;
@@ -40,9 +40,9 @@ export class ChargePaymentsRepository {
    * - OVERDUE: hoje > dueDate e não pago/cancelado
    * - PENDING: caso contrário
    */
-  async syncChargeStatus(chargeId: string) {
+  async syncChargeStatus(condominiumId: string, chargeId: string) {
     const charge = await this.prisma.charges.findFirst({
-      where: { id: chargeId, deletedAt: null },
+      where: { id: chargeId, deletedAt: null, property: { condominiumId } },
       select: { id: true, amount: true, dueDate: true, status: true },
     });
 
@@ -52,7 +52,7 @@ export class ChargePaymentsRepository {
     if (charge.status === ChargeStatus.CANCELED) return;
 
     const agg = await this.prisma.payments.aggregate({
-      where: { chargeId, deletedAt: null },
+      where: { chargeId, deletedAt: null, },
       _sum: { amountPaid: true },
     });
 
@@ -73,6 +73,7 @@ export class ChargePaymentsRepository {
   }
 
   async createPayment(
+    condominiumId: string,
     chargeId: string,
     data: {
       amountPaid: number;
@@ -96,7 +97,7 @@ export class ChargePaymentsRepository {
       };
     },
   ) {
-    const charge = await this.assertCharge(chargeId);
+    const charge = await this.assertCharge(condominiumId, chargeId);
 
     if (charge.status === ChargeStatus.CANCELED) {
       throw new ConflictException('Charge is canceled.');
@@ -131,11 +132,12 @@ export class ChargePaymentsRepository {
       },
     });
 
-    await this.syncChargeStatus(chargeId);
+    await this.syncChargeStatus(condominiumId, chargeId);
     return created;
   }
 
   async updatePayment(
+    condominiumId: string,
     chargeId: string,
     paymentId: string,
     data: {
@@ -160,15 +162,15 @@ export class ChargePaymentsRepository {
       } | null;
     },
   ) {
-    const charge = await this.assertCharge(chargeId);
-    const prev = await this.assertPayment(chargeId, paymentId);
+    const charge = await this.assertCharge(condominiumId, chargeId);
+    const prev = await this.assertPayment(condominiumId, chargeId, paymentId);
 
     if (charge.status === ChargeStatus.CANCELED) {
       throw new ConflictException('Charge is canceled.');
     }
 
     let proofData: any;
-    
+
     if (data.proof === null) {
       proofData = {
         proofObjectName: null,
@@ -208,26 +210,26 @@ export class ChargePaymentsRepository {
       },
     });
 
-    await this.syncChargeStatus(chargeId);
+    await this.syncChargeStatus(condominiumId, chargeId);
     return { updated, previousProofObject: prev.proofObjectName ?? null };
   }
 
-  listPayments(chargeId: string) {
+  listPayments(condominiumId: string, chargeId: string) {
     return this.prisma.payments.findMany({
-      where: { chargeId, deletedAt: null },
+      where: { chargeId, deletedAt: null, charge: { property: { condominiumId } } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  getPayment(chargeId: string, paymentId: string) {
+  getPayment(condominiumId: string, chargeId: string, paymentId: string) {
     return this.prisma.payments.findFirst({
-      where: { id: paymentId, chargeId, deletedAt: null },
+      where: { id: paymentId, chargeId, deletedAt: null, charge: { property: { condominiumId } } },
     });
   }
 
-  async softDeletePayment(chargeId: string, paymentId: string) {
-    const charge = await this.assertCharge(chargeId);
-    await this.assertPayment(chargeId, paymentId);
+  async softDeletePayment(condominiumId: string, paymentId: string, chargeId: string) {
+    const charge = await this.assertCharge(condominiumId, chargeId);
+    await this.assertPayment(condominiumId, chargeId, paymentId);
 
     if (charge.status === ChargeStatus.CANCELED) {
       throw new ConflictException('Charge is canceled.');
@@ -238,7 +240,7 @@ export class ChargePaymentsRepository {
       data: { deletedAt: new Date() },
     });
 
-    await this.syncChargeStatus(chargeId);
+    await this.syncChargeStatus(condominiumId, chargeId);
     return { message: 'Payment removed successfully.' };
   }
 }
