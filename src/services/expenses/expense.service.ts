@@ -9,10 +9,11 @@ import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
 export class ExpenseService {
   constructor(private readonly repo: ExpenseRepository) {}
 
-  create(dto: ExpenseDto) {
+  create(dto: ExpenseDto, condominiumId: string) {
     return this.repo.create({
       ...dto,
       expenseDate: new Date(dto.expenseDate),
+      condominiumId
     } as any);
   }
 

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 
-import { ExpenseController } from 'src/controllers/expenses/expense.controller';
+import { ExpenseController } from 'src/controllers/condominiums/expense.controller';
 import { ExpenseService } from 'src/services/expenses/expense.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
