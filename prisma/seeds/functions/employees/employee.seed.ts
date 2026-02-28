@@ -8,6 +8,7 @@ export async function seedEmployees(
         data: { 
             cpf: '12312312312',
             name: 'Oswaldo Fernandes',
+            condominium: { connect: { id: 'cond-123' } },
             bankData: { create: {
                 bank: 'Banco do Brasil',
                 accountNumber: '123412789',
@@ -15,11 +16,10 @@ export async function seedEmployees(
                 accountType: 'Corrente',
             },
             },
-            role: 'doorman',
-            contractType: 'CLT',
-            hireDate: new Date('2025-02-03T00:00:00.000Z'),
-            baseSalary: 10,
-            workload: 40,
+            status: 'ACTIVE',
+            role: 'PORTEIRO',
+            admissionDate: '2013-01-27',
+            birthDate: '1990-01-01',
         },
     });
 
@@ -27,6 +27,7 @@ export async function seedEmployees(
         data: { 
             cpf: '98765432100',
             name: 'Maria Silva',
+            condominium: { connect: { id: 'cond-123' } },
             bankData: { create: {
                 bank: 'Banco do Brasil',
                 accountNumber: '123456789',
@@ -34,11 +35,11 @@ export async function seedEmployees(
                 accountType: 'Corrente',
             },
             },
-            role: 'doorman',
+            status: 'ACTIVE',
+            role: 'PORTEIRO',
             contractType: 'CLT',
-            hireDate: new Date('2025-02-03T00:00:00.000Z'),
-            baseSalary: 10,
-            workload: 40,
+            admissionDate: '2025-02-03',
+            birthDate: '1990-01-01',
         },
     });
             

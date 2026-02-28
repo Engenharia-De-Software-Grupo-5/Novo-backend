@@ -8,5 +8,6 @@ import { MailService } from 'src/services/tools/mail.service';
   imports: [],
   controllers: [UserController],
   providers: [UserService, UserRepository, MailService],
+  exports: [UserService]
 })
 export class UserModule {}

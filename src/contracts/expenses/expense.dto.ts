@@ -7,9 +7,9 @@ export class ExpenseDto {
   @IsEnum(ExpenseTargetType)
   targetType: ExpenseTargetType;
 
-  @ApiProperty({ description: 'Condominium id when targetType=CONDOMINIUM', example: '123e4567-e89b-12d3-a456-426614174000', required: false })
+  @ApiProperty({ description: 'Expense major description', example: 'WATER' })
   @IsString()
-  condominiumId?: string;
+  description: string;
 
   @ApiProperty({ description: 'Property id when targetType=PROPERTY', example: '123e4567-e89b-12d3-a456-426614174001', required: false })
   @IsString()

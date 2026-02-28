@@ -25,12 +25,13 @@ export class CondominiumDto {
   })
   description: string;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => AddressDto)
   @ApiProperty({
     description: 'Obrigatory field for the address of the condominium',
     type: () => AddressDto,
   })
-  address: AddressDto;
+  address?: AddressDto;
   }
 

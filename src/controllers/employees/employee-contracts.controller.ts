@@ -33,6 +33,7 @@ export class EmployeeContractsController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Upload an employee contract (PDF only)',
@@ -50,10 +51,11 @@ export class EmployeeContractsController {
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('employeeId') employeeId: string,
+    @Param('condId') condId: string,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('Envie um arquivo no campo "file".');
-    return this.service.upload(employeeId, file);
+    return this.service.upload(condId, employeeId, file);
   }
 
   @Get()
@@ -62,8 +64,8 @@ export class EmployeeContractsController {
     description: 'Retrieve a list of contracts linked to an employee.',
   })
   @HttpCode(HttpStatus.OK)
-  async list(@Param('employeeId') employeeId: string) {
-    return this.service.list(employeeId);
+  async list( @Param('condId') condId: string, @Param('employeeId') employeeId: string) {
+    return this.service.list(condId, employeeId);
   }
 
   @Get(':contractId')
@@ -73,10 +75,11 @@ export class EmployeeContractsController {
   })
   @HttpCode(HttpStatus.OK)
   async findOne(
+    @Param('condId') condId: string,
     @Param('employeeId') employeeId: string,
     @Param('contractId') contractId: string,
   ) {
-    return this.service.findOne(employeeId, contractId);
+    return this.service.findOne(condId, employeeId, contractId);
   }
 
   @Get(':contractId/download')
@@ -86,10 +89,11 @@ export class EmployeeContractsController {
   })
   @HttpCode(HttpStatus.OK)
   async download(
+    @Param('condId') condId: string,
     @Param('employeeId') employeeId: string,
     @Param('contractId') contractId: string,
   ) {
-    return this.service.getDownloadUrl(employeeId, contractId);
+    return this.service.getDownloadUrl(condId, employeeId, contractId);
   }
 
   @Delete(':contractId')
@@ -99,9 +103,10 @@ export class EmployeeContractsController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
+    @Param('condId') condId: string,
     @Param('employeeId') employeeId: string,
     @Param('contractId') contractId: string,
   ) {
-    await this.service.remove(employeeId, contractId);
+    await this.service.remove(condId, employeeId, contractId);
   }
 }

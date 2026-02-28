@@ -13,6 +13,9 @@ export class ExpenseResponse {
   @ApiProperty({ description: 'Property id when targetType=PROPERTY', required: false })
   propertyId?: string;
 
+  @ApiProperty({ description: 'Expense major description'})
+  description: string;
+
   @ApiProperty({ description: 'Expense type', example: 'WATER' })
   @IsString()
   expenseType: string;

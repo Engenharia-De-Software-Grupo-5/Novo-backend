@@ -12,6 +12,7 @@ type CreateExpenseInput = {
   condominiumId?: string;
   propertyId?: string;
   expenseType: string;
+  description: string;
   value: number;
   expenseDate: Date;
   paymentMethod: ExpensePaymentMethod;
@@ -107,6 +108,7 @@ export class ExpenseRepository {
 
     return this.prisma.expenses.create({
       data: {
+        description: input.description,
         targetType: input.targetType,
         condominiumId: target.condominiumId,
         propertyId: target.propertyId,

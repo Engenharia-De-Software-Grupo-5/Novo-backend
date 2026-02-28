@@ -10,26 +10,26 @@ import { ContractTemplateRepository as ContractTemplateRepository } from 'src/re
 export class ContractTemplateService {
     constructor(private readonly contractTemplateRepository: ContractTemplateRepository) { }
 
-    getAll(name?: string): Promise<ContractTemplateResponse[]> {
-        return this.contractTemplateRepository.getAll(name)
+    getAll(condominiumId: string, name?: string): Promise<ContractTemplateResponse[]> {
+        return this.contractTemplateRepository.getAll(condominiumId, name)
     }
     getPaginated(
+        condominiumId: string,
         data: PaginationDto,
-      ): Promise<PaginatedResult<ContractTemplateResponse>> {
-        return this.contractTemplateRepository.getPaginated(data);
-      }
-    
-    getById(contractTemplateId: string): Promise<ContractTemplateResponse> {
-        return this.contractTemplateRepository.getById(contractTemplateId)
+    ): Promise<PaginatedResult<ContractTemplateResponse>> {
+        return this.contractTemplateRepository.getPaginated(condominiumId, data);
     }
-    create(dto: ContractTemplateDto): Promise<ContractTemplateResponse> {
-        return this.contractTemplateRepository.create(dto)
+    getById(condominiumId: string, contractTemplateId: string): Promise<ContractTemplateResponse> {
+        return this.contractTemplateRepository.getById(condominiumId, contractTemplateId)
     }
-    update(contractTemplateId: string, dto: ContractTemplateDto): Promise<ContractTemplateResponse> {
-        return this.contractTemplateRepository.update(contractTemplateId, dto)
+    create(condominiumId: string, dto: ContractTemplateDto): Promise<ContractTemplateResponse> {
+        return this.contractTemplateRepository.create(condominiumId, dto)
     }
-    delete(contractTemplateId: string): Promise<ContractTemplateResponse> {
-        return this.contractTemplateRepository.delete(contractTemplateId)
+    update(condominiumId: string, contractTemplateId: string, dto: ContractTemplateDto): Promise<ContractTemplateResponse> {
+        return this.contractTemplateRepository.update(condominiumId, contractTemplateId, dto)
+    }
+    delete(condominiumId: string, contractTemplateId: string): Promise<ContractTemplateResponse> {
+        return this.contractTemplateRepository.delete(condominiumId, contractTemplateId)
     }
 }
 
