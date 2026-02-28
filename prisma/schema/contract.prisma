@@ -9,6 +9,8 @@ model Contracts {
     contractUrl        String?
     description        String?
     content            String?
+    startDate          String
+    dueDate            String
     createdAt          DateTime           @default(now())
     updatedAt          DateTime           @updatedAt
     deletedAt          DateTime?

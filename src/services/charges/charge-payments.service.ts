@@ -16,7 +16,7 @@ export class ChargePaymentsService {
     private readonly repo: ChargePaymentsRepository,
     private readonly minio: MinioClientService,
     private readonly calculator: InterestCalculatorService,
-  ) {}
+  ) { }
 
   private readonly allowedProofExt = ['pdf', 'jpg', 'jpeg', 'png'];
 
@@ -31,92 +31,92 @@ export class ChargePaymentsService {
   }
 
   private compute(
-  charge: { amount: number; dueDate: Date },
-  dto: { amountPaid: number; paymentDate: string; fineRate?: number; monthlyInterestRate?: number },
-) {
-  const dueDate = charge.dueDate.toISOString().slice(0, 10);
+    charge: { amount: number; dueDate: Date },
+    dto: { amountPaid: number; paymentDate: string; fineRate?: number; monthlyInterestRate?: number },
+  ) {
+    const dueDate = charge.dueDate.toISOString().slice(0, 10);
 
-  const calc = this.calculator.calculate({
-    principal: charge.amount, 
-    dueDate,
-    referenceDate: dto.paymentDate,
-    fineRate: dto.fineRate,
-    monthlyInterestRate: dto.monthlyInterestRate,
-  } as any);
+    const calc = this.calculator.calculate({
+      principal: charge.amount,
+      dueDate,
+      referenceDate: dto.paymentDate,
+      fineRate: dto.fineRate,
+      monthlyInterestRate: dto.monthlyInterestRate,
+    } as any);
 
-  return {
-    wasLate: calc.daysLate > 0,
-    daysLate: calc.daysLate,
-    fineRate: calc.fineRate,
-    monthlyRate: calc.monthlyInterestRate,
-    finePaid: calc.fineValue,
-    interestPaid: calc.interestValue,
-    totalPaid: dto.amountPaid + calc.fineValue + calc.interestValue, 
-  };
-}
+    return {
+      wasLate: calc.daysLate > 0,
+      daysLate: calc.daysLate,
+      fineRate: calc.fineRate,
+      monthlyRate: calc.monthlyInterestRate,
+      finePaid: calc.fineValue,
+      interestPaid: calc.interestValue,
+      totalPaid: dto.amountPaid + calc.fineValue + calc.interestValue,
+    };
+  }
 
-  async create(chargeId: string, dto: CreateChargePaymentDto, file?: Express.Multer.File) {
+  async create(condominiumId: string, chargeId: string, dto: CreateChargePaymentDto, file?: Express.Multer.File) {
     this.ensureFile(file);
 
-    const charge = await this.repo.assertCharge(chargeId);
+    const charge = await this.repo.assertCharge(condominiumId, chargeId);
 
     const proof = file
       ? await this.minio.uploadFile(
-          file,
-          this.allowedProofExt,
-          `payments/${chargeId}/${Date.now()}_${file.originalname}`,
-        )
+        file,
+        this.allowedProofExt,
+        `payments/${chargeId}/${Date.now()}_${file.originalname}`,
+      )
       : null;
 
     const ext = file?.originalname.split('.').pop()?.toLowerCase();
 
     const calc = this.compute(charge, dto);
 
-    const created = await this.repo.createPayment(chargeId, {
+    const created = await this.repo.createPayment(condominiumId, chargeId, {
       amountPaid: Number(dto.amountPaid),
       paymentDate: new Date(dto.paymentDate),
       method: dto.method,
       calc,
       proof: file
         ? {
-            objectName: proof.fileName,
-            originalName: file.originalname,
-            mimeType: file.mimetype,
-            extension: ext ?? '',
-            size: file.size,
-          }
+          objectName: proof.fileName,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          extension: ext ?? '',
+          size: file.size,
+        }
         : undefined,
     });
 
     return { id: created.id };
   }
 
-  async list(chargeId: string) {
-    await this.repo.assertCharge(chargeId);
-    return this.repo.listPayments(chargeId);
+  async list(condominiumId: string, chargeId: string) {
+    await this.repo.assertCharge(condominiumId, chargeId);
+    return this.repo.listPayments(condominiumId, chargeId);
   }
 
-  async findOne(chargeId: string, paymentId: string) {
-    await this.repo.assertCharge(chargeId);
-    const p = await this.repo.getPayment(chargeId, paymentId);
+  async findOne(condominiumId: string, chargeId: string, paymentId: string) {
+    await this.repo.assertCharge(condominiumId, chargeId);
+    const p = await this.repo.getPayment(condominiumId, chargeId, paymentId);
     if (!p) throw new NotFoundException('Payment not found.');
 
     return p;
   }
 
-  async getProofDownloadUrl(chargeId: string, paymentId: string) {
-    const p = await this.findOne(chargeId, paymentId);
+  async getProofDownloadUrl(condominiumId: string, chargeId: string, paymentId: string) {
+    const p = await this.findOne(condominiumId, chargeId, paymentId);
     if (!p.proofObjectName) throw new BadRequestException('Payment has no proof file.');
 
     const url = await this.minio.getFileUrl(p.proofObjectName);
     return { url };
   }
 
-  async update(chargeId: string, paymentId: string, dto: UpdateChargePaymentDto, file?: Express.Multer.File) {
+  async update(condominiumId: string, chargeId: string, paymentId: string, dto: UpdateChargePaymentDto, file?: Express.Multer.File) {
     this.ensureFile(file);
 
-    const charge = await this.repo.assertCharge(chargeId);
-    const prev = await this.repo.assertPayment(chargeId, paymentId);
+    const charge = await this.repo.assertCharge(condominiumId, chargeId);
+    const prev = await this.repo.assertPayment(condominiumId, chargeId, paymentId);
 
     const merged = {
       amountPaid: dto.amountPaid ?? prev.amountPaid,
@@ -130,27 +130,27 @@ export class ChargePaymentsService {
 
     const proof = file
       ? await this.minio.uploadFile(
-          file,
-          this.allowedProofExt,
-          `payments/${chargeId}/${Date.now()}_${file.originalname}`,
-        )
+        file,
+        this.allowedProofExt,
+        `payments/${chargeId}/${Date.now()}_${file.originalname}`,
+      )
       : null;
 
     const ext = file?.originalname.split('.').pop()?.toLowerCase();
 
-    const { updated, previousProofObject } = await this.repo.updatePayment(chargeId, paymentId, {
+    const { updated, previousProofObject } = await this.repo.updatePayment(condominiumId, chargeId, paymentId, {
       amountPaid: Number(merged.amountPaid),
       paymentDate: new Date(merged.paymentDate),
       method: merged.method,
       calc,
       proof: file
         ? {
-            objectName: proof.fileName,
-            originalName: file.originalname,
-            mimeType: file.mimetype,
-            extension: ext ?? '',
-            size: file.size,
-          }
+          objectName: proof.fileName,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          extension: ext ?? '',
+          size: file.size,
+        }
         : undefined,
     });
 
@@ -164,11 +164,11 @@ export class ChargePaymentsService {
     return { id: updated.id };
   }
 
-  async remove(chargeId: string, paymentId: string) {
+  async remove(condominiumId: string, chargeId: string, paymentId: string) {
 
-    const p = await this.findOne(chargeId, paymentId);
+    const p = await this.findOne(condominiumId, chargeId, paymentId);
 
-    const res = await this.repo.softDeletePayment(chargeId, paymentId);
+    const res = await this.repo.softDeletePayment(condominiumId, chargeId, paymentId);
 
     if (p.proofObjectName) {
       try {

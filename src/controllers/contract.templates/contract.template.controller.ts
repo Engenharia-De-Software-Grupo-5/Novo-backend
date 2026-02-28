@@ -10,7 +10,7 @@ import { ContractTemplateService } from "src/services/contract.templates/contrac
 
 @ApiTags('ContractTemplates')
 @ApiBearerAuth('access-token')
-@Controller('contracttemplates')
+@Controller('condominios/:condId/modelos-contrato')
 export class ContractTemplateController {
     constructor(private readonly contractTemplateService: ContractTemplateService) { }
 
@@ -20,8 +20,10 @@ export class ContractTemplateController {
         required: false
     })
     @Get()
-    getAll(@Query('name') name?: string): Promise<ContractTemplateResponse[]> {
-        return this.contractTemplateService.getAll(name)
+    getAll(@Param('condId') condominiumId: string,
+        @Query('name') name?: string
+    ): Promise<ContractTemplateResponse[]> {
+        return this.contractTemplateService.getAll(condominiumId, name)
     }
 
     @Get('paginated')
@@ -35,30 +37,40 @@ export class ContractTemplateController {
         schema: PaginatedResponseSchema(ContractTemplateResponse),
     })
     getPaginated(
-    @Query() data: PaginationDto,
+        @Param('condId') condominiumId: string,
+        @Query() data: PaginationDto,
     ): Promise<PaginatedResult<ContractTemplateResponse>> {
-        return this.contractTemplateService.getPaginated(data);
+        return this.contractTemplateService.getPaginated(condominiumId, data);
     }
 
     @Get(':id')
-    getById(@Param('id') contractTemplateId: string): Promise<ContractTemplateResponse> {
-        return this.contractTemplateService.getById(contractTemplateId)
+    getById(
+        @Param('condId') condominiumId: string,
+        @Param('id') contractTemplateId: string
+    ): Promise<ContractTemplateResponse> {
+        return this.contractTemplateService.getById(condominiumId, contractTemplateId)
     }
 
     @Post()
-    create(@Body() dto: ContractTemplateDto): Promise<ContractTemplateResponse> {
-        return this.contractTemplateService.create(dto)
+    create(
+        @Param('condId') condominiumId: string,
+        @Body() dto: ContractTemplateDto
+    ): Promise<ContractTemplateResponse> {
+        return this.contractTemplateService.create(condominiumId, dto)
     }
 
     @Put(':id')
     update(
+        @Param('condId') condominiumId: string,
         @Param('id') contractTemplateId: string,
         @Body() dto: ContractTemplateDto): Promise<ContractTemplateResponse> {
-        return this.contractTemplateService.update(contractTemplateId, dto)
+        return this.contractTemplateService.update(condominiumId, contractTemplateId, dto)
     }
 
     @Delete(':id')
-    delete(@Param('id') contractTemplateId: string): Promise<ContractTemplateResponse> {
-        return this.contractTemplateService.delete(contractTemplateId)
+    delete(
+        @Param('condId') condominiumId: string,
+        @Param('id') contractTemplateId: string): Promise<ContractTemplateResponse> {
+        return this.contractTemplateService.delete(condominiumId, contractTemplateId)
     }
 }

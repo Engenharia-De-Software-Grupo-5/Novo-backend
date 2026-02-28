@@ -23,7 +23,7 @@ import { ExpenseService } from 'src/services/expenses/expense.service';
 
 @ApiTags('Expenses')
 @ApiBearerAuth('access-token')
-@Controller('expenses')
+@Controller('condominios/:condId/expenses')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ExpenseController {
   constructor(private readonly service: ExpenseService) {}
@@ -31,8 +31,8 @@ export class ExpenseController {
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Create expense' })
-  create(@Body() dto: ExpenseDto) {
-    return this.service.create(dto);
+  create(@Param('condId') condominiumId: string, @Body() dto: ExpenseDto) {
+    return this.service.create(dto, condominiumId);
   }
 
   @Get()

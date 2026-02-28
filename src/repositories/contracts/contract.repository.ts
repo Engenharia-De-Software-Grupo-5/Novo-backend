@@ -12,18 +12,29 @@ export class ContractRepository {
     id: true,
     contractUrl: true,
     description: true,
+    content: true,
     property: {
       select: {
         id: true,
         identifier: true,
-        address: true,
         unityNumber: true,
         unityType: true,
-        block: true,
-        floor: true,
-        totalArea: true,
         propertySituation: true,
         observations: true,
+        propertyAddress: {
+          select: {
+            id: true,
+            zip: true,
+            neighborhood: true,
+            city: true,
+            number: true,
+            street: true,
+            uf: true,
+            block: true,
+            floor: true,
+            totalArea: true,
+          },
+        },
         condominium: {
           select: {
             id: true,
@@ -143,19 +154,21 @@ export class ContractRepository {
         },
       },
     },
-    content: true
+    startDate: true,
+    dueDate: true,
   };
 
   constructor(private prisma: PrismaService) { }
 
   async getPaginated(
+    condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<ContractResponse>> {
     const where = buildDynamicWhere(
       data,
-      { deletedAt: null },
+      { deletedAt: null, property: { condominiumId } },
       {
-        enumFields: ['status'], 
+        enumFields: ['status'],
         customMappings: {
           permissionName: (content) => ({
             permission: { name: { contains: content, mode: 'insensitive' } },
@@ -189,76 +202,116 @@ export class ContractRepository {
   }
 
   // getAll, getById, create, update, delete
-  getAll(): Promise<ContractResponse[]> {
+  getAll(condominiumId: string): Promise<ContractResponse[]> {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        property: { condominiumId },
+      },
       select: this.selectFields,
     });
   }
 
-  getById(contractId: string): Promise<ContractResponse> {
+  getById(condominiumId: string, contractId: string): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
-      where: { id: contractId, deletedAt: null },
+      where: {
+        id: contractId, deletedAt: null,
+        property: { condominiumId },
+      },
       select: this.selectFields,
     });
   }
 
-  checkIfHas(dto: ContractDto): Promise<ContractResponse> {
+  checkIfHas(condominiumId: string, dto: ContractDto): Promise<ContractResponse> {
     return this.prisma.contracts.findUnique({
       where: {
         tenantId_propertyId: {
           tenantId: dto.tenantId,
           propertyId: dto.propertyId,
         },
+        property: { condominiumId },
       },
       select: this.selectFields,
     });
   }
 
-  create(dto: ContractDto): Promise<ContractResponse> {
+  async create(condominiumId: string, dto: ContractDto): Promise<ContractResponse> {
     const { file, ...dadosDoContrato } = dto;
+
+    const property = await this.prisma.properties.findFirst({
+      where: {
+        id: dto.propertyId,
+        condominiumId,
+      },
+    });
+
+    if (!property) {
+      throw new Error("Property não pertence a esse condomínio");
+    }
+
+    const data: any = {
+      description: dadosDoContrato.description,
+      content: dadosDoContrato.content,
+      startDate: dadosDoContrato.startDate,
+      dueDate: dadosDoContrato.dueDate,
+      tenant: { connect: { id: dto.tenantId } },
+      property: { connect: { id: dto.propertyId } },
+    };
+
+    if (dto.contractTemplateId) {
+      data.contractTemplate = { connect: { id: dto.contractTemplateId } };
+    }
 
     return this.prisma.contracts.create({
-      data: { ...dadosDoContrato },
+      data,
       select: this.selectFields,
     });
   }
 
-  update(id: string, dto: ContractDto): Promise<ContractResponse> {
+  update(condominiumId: string, contractId: string, dto: ContractDto): Promise<ContractResponse> {
     const { file, ...dadosDoContrato } = dto;
     return this.prisma.contracts.update({
-      where: { id: id },
+      where: {
+        id: contractId,
+        property: { condominiumId },
+      },
       data: { ...dadosDoContrato },
       select: this.selectFields,
     });
   }
 
-  updateUrl(id: string, url: string): Promise<ContractResponse> {
+  updateUrl(condominiumId: string, contractId: string, url: string): Promise<ContractResponse> {
     return this.prisma.contracts.update({
-      where: { id: id },
+      where: {
+        id: contractId,
+        property: { condominiumId },
+      },
       data: { contractUrl: url },
       select: this.selectFields,
     });
   }
 
-  delete(contratoId: string): Promise<ContractResponse> {
+  delete(condominiumId: string, contractId: string): Promise<ContractResponse> {
     return this.prisma.contracts.update({
-      where: { id: contratoId },
+      where: {
+        id: contractId,
+        property: { condominiumId },
+      },
       data: { deletedAt: new Date() },
       select: this.selectFields,
     });
   }
 
-  listByTenant(tenantId: string) {
+  listByTenant(condominiumId: string, tenantId: string) {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null, tenant: { id: tenantId } },
+      where: { deletedAt: null, tenant: { id: tenantId }, property: { condominiumId } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  listByProperty(propertyId: string) {
+  listByProperty(condominiumId: string, propertyId: string) {
     return this.prisma.contracts.findMany({
-      where: { deletedAt: null, property: { id: propertyId } },
+      where: { deletedAt: null, property: { id: propertyId, condominiumId } },
       orderBy: { createdAt: 'desc' },
     });
   }
