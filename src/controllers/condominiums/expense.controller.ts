@@ -26,7 +26,7 @@ import { ExpenseService } from 'src/services/expenses/expense.service';
 @Controller('condominios/:condId/expenses')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ExpenseController {
-  constructor(private readonly service: ExpenseService) {}
+  constructor(private readonly service: ExpenseService) { }
 
   @Post()
   @HttpCode(HttpStatus.OK)

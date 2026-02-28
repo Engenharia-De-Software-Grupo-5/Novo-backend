@@ -6,6 +6,7 @@ import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
+import { link } from 'fs';
 
 type CreateExpenseInput = {
   expensesFiles: Express.Multer.File[];
@@ -17,6 +18,11 @@ type CreateExpenseInput = {
   value: number;
   expenseDate: Date;
   paymentMethod: ExpensePaymentMethod;
+};
+
+type UpdateExpenseInput = Omit<CreateExpenseInput, 'expensesFiles'> & {
+  filesToKeep: string[]; // Lista de links dos arquivos que devem ser mantidos
+  newFiles: Express.Multer.File[]; // Novos arquivos a serem adicionados
 };
 
 @Injectable()
@@ -105,15 +111,15 @@ export class ExpenseRepository {
   }
 
   private readonly expenseSelect: {
-        description: true,
-        id: true,
-        propertyId: true,
-        value: true,
-        expenseFiles: true,
-        expenseType: true,
-        expenseDate: true,
-        paymentMethod: true,
-        targetType: true,
+    description: true,
+    id: true,
+    propertyId: true,
+    value: true,
+    expenseFiles: true,
+    expenseType: true,
+    expenseDate: true,
+    paymentMethod: true,
+    targetType: true,
   }
 
   async create(input: CreateExpenseInput, fileNameLinks: string[]) { //listaLinks: String[]
@@ -143,11 +149,11 @@ export class ExpenseRepository {
   }
 
   getAll(): Promise<ExpenseResponse[]> {
-      return this.prisma.condominiums.findMany({
-        where: { deletedAt: null },
-        select: this.expenseSelect,
-      });
-    }
+    return this.prisma.condominiums.findMany({
+      where: { deletedAt: null },
+      select: this.expenseSelect,
+    });
+  }
 
   async findByIdOrThrow(id: string): Promise<ExpenseResponse> {
     const exp = await this.prisma.expenses.findFirst({
@@ -159,7 +165,7 @@ export class ExpenseRepository {
     return exp
   }
 
-  async update(id: string, input: CreateExpenseInput) {
+  async update(id: string, input: UpdateExpenseInput, newFileNameLinks: string[]) {
     await this.findByIdOrThrow(id);
 
     const target = await this.assertTargetExists(input);
@@ -174,6 +180,18 @@ export class ExpenseRepository {
         value: input.value,
         expenseDate: input.expenseDate,
         paymentMethod: input.paymentMethod,
+        expenseFiles: {
+          deleteMany: {
+            link: {
+              notIn: input.filesToKeep,
+            },
+          },
+
+          create: newFileNameLinks.map(link => ({
+            link,
+            type: null,
+          }))
+        }
       },
     });
   }

@@ -3,7 +3,7 @@ import { IsEnum, IsNumber, IsString, IsDateString, Min, isString } from 'class-v
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 
 export class ExpenseDto {
-  @ApiProperty({description: 'Expense target type', enum: ExpenseTargetType, example: ExpenseTargetType.CONDOMINIUM })
+  @ApiProperty({ description: 'Expense target type', enum: ExpenseTargetType, example: ExpenseTargetType.CONDOMINIUM })
   @IsEnum(ExpenseTargetType)
   targetType: ExpenseTargetType;
 
@@ -30,9 +30,11 @@ export class ExpenseDto {
 
   @ApiProperty()
   files: Express.Multer.File[];
-  
 
-  @ApiProperty({description: 'Payment method', enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
+  @ApiProperty()
+  filesToKeep: string[];
+
+  @ApiProperty({ description: 'Payment method', enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
   @IsEnum(ExpensePaymentMethod)
   paymentMethod: ExpensePaymentMethod;
 }

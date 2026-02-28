@@ -14,16 +14,19 @@ export class ExpenseService {
   ) { }
 
   async create(dto: ExpenseDto, condominiumId: string) {
-    let fileNamesList: string[] = [];
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
-    for (let i = 0; i < dto.files.length; i++) {
-      const minioResponse = await this.minioClientService.uploadFile(
-        dto.files[i],
-        allowedExtensions,
-        dto.files[i].originalname, //talvez precise adicionar o I
-      );
-      fileNamesList[i] = minioResponse.fileName
-    }
+
+    const uploadResponses = await Promise.all(
+      dto.files.map(file =>
+        this.minioClientService.uploadFile(
+          file,
+          allowedExtensions,
+          file.originalname
+        )
+      )
+    );
+    const fileNamesList = uploadResponses.map(r => r.fileName);
+
     const result = await this.repo.create({
       ...dto,
       expenseDate: new Date(dto.expenseDate),
@@ -36,8 +39,8 @@ export class ExpenseService {
 
   async getAll(): Promise<ExpenseResponse[]> {
     const result = await this.repo.getAll();
-    for(let i = 0; i < result.length; i++) {
-      for(let j = 0; j < result[i].expenseFiles.length; j++){
+    for (let i = 0; i < result.length; i++) {
+      for (let j = 0; j < result[i].expenseFiles.length; j++) {
         const tempUrl = await this.minioClientService.getFileUrl(result[i].expenseFiles[j].link)
         result[i].expenseFiles[j].link = tempUrl
       }
@@ -53,22 +56,38 @@ export class ExpenseService {
 
   async findOne(id: string): Promise<ExpenseResponse> {
     const result = await this.repo.findByIdOrThrow(id);
-    
-    for(let i = 0; i < result.expenseFiles.length; i++){
+
+    for (let i = 0; i < result.expenseFiles.length; i++) {
       const tempUrl = await this.minioClientService.getFileUrl(result.expenseFiles[i].link)
-      result.expenseFiles[i].link = tempUrl 
+      result.expenseFiles[i].link = tempUrl
     }
 
     return result
   }
 
-  update(id: string, dto: ExpenseDto) {
+  async update(id: string, dto: ExpenseDto) {
+
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
+
+    const uploadResponses = await Promise.all(
+      dto.files.map(file =>
+        this.minioClientService.uploadFile(
+          file,
+          allowedExtensions,
+          file.originalname
+        )
+      )
+    );
+    const newFileNamesList = uploadResponses.map(r => r.fileName);
+
     return this.repo.update(id, {
       ...dto,
       expenseDate: new Date(dto.expenseDate),
-    } as any);
+      newFiles: dto.files,
+      filesToKeep: dto.filesToKeep,
+    },
+      newFileNamesList);
   }
-
   remove(id: string) {
     return this.repo.softDelete(id);
   }
