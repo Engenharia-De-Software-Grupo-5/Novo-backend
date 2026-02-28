@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsCPF } from 'class-validator-cpf';
 import { TenantStatus } from '@prisma/client';
 import { SpouseDto } from './spouse.dto';
 import { ProfessionalInfoDto } from './professionalInfo.dto';
@@ -12,76 +11,37 @@ import { BankingInfoDto } from './bankingInfo.dto';
 
 import {
   IsArray,
-  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 
-export class TenantDto {
-  @IsCPF()
-  @ApiProperty({
-    description: 'Tenant CPF (numbers only)',
-    example: '17508074084',
-  })
-  cpf: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'Full name of the tenant',
-    example: 'Pedro Pereira',
-  })
-  name: string;
-
-  @IsEmail()
-  @ApiProperty({
-    description: 'Tenant rg (numbers only)',
-    example: '123456789',
-  })
-  rg: string;
-
-  @IsEmail()
-  @ApiProperty({
-    description: 'Tenant issuing authority for RG',
-    example: 'SSP/PE',
-  })
-  issuingAuthority: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'Tenant birth date in string format',
-    example: '1995-03-15',
-  })
-  birthDate: string;
-
+export class TenantPatchDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
     description: 'Marital status of the tenant',
     example: 'Single',
   })
-  maritalStatus: string;
+  maritalStatus?: string;
 
   @IsNumber()
   @ApiProperty({
     description: 'Monthly income of the tenant',
     example: 5000,
   })
-  monthlyIncome: number;
+  monthlyIncome?: number;
 
   @IsEmail()
   @ApiProperty({
     description: 'Tenant email address',
     example: 'pedro@email.com',
   })
-  email: string;
+  email?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -89,7 +49,7 @@ export class TenantDto {
     description: 'Primary phone number',
     example: '+55 83 99999-0000',
   })
-  primaryPhone: string;
+  primaryPhone?: string;
 
   @IsOptional()
   @IsString()
@@ -105,7 +65,7 @@ export class TenantDto {
     description: 'Tenant address',
     example: '123 Main St, Apt 4B, Cityville',
   })
-  address: string;
+  address?: string;
 
   @IsEnum(TenantStatus)
   @ApiProperty({
