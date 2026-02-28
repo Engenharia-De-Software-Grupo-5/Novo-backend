@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { UserStatus } from '@prisma/client';
+import { SkipUppercase } from 'src/common/decorators';
 
 export class UserDto {
   @IsString()
@@ -11,7 +18,7 @@ export class UserDto {
   })
   name: string;
 
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
   @ApiProperty({
     description: 'Endereço de e-mail do usuário',
@@ -21,9 +28,10 @@ export class UserDto {
 
   @IsString()
   @IsNotEmpty()
+  @SkipUppercase()
   @ApiProperty({
     description: 'Nome da permissão ou perfil de acesso associado',
-    example: 'ADMIN',
+    example: 'Admin',
   })
   role: string;
 
@@ -37,6 +45,7 @@ export class UserDto {
   status?: UserStatus;
 
   @IsOptional()
+  @SkipUppercase()
   @IsString()
   @ApiPropertyOptional({
     description: 'Mensagem de retorno ou observação sobre o usuário',
