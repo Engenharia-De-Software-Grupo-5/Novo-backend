@@ -34,8 +34,15 @@ export class ExpenseService {
     return result
   }
 
-  list() {
-    return this.repo.findAll();
+  async getAll(): Promise<ExpenseResponse[]> {
+    const result = await this.repo.getAll();
+    for(let i = 0; i < result.length; i++) {
+      for(let j = 0; j < result[i].expenseFiles.length; j++){
+        const tempUrl = await this.minioClientService.getFileUrl(result[i].expenseFiles[j].link)
+        result[i].expenseFiles[j].link = tempUrl
+      }
+    }
+    return result
   }
 
   listPaginated(
@@ -44,8 +51,15 @@ export class ExpenseService {
     return this.repo.getPaginated(data);
   }
 
-  findOne(id: string) {
-    return this.repo.findByIdOrThrow(id);
+  async findOne(id: string): Promise<ExpenseResponse> {
+    const result = await this.repo.findByIdOrThrow(id);
+    
+    for(let i = 0; i < result.expenseFiles.length; i++){
+      const tempUrl = await this.minioClientService.getFileUrl(result.expenseFiles[i].link)
+      result.expenseFiles[i].link = tempUrl 
+    }
+
+    return result
   }
 
   update(id: string, dto: ExpenseDto) {

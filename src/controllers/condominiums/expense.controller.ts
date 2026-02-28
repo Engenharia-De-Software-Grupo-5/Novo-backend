@@ -38,8 +38,8 @@ export class ExpenseController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List expenses' })
-  list() {
-    return this.service.list();
+  list(): Promise<ExpenseResponse[]> {
+    return this.service.getAll();
   }
 
   @Get('paginated')

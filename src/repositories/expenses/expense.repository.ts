@@ -104,8 +104,21 @@ export class ExpenseRepository {
     throw new BadRequestException('targetType invalid.');
   }
 
+  private readonly expenseSelect: {
+        description: true,
+        id: true,
+        propertyId: true,
+        value: true,
+        expenseFiles: true,
+        expenseType: true,
+        expenseDate: true,
+        paymentMethod: true,
+        targetType: true,
+  }
+
   async create(input: CreateExpenseInput, fileNameLinks: string[]) { //listaLinks: String[]
     const target = await this.assertTargetExists(input);
+
 
     const response = await this.prisma.expenses.create({
       data: {
@@ -129,22 +142,21 @@ export class ExpenseRepository {
     return response;
   }
 
-  findAll() {
-    return this.prisma.expenses.findMany({
-      where: { deletedAt: null },
-      orderBy: { expenseDate: 'desc' },
-      include: { invoices: { where: { deletedAt: null } } }, // útil pro front
-    });
-  }
+  getAll(): Promise<ExpenseResponse[]> {
+      return this.prisma.condominiums.findMany({
+        where: { deletedAt: null },
+        select: this.expenseSelect,
+      });
+    }
 
-  async findByIdOrThrow(id: string) {
+  async findByIdOrThrow(id: string): Promise<ExpenseResponse> {
     const exp = await this.prisma.expenses.findFirst({
       where: { id, deletedAt: null },
-      include: { invoices: { where: { deletedAt: null } } },
+      select: this.expenseSelect
     });
 
     if (!exp) throw new NotFoundException('Expense not found.');
-    return exp;
+    return exp
   }
 
   async update(id: string, input: CreateExpenseInput) {

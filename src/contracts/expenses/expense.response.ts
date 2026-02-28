@@ -8,9 +8,6 @@ export class ExpenseResponse {
   @IsEnum(ExpenseTargetType)
   targetType: ExpenseTargetType;
 
-  @ApiProperty({ description: 'Condominium id when targetType=CONDOMINIUM', required: false })
-  condominiumId?: string;
-
   @ApiProperty({ description: 'Property id when targetType=PROPERTY', required: false })
   propertyId?: string;
 
