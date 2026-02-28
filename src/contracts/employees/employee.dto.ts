@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, MinLength, ValidateNested} from 'class-validator';
+import { IsArray, IsEnum, IsISO8601, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, MinLength, ValidateNested} from 'class-validator';
 import { EmployeeStatus, ContractType, EmployeeRoles } from '@prisma/client';
 import { BankDataDto } from './bankData.dto';
 import { IsCPF } from 'class-validator-cpf';
+import { EmployeeContractDto } from './employeeContract.dto';
 
 
 export class EmployeeDto {
@@ -23,13 +24,14 @@ export class EmployeeDto {
     name: string;
 
     
-    @Type(() => Date)
-    @IsDate()
+    @IsString()
+    @IsNotEmpty()
+    @IsISO8601()
     @ApiProperty({
         description: "Obrigatory field for employee's birth date",
-        example: '1990-01-01T00:00:00.000Z',
+        example: '1990-01-01',
     })
-    birthDate: Date;
+    birthDate: string;
 
     @IsOptional()
     @IsString()
@@ -82,13 +84,13 @@ export class EmployeeDto {
     contractType?: ContractType;
 
     @IsOptional()
-    @Type(() => Date)
-    @IsDate()
+    @IsString()
+    @IsISO8601()
     @ApiPropertyOptional({
         description: "Optional field for employee's admission date",
-        example: '2013-01-27T04:59:32.000Z',
+        example: '2013-01-27',
     })
-    admissionDate?: Date;
+    admissionDate?: string;
 
     @IsOptional()
     @Type(() => Number)
@@ -111,28 +113,26 @@ export class EmployeeDto {
     @IsOptional()
     @IsEnum(EmployeeStatus)
     @ApiPropertyOptional({
-        description: "Optional field for employee's current state (ATIVO is the dafault option)",
+        description: "Optional field for employee's current state (ACTIVE is the dafault option)",
         enum: EmployeeStatus,
-        example: EmployeeStatus.ATIVO,
+        example: EmployeeStatus.ACTIVE,
     })
-    status?: EmployeeStatus;
+    status: EmployeeStatus;
 
-    lastContract?: EmployeeContract;
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => EmployeeContractDto)
+    @ApiPropertyOptional({
+        description: 'Optional field for employee last contract',
+        type: () => EmployeeContractDto,
+    })
+    lastContract?: EmployeeContractDto;
 
-    contracts?: {
-        id: string;
-        name: string;
-        type: string;
-        size: number;
-        url: string;
-    }[];
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => EmployeeContractDto)
+    @ApiPropertyOptional({ type: () => [EmployeeContractDto] })
+    contracts?: EmployeeContractDto[];
 
-}
-
-export interface EmployeeContract {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url: string;
 }

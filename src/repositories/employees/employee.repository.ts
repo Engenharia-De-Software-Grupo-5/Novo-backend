@@ -32,9 +32,10 @@ export class EmployeeRepository {
       orderBy: { createdAt: Prisma.SortOrder.asc },
       select: {
         id: true,
-        originalName: true,
-        mimeType: true,
+        name: true,
+        type: true,
         size: true,
+        url: true,
       },
     },
     role: true,

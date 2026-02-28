@@ -16,9 +16,10 @@ export async function seedEmployees(
                 accountType: 'Corrente',
             },
             },
+            status: 'ACTIVE',
             role: 'PORTEIRO',
-            admissionDate: new Date('2025-02-03T00:00:00.000Z'),
-            birthDate: new Date('1990-01-01T00:00:00.000Z'),
+            admissionDate: '2013-01-27',
+            birthDate: '1990-01-01',
         },
     });
 
@@ -34,10 +35,11 @@ export async function seedEmployees(
                 accountType: 'Corrente',
             },
             },
+            status: 'ACTIVE',
             role: 'PORTEIRO',
             contractType: 'CLT',
-            admissionDate: new Date('2025-02-03T00:00:00.000Z'),
-            birthDate: new Date('1990-01-01T00:00:00.000Z'),
+            admissionDate: '2025-02-03',
+            birthDate: '1990-01-01',
         },
     });
             

@@ -1,6 +1,7 @@
 import { ContractType, EmployeeStatus, EmployeeRoles } from "@prisma/client";
 import { BankDataResponse } from "./bankData.response";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { EmployeeContractResponse } from "./employeeContract.response";
 
 export class EmployeeResponse {
 
@@ -63,9 +64,9 @@ export class EmployeeResponse {
 
   @ApiPropertyOptional({
     description: 'Employee admission date',
-    example: '2023-01-01T00:00:00.000Z',
+    example: '2021-01-01',
   })
-  admissionDate?: Date;
+  admissionDate?: string;
 
   @ApiPropertyOptional({
     description: 'Employee base salary',
@@ -82,32 +83,21 @@ export class EmployeeResponse {
   @ApiPropertyOptional({
     description: 'Employee status',
     enum: EmployeeStatus,
-    example: EmployeeStatus.ATIVO,
+    example: EmployeeStatus.ACTIVE,
   })
   status?: EmployeeStatus;
 
-  contracts?: {
-      id: string;
-      name: string;
-      type: string;
-      size: number;
-      url: string;
-  }[];
+  @ApiPropertyOptional({
+    description: 'Employee contracts',
+    type: () => [EmployeeContractResponse],
+  })
+  contracts?: EmployeeContractResponse[];
 
-  lastContract?: {
-      id: string;
-      name: string;
-      type: string;
-      size: number;
-      url: string;
-  };
+  @ApiPropertyOptional({
+    description: 'Employee last contract',
+    type: () => EmployeeContractResponse,
+    nullable: true,
+  })
+  lastContract?: EmployeeContractResponse;
 }
 
-
-export interface EmployeeContract {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url: string;
-}

@@ -15,11 +15,10 @@ export class EmployeeContractsRepository {
   create(data: {
     condId: string;
     employeeId: string;
-    objectName: string;
-    originalName: string;
-    mimeType: string;
-    extension: string;
+    name: string;
+    type: string;
     size: number;
+    url: string;
   }) {
     return this.prisma.employeeContracts.create({ data });
   }

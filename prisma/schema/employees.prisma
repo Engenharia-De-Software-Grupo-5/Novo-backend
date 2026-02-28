@@ -7,9 +7,9 @@ enum ContractType {
 }
 
 enum EmployeeStatus {
-  ATIVO
-  INATIVO
-  PENDENTE
+  ACTIVE
+  INACTIVE
+  PENDING
 }
 
 enum EmployeeRoles {
@@ -33,14 +33,14 @@ model Employees {
   deletedAt         DateTime?
   role              EmployeeRoles
   contractType      ContractType?
-  admissionDate     DateTime?
-  birthDate         DateTime
+  admissionDate     String?
+  birthDate         String
   address           String?
   phone             String?
   terminationDate   DateTime?
   baseSalary        Float?
   workload          Int?
-  status            EmployeeStatus      @default(ATIVO)
+  status            EmployeeStatus      
   employeeContracts EmployeeContracts[]
   employeePayments  EmployeePayments[]
   employeeBenefits  EmployeeBenefits[]

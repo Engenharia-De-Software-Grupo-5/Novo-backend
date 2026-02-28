@@ -30,11 +30,10 @@ export class EmployeeContractsService {
     return this.repo.create({
       condId,
       employeeId,
-      objectName: fileName,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      extension: 'pdf',
+      name: fileName,
+      type: file.mimetype,
       size: file.size,
+      url: await this.minio.getFileUrl(fileName),
     });
   }
 
@@ -49,7 +48,7 @@ export class EmployeeContractsService {
     const contract = await this.repo.findForEmployee(condId, employeeId, contractId);
     if (!contract) throw new NotFoundException('Contract not found.');
 
-    const url = await this.minio.getFileUrl(contract.objectName);
+    const url = await this.minio.getFileUrl(contract.name);
     return { ...contract, url };
   }
 
@@ -57,7 +56,7 @@ export class EmployeeContractsService {
     const contract = await this.repo.findForEmployee(condId, employeeId, contractId);
     if (!contract) throw new NotFoundException('Contract not found.');
 
-    const url = await this.minio.getFileUrl(contract.objectName);
+    const url = await this.minio.getFileUrl(contract.name);
     return { url };
   }
 
@@ -65,7 +64,7 @@ export class EmployeeContractsService {
     const contract = await this.repo.findForEmployee(condId, employeeId, contractId);
     if (!contract) throw new NotFoundException('Contract not found.');
     try {
-      await this.minio.deleteFile(contract.objectName);
+      await this.minio.deleteFile(contract.name);
     } catch {
     }
 
@@ -82,7 +81,7 @@ export class EmployeeContractsService {
 
     const contractsToRemove = currentContracts.filter(c => !existingIds.includes(c.id));
     for (const c of contractsToRemove) {
-      try { await this.minio.deleteFile(c.objectName); } catch {}
+      try { await this.minio.deleteFile(c.name); } catch {}
       await this.repo.softDelete(c.id);
     }
 
@@ -90,21 +89,23 @@ export class EmployeeContractsService {
     for (const file of files) {
       const uploaded = await this.upload(condId, employeeId, file);
       uploadedContracts.push({
-        id: uploaded.id,
-        name: uploaded.originalName,
-        type: uploaded.mimeType,
+        condId: uploaded.condId,
+        employeeId: uploaded.employeeId,
+        name: uploaded.name,
+        type: uploaded.type,
         size: uploaded.size,
-        url: await this.minio.getFileUrl(uploaded.objectName),
+        url: await this.minio.getFileUrl(uploaded.name),
       });
     }
 
     const keptContracts = currentContracts.filter(c => existingIds.includes(c.id))
       .map(async c => ({
-        id: c.id,
-        name: c.originalName,
-        type: c.mimeType,
+        condId: c.condId,
+        employeeId: c.employeeId,
+        name: c.name,
+        type: c.type,
         size: c.size,
-        url: await this.minio.getFileUrl(c.objectName),
+        url: await this.minio.getFileUrl(c.name),
       }));
 
     return [...keptContracts, ...uploadedContracts];

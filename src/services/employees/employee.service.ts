@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { EmployeeContract, EmployeeDto } from 'src/contracts/employees/employee.dto';
+import { EmployeeDto } from 'src/contracts/employees/employee.dto';
+import { EmployeeContractDto } from 'src/contracts/employees/employeeContract.dto';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { EmployeeRepository } from 'src/repositories/employees/employee.repository';
 import { EmployeeContractsService } from './employee-contracts.service';
@@ -56,7 +57,7 @@ export class EmployeeService {
       existingFileIds,
     );
 
-    const finalContractsMapped: EmployeeContract[] = finalContracts.map(c => ({
+    const finalContractsMapped: EmployeeContractDto[] = finalContracts.map(c => ({
       id: c.id,
       name: c.originalName,
       type: c.mimeType,
