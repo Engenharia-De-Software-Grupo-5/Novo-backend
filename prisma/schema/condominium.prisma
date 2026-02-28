@@ -11,7 +11,9 @@ model Condominiums {
   deletedAt         DateTime?
   expenses          Expenses[]
   accesses          Access[]
-
+  employees         Employees[]
+  employeeContracts EmployeeContracts[]
+  
   @@map("condominiums")
 }
 

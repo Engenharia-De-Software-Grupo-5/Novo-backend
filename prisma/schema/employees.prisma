@@ -9,31 +9,44 @@ enum ContractType {
 enum EmployeeStatus {
   ACTIVE
   INACTIVE
-  TERMINATED
-  ON_LEAVE
-  VACATION
+  PENDING
+}
+
+enum EmployeeRoles {
+  GERENTE
+  PORTEIRO
+  ZELADOR
+  FAXINEIRO
 }
 
 model Employees {
   id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cpf               String              @unique
+  cpf               String              
   name              String
-  bankDataId        String              @unique @db.Uuid
-  bankData          BanksData           @relation(fields: [bankDataId], references: [id])
+  condominium       Condominiums        @relation(fields: [condId], references: [id])
+  condId            String              @db.Uuid
+  email             String?
+  bankDataId        String?             @unique @db.Uuid
+  bankData          BanksData?          @relation(fields: [bankDataId], references: [id])
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   deletedAt         DateTime?
-  role              String
-  contractType      ContractType
-  hireDate          DateTime
+  role              EmployeeRoles
+  contractType      ContractType?
+  admissionDate     String?
+  birthDate         String
+  address           String?
+  phone             String?
   terminationDate   DateTime?
-  baseSalary        Float
-  workload          Int
-  status            EmployeeStatus      @default(ACTIVE)
+  baseSalary        Float?
+  workload          Int?
+  status            EmployeeStatus      
   employeeContracts EmployeeContracts[]
   employeePayments  EmployeePayments[]
   employeeBenefits  EmployeeBenefits[]
 
+  @@unique([cpf, condId])
+  @@index([condId, deletedAt])
   @@map("employees")
 }
 
@@ -56,14 +69,16 @@ model BanksData {
 model EmployeeContracts {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  employeeId String    @db.Uuid
-  employee   Employees @relation(fields: [employeeId], references: [id])
+  condominium  Condominiums @relation(fields: [condId], references: [id])
+  condId       String @db.Uuid
 
-  objectName   String @unique
-  originalName String
-  mimeType     String
-  extension    String
-  size         Int
+  employeeId   String    @db.Uuid
+  employee     Employees @relation(fields: [employeeId], references: [id])
+
+  name String
+  type String
+  size Int
+  url  String
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
