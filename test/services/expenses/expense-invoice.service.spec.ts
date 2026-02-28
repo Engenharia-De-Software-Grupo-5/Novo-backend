@@ -68,7 +68,6 @@ describe('ExpenseInvoiceService', () => {
       objectName: 'obj.pdf',
       originalName: 'note.png',
       mimeType: 'application/pdf',
-      extension: 'png',
       size: 999,
     });
 

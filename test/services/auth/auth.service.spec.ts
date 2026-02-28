@@ -4,25 +4,23 @@ import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
+  hash: jest.fn(),
 }));
 
 describe('AuthService', () => {
-  beforeEach(() => {
-    jest.spyOn(console, 'log').mockImplementation(() => undefined);
-  });
-
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   const makeService = () => {
     const authRepository = {
-      getUserByEmailOrCpf: jest.fn(),
+      getUserByEmail: jest.fn(),
+      getUserIdByEmail: jest.fn(),
+      updateUserPassword: jest.fn(),
     };
 
     const jwtService = {
       sign: jest.fn(),
-      signAsync: jest.fn(),
     };
 
     const service = new AuthService(authRepository as any, jwtService as any);
@@ -31,51 +29,36 @@ describe('AuthService', () => {
   };
 
   describe('validateUser', () => {
-    it('should return user (without password) if password matches', async () => {
+    it('should return user (with password undefined) if password matches', async () => {
       const { service, authRepository } = makeService();
 
       const userFromRepo = {
         id: '1',
         email: 'test@test.com',
-        cpf: '12345678900',
         password: 'hashed',
         name: 'Test',
+        isAdminMaster: false,
         accesses: [],
       };
 
-      authRepository.getUserByEmailOrCpf.mockResolvedValue(userFromRepo);
+      authRepository.getUserByEmail.mockResolvedValue(userFromRepo);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser('test@test.com', '123');
 
-      expect(authRepository.getUserByEmailOrCpf).toHaveBeenCalledWith('test@test.com');
+      expect(authRepository.getUserByEmail).toHaveBeenCalledWith('test@test.com');
       expect(bcrypt.compare).toHaveBeenCalledWith('123', 'hashed');
 
       expect(result).toEqual({
-        id: '1',
-        email: 'test@test.com',
-        cpf: '12345678900',
-        name: 'Test',
-        accesses: [],
+        ...userFromRepo,
+        password: undefined,
       });
-    });
-
-    it('should normalize cpf (remove . and -) before calling repository', async () => {
-      const { service, authRepository } = makeService();
-
-      authRepository.getUserByEmailOrCpf.mockResolvedValue(null);
-
-      await expect(service.validateUser('123.456.789-00', '123')).rejects.toBeInstanceOf(
-        UnauthorizedException,
-      );
-
-      expect(authRepository.getUserByEmailOrCpf).toHaveBeenCalledWith('12345678900');
     });
 
     it('should throw UnauthorizedException if user does not exist', async () => {
       const { service, authRepository } = makeService();
 
-      authRepository.getUserByEmailOrCpf.mockResolvedValue(null);
+      authRepository.getUserByEmail.mockResolvedValue(null);
 
       await expect(service.validateUser('test@test.com', '123')).rejects.toBeInstanceOf(
         UnauthorizedException,
@@ -88,13 +71,13 @@ describe('AuthService', () => {
       const userFromRepo = {
         id: '1',
         email: 'test@test.com',
-        cpf: '12345678900',
         password: 'hashed',
         name: 'Test',
+        isAdminMaster: true,
         accesses: [],
       };
 
-      authRepository.getUserByEmailOrCpf.mockResolvedValue(userFromRepo);
+      authRepository.getUserByEmail.mockResolvedValue(userFromRepo);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(service.validateUser('test@test.com', 'wrong')).rejects.toBeInstanceOf(
@@ -104,7 +87,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should sign payload correctly and return access_token', async () => {
+    it('should sign payload correctly and return access_token + name', () => {
       const { service, jwtService } = makeService();
 
       jwtService.sign.mockReturnValue('jwt-token');
@@ -112,37 +95,29 @@ describe('AuthService', () => {
       const user = {
         id: '1',
         email: 'test@test.com',
-        cpf: '12345678900',
         name: 'Test User',
+        isAdminMaster: true,
         accesses: [
           { permission: { id: 'p1', name: 'ADMIN' }, condominium: { id: 'c1', name: 'C1' } },
           { permission: { id: 'p2', name: 'MANAGER' }, condominium: { id: 'c2', name: 'C2' } },
         ],
       };
 
-      const result: any = await service.login(user as any);
+      const result = service.login(user as any);
 
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: user.id,
         email: user.email,
-        cpf: user.cpf,
         name: user.name,
+        isAdminMaster: user.isAdminMaster,
         permission: user.accesses.map((a) => a.permission),
         condominium: user.accesses.map((a) => a.condominium),
       });
 
-  
-      expect(result).toEqual(
-        expect.objectContaining({
-          access_token: 'jwt-token',
-        }),
-      );
-
-   
-      expect(result.name).toBe('Test User');
-
- 
-      expect(result.user).toBeUndefined();
+      expect(result).toEqual({
+        access_token: 'jwt-token',
+        name: 'Test User',
+      });
     });
   });
 });

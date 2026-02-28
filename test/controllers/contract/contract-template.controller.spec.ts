@@ -14,6 +14,7 @@ describe('ContractTemplateController', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    getPaginated: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -31,48 +32,48 @@ describe('ContractTemplateController', () => {
     service = module.get(ContractTemplateService);
   });
 
-  it('getAll should call service.getAll(name?)', async () => {
+  it('getAll should call service.getAll(condominiumId, name?)', async () => {
     service.getAll.mockResolvedValue([{ id: 't1' }] as any);
 
-    const res = await controller.getAll('abc');
+    const res = await controller.getAll('c1', 'abc');
 
-    expect(service.getAll).toHaveBeenCalledWith('abc');
+    expect(service.getAll).toHaveBeenCalledWith('c1', 'abc');
     expect(res).toEqual([{ id: 't1' }]);
   });
 
-  it('getById should call service.getById(id)', async () => {
+  it('getById should call service.getById(condominiumId, id)', async () => {
     service.getById.mockResolvedValue({ id: 't1' } as any);
 
-    const res = await controller.getById('t1');
+    const res = await controller.getById('c1', 't1');
 
-    expect(service.getById).toHaveBeenCalledWith('t1');
+    expect(service.getById).toHaveBeenCalledWith('c1', 't1');
     expect(res).toEqual({ id: 't1' });
   });
 
-  it('create should call service.create(dto)', async () => {
+  it('create should call service.create(condominiumId, dto)', async () => {
     service.create.mockResolvedValue({ id: 't1' } as any);
 
-    const res = await controller.create({ name: 'X' } as any);
+    const res = await controller.create('c1', { name: 'X' } as any);
 
-    expect(service.create).toHaveBeenCalledWith({ name: 'X' });
+    expect(service.create).toHaveBeenCalledWith('c1', { name: 'X' });
     expect(res).toEqual({ id: 't1' });
   });
 
-  it('update should call service.update(id, dto)', async () => {
+  it('update should call service.update(condominiumId, id, dto)', async () => {
     service.update.mockResolvedValue({ id: 't1' } as any);
 
-    const res = await controller.update('t1', { name: 'Y' } as any);
+    const res = await controller.update('c1', 't1', { name: 'Y' } as any);
 
-    expect(service.update).toHaveBeenCalledWith('t1', { name: 'Y' });
+    expect(service.update).toHaveBeenCalledWith('c1', 't1', { name: 'Y' });
     expect(res).toEqual({ id: 't1' });
   });
 
-  it('delete should call service.delete(id)', async () => {
+  it('delete should call service.delete(condominiumId, id)', async () => {
     service.delete.mockResolvedValue({ id: 't1' } as any);
 
-    const res = await controller.delete('t1');
+    const res = await controller.delete('c1', 't1');
 
-    expect(service.delete).toHaveBeenCalledWith('t1');
+    expect(service.delete).toHaveBeenCalledWith('c1', 't1');
     expect(res).toEqual({ id: 't1' });
   });
 });

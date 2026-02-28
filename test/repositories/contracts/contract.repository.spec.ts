@@ -8,12 +8,18 @@ describe('ContractRepository', () => {
       create: jest.fn(),
       update: jest.fn(),
     },
+    properties: {
+      findFirst: jest.fn(),
+    },
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('create should omit "file" from dto before sending to prisma', async () => {
     prisma.contracts.create.mockResolvedValue({ id: 'c1' } as any);
+    prisma.properties.findFirst.mockResolvedValue({ id: 'p1' } as any);
 
     const repo = new ContractRepository(prisma as any);
 
@@ -21,11 +27,12 @@ describe('ContractRepository', () => {
       tenantId: 't1',
       propertyId: 'p1',
       contractTemplateId: 'ct1',
-      description: 'x',
-      file: { any: true },
+      startDate: new Date('2026-02-01'),
+      endDate: new Date('2026-03-01'),
+      file: { originalname: 'x.pdf' }, // deve ser removido
     };
 
-    const res = await repo.create(dto);
+    const res = await repo.create('cond1', dto);
 
     expect(prisma.contracts.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -39,11 +46,11 @@ describe('ContractRepository', () => {
     prisma.contracts.update.mockResolvedValue({ id: 'c1' } as any);
 
     const repo = new ContractRepository(prisma as any);
-    const res = await repo.updateUrl('c1', 'url');
+    const res = await repo.updateUrl('cond1', 'c1', 'url');
 
     expect(prisma.contracts.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'c1' },
+        where: { id: 'c1', property: { condominiumId: 'cond1' } },
         data: { contractUrl: 'url' },
       }),
     );
@@ -54,11 +61,11 @@ describe('ContractRepository', () => {
     prisma.contracts.update.mockResolvedValue({ id: 'c1' } as any);
 
     const repo = new ContractRepository(prisma as any);
-    const res = await repo.delete('c1');
+    const res = await repo.delete('cond1', 'c1');
 
     expect(prisma.contracts.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'c1' },
+        where: { id: 'c1', property: { condominiumId: 'cond1' } },
         data: { deletedAt: expect.any(Date) },
       }),
     );

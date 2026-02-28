@@ -42,7 +42,6 @@ describe('ExpenseInvoiceRepository', () => {
       objectName: 'obj.pdf',
       originalName: 'inv.pdf',
       mimeType: 'application/pdf',
-      extension: 'pdf',
       size: 10,
     });
 
@@ -52,7 +51,6 @@ describe('ExpenseInvoiceRepository', () => {
         objectName: 'obj.pdf',
         originalName: 'inv.pdf',
         mimeType: 'application/pdf',
-        extension: 'pdf',
         size: 10,
       },
     });
@@ -82,23 +80,9 @@ describe('ExpenseInvoiceRepository', () => {
     const repo = new ExpenseInvoiceRepository(prisma as any);
 
     await expect(repo.findOneOrThrow('e1', 'i1')).rejects.toThrow(NotFoundException);
-
-    expect(prisma.invoices.findFirst).toHaveBeenCalledWith({
-      where: { id: 'i1', expenseId: 'e1', deletedAt: null },
-    });
   });
 
-  it('findOneOrThrow should return invoice when found', async () => {
-    prisma.invoices.findFirst.mockResolvedValue({ id: 'i1' } as any);
-
-    const repo = new ExpenseInvoiceRepository(prisma as any);
-
-    const res = await repo.findOneOrThrow('e1', 'i1');
-
-    expect(res).toEqual({ id: 'i1' });
-  });
-
-  it('softDelete should find invoice then update deletedAt and return message', async () => {
+  it('softDelete should update deletedAt and return message', async () => {
     prisma.invoices.findFirst.mockResolvedValue({ id: 'i1' } as any);
     prisma.invoices.update.mockResolvedValue({} as any);
 

@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExpenseInvoiceController } from 'src/controllers/expenses/expense-invoice.controller';
 import { ExpenseInvoiceService } from 'src/services/expenses/expense-invoice.service';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 describe('ExpenseInvoiceController', () => {
   let controller: ExpenseInvoiceController;
@@ -12,7 +13,7 @@ describe('ExpenseInvoiceController', () => {
     upload: jest.fn(),
     list: jest.fn(),
     findOne: jest.fn(),
-    getDownloadUrl: jest.fn(), 
+    getDownloadUrl: jest.fn(),
     remove: jest.fn(),
   };
 
@@ -31,6 +32,8 @@ describe('ExpenseInvoiceController', () => {
       controllers: [ExpenseInvoiceController],
       providers: [{ provide: ExpenseInvoiceService, useValue: mockService }],
     })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
       .overrideGuard(RolesGuard)
       .useValue({ canActivate: () => true })
       .compile();

@@ -16,6 +16,9 @@ describe('ContractController', () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    listPaginated: jest.fn(),
+    listByTenant: jest.fn(),
+    listByProperty: jest.fn(),
   };
 
   const mockPreviewService = {
@@ -49,26 +52,26 @@ describe('ContractController', () => {
     previewService = module.get(PreviewContractService);
   });
 
-  it('getAll should call contractService.getAll()', async () => {
+  it('getAll should call contractService.getAll(condominiumId)', async () => {
     contractService.getAll.mockResolvedValue([{ id: 'c1' }] as any);
 
-    const res = await controller.getAll();
+    const res = await controller.getAll('cond1');
 
-    expect(contractService.getAll).toHaveBeenCalledTimes(1);
+    expect(contractService.getAll).toHaveBeenCalledWith('cond1');
     expect(res).toEqual([{ id: 'c1' }]);
   });
 
-  it('getById should call contractService.getById(id)', async () => {
+  it('getById should call contractService.getById(condominiumId, id)', async () => {
     contractService.getById.mockResolvedValue({ id: 'c1' } as any);
 
-    const res = await controller.getById('c1');
+    const res = await controller.getById('cond1', 'c1');
 
-    expect(contractService.getById).toHaveBeenCalledWith('c1');
+    expect(contractService.getById).toHaveBeenCalledWith('cond1', 'c1');
     expect(res).toEqual({ id: 'c1' });
   });
 
   describe('createWithFile', () => {
-    it('should call contractService.create(dto, file) when file provided', async () => {
+    it('should call contractService.create(condominiumId, dto, file) when file provided', async () => {
       contractService.create.mockResolvedValue({ id: 'c1' } as any);
 
       const dto: any = {
@@ -79,13 +82,13 @@ describe('ContractController', () => {
       };
       const file = makeFile('a.pdf');
 
-      const res = await controller.createWithFile(dto, file);
+      const res = await controller.createWithFile('cond1', dto, file);
 
-      expect(contractService.create).toHaveBeenCalledWith(dto, file);
+      expect(contractService.create).toHaveBeenCalledWith('cond1', dto, file);
       expect(res).toEqual({ id: 'c1' });
     });
 
-    it('should call contractService.create(dto, undefined) when file not provided', async () => {
+    it('should call contractService.create(condominiumId, dto, undefined) when file not provided', async () => {
       contractService.create.mockResolvedValue({ id: 'c1' } as any);
 
       const dto: any = {
@@ -94,41 +97,41 @@ describe('ContractController', () => {
         contractTemplateId: 'tpl1',
       };
 
-      const res = await controller.createWithFile(dto, undefined);
+      const res = await controller.createWithFile('cond1', dto, undefined);
 
-      expect(contractService.create).toHaveBeenCalledWith(dto, undefined);
+      expect(contractService.create).toHaveBeenCalledWith('cond1', dto, undefined);
       expect(res).toEqual({ id: 'c1' });
     });
   });
 
-  it('update should call contractService.update(id, dto)', async () => {
+  it('update should call contractService.update(condominiumId, id, dto)', async () => {
     contractService.update.mockResolvedValue({ id: 'c1' } as any);
 
     const dto: any = { description: 'new' };
 
-    const res = await controller.update('c1', dto);
+    const res = await controller.update('cond1', 'c1', dto);
 
-    expect(contractService.update).toHaveBeenCalledWith('c1', dto);
+    expect(contractService.update).toHaveBeenCalledWith('cond1', 'c1', dto);
     expect(res).toEqual({ id: 'c1' });
   });
 
-  it('delete should call contractService.delete(id)', async () => {
+  it('delete should call contractService.delete(condominiumId, id)', async () => {
     contractService.delete.mockResolvedValue({ id: 'c1' } as any);
 
-    const res = await controller.delete('c1');
+    const res = await controller.delete('cond1', 'c1');
 
-    expect(contractService.delete).toHaveBeenCalledWith('c1');
+    expect(contractService.delete).toHaveBeenCalledWith('cond1', 'c1');
     expect(res).toEqual({ id: 'c1' });
   });
 
-  it('preview should call previewContractService.execute(dto)', async () => {
-    previewService.execute.mockResolvedValue({ html: '<h1>ok</h1>' } as any);
+  it('preview should call previewContractService.execute(condominiumId, dto)', async () => {
+    previewService.execute.mockResolvedValue({ previewHtml: '<h1>ok</h1>' } as any);
 
-    const dto: any = { tenantId: 't1', propertyId: 'p1', contractTemplateId: 'tpl1' };
+    const dto: any = { templateId: 't1', data: {} };
 
-    const res = await controller.preview(dto);
+    const res = await controller.preview('cond1', dto);
 
-    expect(previewService.execute).toHaveBeenCalledWith(dto);
-    expect(res).toEqual({ html: '<h1>ok</h1>' });
+    expect(previewService.execute).toHaveBeenCalledWith('cond1', dto);
+    expect(res).toEqual({ previewHtml: '<h1>ok</h1>' });
   });
 });

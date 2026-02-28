@@ -31,6 +31,7 @@ describe('ContractService', () => {
     delete: jest.fn(),
     listByTenant: jest.fn(),
     listByProperty: jest.fn(),
+    getPaginated: jest.fn(),
   };
 
   const makeFile = (): Express.Multer.File =>
@@ -54,12 +55,12 @@ describe('ContractService', () => {
     jest.clearAllMocks();
   });
 
-  it('getAll should call repo.getAll', async () => {
+  it('getAll should call repo.getAll(condominiumId)', async () => {
     repo.getAll.mockResolvedValue([{ id: 'c1' }] as any);
 
-    const res = await service.getAll();
+    const res = await service.getAll('cond1');
 
-    expect(repo.getAll).toHaveBeenCalledTimes(1);
+    expect(repo.getAll).toHaveBeenCalledWith('cond1');
     expect(res).toEqual([{ id: 'c1' }]);
   });
 
@@ -67,8 +68,9 @@ describe('ContractService', () => {
     repo.getById.mockResolvedValue({ id: 'c1', contractUrl: 'obj.pdf' } as any);
     minio.getFileUrl.mockResolvedValue('signed-url');
 
-    const res = await service.getById('c1');
+    const res = await service.getById('cond1', 'c1');
 
+    expect(repo.getById).toHaveBeenCalledWith('cond1', 'c1');
     expect(minio.getFileUrl).toHaveBeenCalledWith('obj.pdf');
     expect(res.contractUrl).toBe('signed-url');
   });
@@ -77,9 +79,8 @@ describe('ContractService', () => {
     it('should throw when contract already exists', async () => {
       repo.checkIfHas.mockResolvedValue({ id: 'exists' } as any);
 
-      await expect(service.create({} as any, makeFile())).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.create('cond1', { tenantId: 't1', propertyId: 'p1' } as any, makeFile()))
+        .rejects.toThrow(BadRequestException);
 
       expect(repo.create).not.toHaveBeenCalled();
     });
@@ -87,70 +88,76 @@ describe('ContractService', () => {
     it('should create using template (contractTemplateId), generate pdf and update url', async () => {
       repo.checkIfHas.mockResolvedValue(null);
 
-      repo.create.mockResolvedValue({ id: 'c1' } as any);
+      repo.create.mockResolvedValue({ id: 'ct1' } as any);
       generator.execute.mockResolvedValue({ url: 'minio.pdf' } as any);
-      repo.updateUrl.mockResolvedValue({ id: 'c1', contractUrl: 'minio.pdf' } as any);
+      repo.updateUrl.mockResolvedValue({ id: 'ct1', contractUrl: 'minio.pdf' } as any);
       minio.getFileUrl.mockResolvedValue('signed-url');
 
       const res = await service.create(
-        { contractTemplateId: 't1', content: 'manual' } as any,
+        'cond1',
+        { contractTemplateId: 't1', content: 'manual', tenantId: 't1', propertyId: 'p1' } as any,
         undefined,
       );
 
-      expect(generator.execute).toHaveBeenCalledWith('c1', 'manual');
-      expect(repo.updateUrl).toHaveBeenCalledWith('c1', 'minio.pdf');
+      // OBS: o código atual chama generator.execute(response.id, dto.content)
+      expect(generator.execute).toHaveBeenCalledWith('ct1', 'manual');
+      expect(repo.updateUrl).toHaveBeenCalledWith('cond1', 'ct1', 'minio.pdf');
       expect(res.contractUrl).toBe('signed-url');
     });
 
     it('should create by uploading file when no templateId', async () => {
       repo.checkIfHas.mockResolvedValue(null);
 
-      repo.create.mockResolvedValue({ id: 'c1' } as any);
+      repo.create.mockResolvedValue({ id: 'ct1' } as any);
       minio.uploadFile.mockResolvedValue({ fileName: 'uploaded.pdf' } as any);
-      repo.updateUrl.mockResolvedValue({ id: 'c1', contractUrl: 'uploaded.pdf' } as any);
+      repo.updateUrl.mockResolvedValue({ id: 'ct1', contractUrl: 'uploaded.pdf' } as any);
       minio.getFileUrl.mockResolvedValue('signed-url');
 
-      const res = await service.create({} as any, makeFile());
+      const res = await service.create(
+        'cond1',
+        { tenantId: 't1', propertyId: 'p1' } as any,
+        makeFile(),
+      );
 
       expect(minio.uploadFile).toHaveBeenCalledTimes(1);
-      expect(repo.updateUrl).toHaveBeenCalledWith('c1', 'uploaded.pdf');
+      expect(repo.updateUrl).toHaveBeenCalledWith('cond1', 'ct1', 'uploaded.pdf');
       expect(res.contractUrl).toBe('signed-url');
     });
   });
 
-  it('update should call repo.update', async () => {
-    repo.update.mockResolvedValue({ id: 'c1' } as any);
+  it('update should call repo.update(condominiumId, id, dto)', async () => {
+    repo.update.mockResolvedValue({ id: 'ct1' } as any);
 
-    const res = await service.update('c1', { } as any);
+    const res = await service.update('cond1', 'ct1', {} as any);
 
-    expect(repo.update).toHaveBeenCalledWith('c1', {});
-    expect(res).toEqual({ id: 'c1' });
+    expect(repo.update).toHaveBeenCalledWith('cond1', 'ct1', {});
+    expect(res).toEqual({ id: 'ct1' });
   });
 
-  it('delete should call repo.delete', async () => {
-    repo.delete.mockResolvedValue({ id: 'c1' } as any);
+  it('delete should call repo.delete(condominiumId, id)', async () => {
+    repo.delete.mockResolvedValue({ id: 'ct1' } as any);
 
-    const res = await service.delete('c1');
+    const res = await service.delete('cond1', 'ct1');
 
-    expect(repo.delete).toHaveBeenCalledWith('c1');
-    expect(res).toEqual({ id: 'c1' });
+    expect(repo.delete).toHaveBeenCalledWith('cond1', 'ct1');
+    expect(res).toEqual({ id: 'ct1' });
   });
 
-  it('listByTenant should call repo.listByTenant', async () => {
-    repo.listByTenant.mockResolvedValue([{ id: 'c1' }] as any);
+  it('listByTenant should call repo.listByTenant(condominiumId, tenantId)', async () => {
+    repo.listByTenant.mockResolvedValue([{ id: 'ct1' }] as any);
 
-    const res = await service.listByTenant('t1');
+    const res = await service.listByTenant('cond1', 't1');
 
-    expect(repo.listByTenant).toHaveBeenCalledWith('t1');
-    expect(res).toEqual([{ id: 'c1' }]);
+    expect(repo.listByTenant).toHaveBeenCalledWith('cond1', 't1');
+    expect(res).toEqual([{ id: 'ct1' }]);
   });
 
-  it('listByProperty should call repo.listByProperty', async () => {
-    repo.listByProperty.mockResolvedValue([{ id: 'c1' }] as any);
+  it('listByProperty should call repo.listByProperty(condominiumId, propertyId)', async () => {
+    repo.listByProperty.mockResolvedValue([{ id: 'ct1' }] as any);
 
-    const res = await service.listByProperty('p1');
+    const res = await service.listByProperty('cond1', 'p1');
 
-    expect(repo.listByProperty).toHaveBeenCalledWith('p1');
-    expect(res).toEqual([{ id: 'c1' }]);
+    expect(repo.listByProperty).toHaveBeenCalledWith('cond1', 'p1');
+    expect(res).toEqual([{ id: 'ct1' }]);
   });
 });

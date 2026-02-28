@@ -12,33 +12,34 @@ describe('AuthRepository', () => {
     jest.clearAllMocks();
   });
 
-  it('getUserByEmailOrCpf should query by OR(email/cpf) and include accesses', async () => {
+  it('getUserByEmail should call prisma.users.findFirst with include accesses and deletedAt null', async () => {
     prisma.users.findFirst.mockResolvedValue({ id: 'u1' } as any);
 
     const repo = new AuthRepository(prisma as any);
-    const res = await repo.getUserByEmailOrCpf('login');
+    const res = await repo.getUserByEmail('test@test.com');
 
     expect(prisma.users.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { OR: [{ email: 'login' }, { cpf: 'login' }], deletedAt: null },
+        where: { email: 'test@test.com', deletedAt: null },
         include: expect.any(Object),
         omit: { createdAt: true, updatedAt: true },
       }),
     );
+
     expect(res).toEqual({ id: 'u1' });
   });
 
-  it('getUserByEmail should return id or undefined', async () => {
-    prisma.users.findFirst.mockResolvedValue({ id: 'u1' });
+  it('getUserIdByEmail should return id or undefined', async () => {
+    prisma.users.findFirst.mockResolvedValue({ id: 'u1' } as any);
 
     const repo = new AuthRepository(prisma as any);
-    await expect(repo.getUserByEmail('a@b.com')).resolves.toBe('u1');
+    await expect(repo.getUserIdByEmail('a@b.com')).resolves.toBe('u1');
 
     prisma.users.findFirst.mockResolvedValue(null);
-    await expect(repo.getUserByEmail('x@x.com')).resolves.toBeUndefined();
+    await expect(repo.getUserIdByEmail('a@b.com')).resolves.toBeUndefined();
   });
 
-  it('updateUserPassword should update password', async () => {
+  it('updateUserPassword should call prisma.users.update', async () => {
     prisma.users.update.mockResolvedValue({} as any);
 
     const repo = new AuthRepository(prisma as any);

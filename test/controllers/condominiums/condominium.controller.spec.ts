@@ -31,12 +31,21 @@ describe('CondominiumController', () => {
     service = module.get(CondominiumService);
   });
 
-  it('create should call service.create(dto)', async () => {
+  it('create should call service.create(dto, user)', async () => {
     service.create.mockResolvedValue({ id: 'c1' } as any);
 
-    const res = await controller.create({ name: 'Condo' } as any);
+    const user: any = {
+      sub: 'u1',
+      email: 'a@a.com',
+      name: 'A',
+      isAdminMaster: false,
+      permission: [],
+      condominium: [],
+    };
 
-    expect(service.create).toHaveBeenCalledWith({ name: 'Condo' });
+    const res = await controller.create({ name: 'Condo' } as any, user);
+
+    expect(service.create).toHaveBeenCalledWith({ name: 'Condo' }, user);
     expect(res).toEqual({ id: 'c1' });
   });
 

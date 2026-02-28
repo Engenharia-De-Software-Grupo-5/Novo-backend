@@ -9,6 +9,7 @@ describe('UserRepository', () => {
       create: jest.fn(),
       update: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
 
   beforeEach(() => {
@@ -25,7 +26,7 @@ describe('UserRepository', () => {
       expect.objectContaining({
         where: {
           deletedAt: null,
-          accesses: { some: { condominiumsId: 'c1' } }, 
+          accesses: { some: { condominiumsId: 'c1' } },
         },
         include: expect.objectContaining({
           accesses: expect.objectContaining({
@@ -46,7 +47,6 @@ describe('UserRepository', () => {
     const repo = new UserRepository(prisma as any);
     const res = await repo.findByEmail('a@b.com');
 
-
     expect(prisma.users.findFirst).not.toHaveBeenCalled();
 
     expect(prisma.users.findUnique).toHaveBeenCalledWith(
@@ -64,14 +64,25 @@ describe('UserRepository', () => {
     prisma.users.create.mockResolvedValue({ id: 'u1' } as any);
 
     const repo = new UserRepository(prisma as any);
-    const res = await repo.create({ email: 'a@b.com' } as any, 'hashed', 'c1');
+    const res = await repo.create(
+      { name: 'A', email: 'a@b.com', role: 'ADMIN', status: 'ACTIVE' } as any,
+      'hashed',
+      'c1',
+    );
 
     expect(prisma.users.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          name: 'A',
           email: 'a@b.com',
           password: 'hashed',
-          accesses: expect.any(Object),
+          accesses: {
+            create: expect.objectContaining({
+              condominium: { connect: { id: 'c1' } },
+              permission: { connect: { name: 'ADMIN' } },
+              status: 'ACTIVE',
+            }),
+          },
         }),
         include: expect.any(Object),
         omit: { createdAt: true, updatedAt: true },
@@ -81,28 +92,29 @@ describe('UserRepository', () => {
     expect(res).toEqual({ id: 'u1' });
   });
 
-  it('update should update user and update access using composite key', async () => {
+  it('update should update access (permission/status) using composite key', async () => {
     prisma.users.update.mockResolvedValue({ id: 'u1' } as any);
 
     const repo = new UserRepository(prisma as any);
-    const res = await repo.update('u1', { name: 'A' } as any, 'c1');
+    const res = await repo.update('u1', { role: 'MANAGER', status: 'INACTIVE' } as any, 'c1');
 
     expect(prisma.users.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'u1', deletedAt: null },
-        data: expect.objectContaining({
-          name: 'A',
+        data: {
           accesses: {
             update: {
               where: {
                 usersId_condominiumsId: { usersId: 'u1', condominiumsId: 'c1' },
               },
-              data: expect.objectContaining({
-                deletedAt: null, 
-              }),
+              data: {
+                deletedAt: null,
+                permission: { connect: { name: 'MANAGER' } },
+                status: 'INACTIVE',
+              },
             },
           },
-        }),
+        },
         include: expect.any(Object),
         omit: { createdAt: true, updatedAt: true },
       }),
@@ -129,7 +141,7 @@ describe('UserRepository', () => {
     expect(res).toEqual({ id: 'u1' });
   });
 
-  it('delete should soft delete access in given condominium (requires condominiumId)', async () => {
+  it('delete should soft delete access in given condominium', async () => {
     prisma.users.update.mockResolvedValue({ id: 'u1' } as any);
 
     const repo = new UserRepository(prisma as any);

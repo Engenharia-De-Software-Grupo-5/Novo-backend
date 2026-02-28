@@ -22,14 +22,14 @@ describe('ChargePaymentsRepository', () => {
     prisma.charges.findFirst.mockResolvedValue(null);
 
     const repo = new ChargePaymentsRepository(prisma as any);
-    await expect(repo.assertCharge('c1')).rejects.toThrow(NotFoundException);
+    await expect(repo.assertCharge('cond1', 'c1')).rejects.toThrow(NotFoundException);
   });
 
   it('assertPayment should throw NotFoundException when missing', async () => {
     prisma.payments.findFirst.mockResolvedValue(null);
 
     const repo = new ChargePaymentsRepository(prisma as any);
-    await expect(repo.assertPayment('c1', 'p1')).rejects.toThrow(NotFoundException);
+    await expect(repo.assertPayment('cond1', 'c1', 'p1')).rejects.toThrow(NotFoundException);
   });
 
   it('syncChargeStatus should not change when status is CANCELED', async () => {
@@ -41,7 +41,7 @@ describe('ChargePaymentsRepository', () => {
     });
 
     const repo = new ChargePaymentsRepository(prisma as any);
-    await repo.syncChargeStatus('c1');
+    await repo.syncChargeStatus('cond1', 'c1');
 
     expect(prisma.payments.aggregate).not.toHaveBeenCalled();
     expect(prisma.charges.update).not.toHaveBeenCalled();
@@ -57,7 +57,7 @@ describe('ChargePaymentsRepository', () => {
     prisma.payments.aggregate.mockResolvedValue({ _sum: { amountPaid: 120 } });
 
     const repo = new ChargePaymentsRepository(prisma as any);
-    await repo.syncChargeStatus('c1');
+    await repo.syncChargeStatus('cond1', 'c1');
 
     expect(prisma.charges.update).toHaveBeenCalledWith({
       where: { id: 'c1' },
@@ -77,7 +77,7 @@ describe('ChargePaymentsRepository', () => {
     prisma.payments.aggregate.mockResolvedValue({ _sum: { amountPaid: 0 } });
 
     const repo = new ChargePaymentsRepository(prisma as any);
-    await repo.syncChargeStatus('c1');
+    await repo.syncChargeStatus('cond1', 'c1');
 
     expect(prisma.charges.update).toHaveBeenCalledWith({
       where: { id: 'c1' },
@@ -98,7 +98,7 @@ describe('ChargePaymentsRepository', () => {
     const repo = new ChargePaymentsRepository(prisma as any);
 
     await expect(
-      repo.createPayment('c1', {
+      repo.createPayment('cond1', 'c1', {
         amountPaid: 10,
         paymentDate: new Date(),
         method: 'PIX',
@@ -127,7 +127,7 @@ describe('ChargePaymentsRepository', () => {
 
     const repo = new ChargePaymentsRepository(prisma as any);
 
-    const res = await repo.createPayment('c1', {
+    const res = await repo.createPayment('cond1', 'c1', {
       amountPaid: 10,
       paymentDate: new Date('2026-02-18'),
       method: 'PIX',
@@ -152,7 +152,6 @@ describe('ChargePaymentsRepository', () => {
     expect(prisma.payments.create).toHaveBeenCalled();
     expect(res).toEqual({ id: 'p1', proofObjectName: null });
 
-    // syncChargeStatus roda no final (aggregate chamado)
     expect(prisma.payments.aggregate).toHaveBeenCalled();
   });
 
@@ -169,7 +168,7 @@ describe('ChargePaymentsRepository', () => {
 
     const repo = new ChargePaymentsRepository(prisma as any);
 
-    const out = await repo.updatePayment('c1', 'p1', {
+    const out = await repo.updatePayment('cond1', 'c1', 'p1', {
       amountPaid: 10,
       paymentDate: new Date(),
       method: 'PIX',
@@ -213,7 +212,7 @@ describe('ChargePaymentsRepository', () => {
 
     const repo = new ChargePaymentsRepository(prisma as any);
 
-    const res = await repo.softDeletePayment('c1', 'p1');
+    const res = await repo.softDeletePayment('cond1', 'p1', 'c1');
 
     expect(prisma.payments.update).toHaveBeenCalledWith(
       expect.objectContaining({

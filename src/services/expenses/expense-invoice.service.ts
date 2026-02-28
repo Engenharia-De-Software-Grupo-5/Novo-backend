@@ -24,7 +24,6 @@ export class ExpenseInvoiceService {
       objectName: fileName,
       originalName: file.originalname,
       mimeType: file.mimetype,
-      extension: ext,
       size: file.size,
     });
   }

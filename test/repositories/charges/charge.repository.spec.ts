@@ -26,7 +26,7 @@ describe('ChargesRepository', () => {
     const repo = new ChargesRepository(prisma as any);
 
     await expect(
-      repo.create({
+      repo.create('cond1', {
         tenantId: 't1',
         propertyId: 'p1',
         amount: 10,
@@ -43,7 +43,7 @@ describe('ChargesRepository', () => {
     const repo = new ChargesRepository(prisma as any);
 
     await expect(
-      repo.create({
+      repo.create('cond1', {
         tenantId: 't1',
         propertyId: 'p1',
         amount: 10,
@@ -60,7 +60,7 @@ describe('ChargesRepository', () => {
 
     const repo = new ChargesRepository(prisma as any);
 
-    const res = await repo.create({
+    const res = await repo.create('cond1', {
       tenantId: 't1',
       propertyId: 'p1',
       amount: 10,
@@ -83,8 +83,8 @@ describe('ChargesRepository', () => {
 
   it('list should call findMany twice and try recompute for each charge', async () => {
     prisma.charges.findMany
-      .mockResolvedValueOnce([{ id: 'c1' }, { id: 'c2' }] as any) // primeira busca
-      .mockResolvedValueOnce([{ id: 'c1' }, { id: 'c2' }] as any); // segunda (retorno)
+      .mockResolvedValueOnce([{ id: 'c1' }, { id: 'c2' }] as any)
+      .mockResolvedValueOnce([{ id: 'c1' }, { id: 'c2' }] as any);
 
     prisma.charges.findFirst.mockResolvedValue({
       id: 'c1',
@@ -106,20 +106,25 @@ describe('ChargesRepository', () => {
     prisma.charges.findFirst.mockResolvedValue(null);
 
     const repo = new ChargesRepository(prisma as any);
-    await expect(repo.findOne('c1')).rejects.toThrow(NotFoundException);
+    await expect(repo.findOne('cond1', 'c1')).rejects.toThrow(NotFoundException);
   });
 
   it('update should call charges.update and recompute status', async () => {
     prisma.charges.findFirst
-      .mockResolvedValueOnce({ id: 'c1', payments: [] } as any) // findOne
-      .mockResolvedValueOnce({ id: 'c1', amount: 100, dueDate: new Date('2099-01-01'), status: ChargeStatus.PENDING } as any) // recompute internal
-      .mockResolvedValueOnce({ id: 'c1', payments: [] } as any); // findOne retorno final (pós-recompute)
+      .mockResolvedValueOnce({ id: 'c1', payments: [] } as any)
+      .mockResolvedValueOnce({
+        id: 'c1',
+        amount: 100,
+        dueDate: new Date('2099-01-01'),
+        status: ChargeStatus.PENDING,
+      } as any)
+      .mockResolvedValueOnce({ id: 'c1', payments: [] } as any);
 
     prisma.payments.aggregate.mockResolvedValue({ _sum: { totalPaid: 0 } });
     prisma.charges.update.mockResolvedValue({ id: 'c1' } as any);
 
     const repo = new ChargesRepository(prisma as any);
-    const res = await repo.update('c1', { amount: 200 } as any);
+    const res = await repo.update('cond1', 'c1', { amount: 200 } as any);
 
     expect(prisma.charges.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'c1' }, data: { amount: 200 } }),
@@ -132,7 +137,7 @@ describe('ChargesRepository', () => {
     prisma.charges.update.mockResolvedValue({ id: 'c1' } as any);
 
     const repo = new ChargesRepository(prisma as any);
-    const res = await repo.cancel('c1');
+    const res = await repo.cancel('cond1', 'c1');
 
     expect(prisma.charges.update).toHaveBeenCalledWith({
       where: { id: 'c1' },
@@ -146,7 +151,7 @@ describe('ChargesRepository', () => {
     prisma.charges.update.mockResolvedValue({} as any);
 
     const repo = new ChargesRepository(prisma as any);
-    await repo.softDelete('c1');
+    await repo.softDelete('cond1', 'c1');
 
     expect(prisma.charges.update).toHaveBeenCalledWith(
       expect.objectContaining({

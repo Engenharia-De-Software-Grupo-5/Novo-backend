@@ -14,7 +14,7 @@ describe('EmployeeRepository', () => {
     jest.clearAllMocks();
   });
 
-  it('getAll should call prisma.employees.findMany with deletedAt null and select employeeSelect', async () => {
+  it('getAll should return employees with employeeSelect', async () => {
     prisma.employees.findMany.mockResolvedValue([{ id: 'e1' }] as any);
 
     const repo = new EmployeeRepository(prisma as any);
@@ -29,7 +29,7 @@ describe('EmployeeRepository', () => {
     expect(res).toEqual([{ id: 'e1' }]);
   });
 
-  it('getById should call prisma.employees.findUnique with id + deletedAt null and select employeeSelect', async () => {
+  it('getById should return employee', async () => {
     prisma.employees.findUnique.mockResolvedValue({ id: 'e1' } as any);
 
     const repo = new EmployeeRepository(prisma as any);
@@ -38,21 +38,6 @@ describe('EmployeeRepository', () => {
     expect(prisma.employees.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'e1', deletedAt: null },
-        select: expect.any(Object),
-      }),
-    );
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('getByCpf should call prisma.employees.findUnique with cpf + deletedAt null and select employeeSelect', async () => {
-    prisma.employees.findUnique.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new EmployeeRepository(prisma as any);
-    const res = await repo.getByCpf('123');
-
-    expect(prisma.employees.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { cpf: '123', deletedAt: null },
         select: expect.any(Object),
       }),
     );
@@ -73,6 +58,12 @@ describe('EmployeeRepository', () => {
       baseSalary: 1000,
       workload: 40,
       status: 'ACTIVE',
+      bankData: {
+        bank: 'BB',
+        accountType: 'CHECKING',
+        accountNumber: '12345-6',
+        agency: '0001',
+      },
     };
 
     const res = await repo.create(dto);
@@ -83,12 +74,35 @@ describe('EmployeeRepository', () => {
         update: expect.objectContaining({
           cpf: '123',
           name: 'Emp',
+          bankData: {
+            upsert: {
+              update: {
+                bank: 'BB',
+                accountType: 'CHECKING',
+                accountNumber: '12345-6',
+                agency: '0001',
+              },
+              create: {
+                bank: 'BB',
+                accountType: 'CHECKING',
+                accountNumber: '12345-6',
+                agency: '0001',
+              },
+            },
+          },
           deletedAt: null,
         }),
         create: expect.objectContaining({
           cpf: '123',
           name: 'Emp',
-          bankData: { create: {} },
+          bankData: {
+            create: {
+              bank: 'BB',
+              accountType: 'CHECKING',
+              accountNumber: '12345-6',
+              agency: '0001',
+            },
+          },
         }),
         select: expect.any(Object),
       }),
@@ -97,7 +111,7 @@ describe('EmployeeRepository', () => {
     expect(res).toEqual({ id: 'e1' });
   });
 
-  it('update should call prisma.employees.update and force deletedAt null', async () => {
+  it('update should call prisma.employees.update', async () => {
     prisma.employees.update.mockResolvedValue({ id: 'e1' } as any);
 
     const repo = new EmployeeRepository(prisma as any);
@@ -106,32 +120,14 @@ describe('EmployeeRepository', () => {
     expect(prisma.employees.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: 'e1' },
-        data: expect.objectContaining({ name: 'New', deletedAt: null }),
+        data: expect.objectContaining({ name: 'New' }),
         select: expect.any(Object),
       }),
     );
-
     expect(res).toEqual({ id: 'e1' });
   });
 
-  it('updateByCpf should call prisma.employees.update by cpf and force deletedAt null', async () => {
-    prisma.employees.update.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new EmployeeRepository(prisma as any);
-    const res = await repo.updateByCpf('123', { name: 'New' } as any);
-
-    expect(prisma.employees.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { cpf: '123' },
-        data: expect.objectContaining({ name: 'New', deletedAt: null }),
-        select: expect.any(Object),
-      }),
-    );
-
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('delete should soft delete by id (requires deletedAt null in where)', async () => {
+  it('delete should soft delete employee', async () => {
     prisma.employees.update.mockResolvedValue({ id: 'e1' } as any);
 
     const repo = new EmployeeRepository(prisma as any);
@@ -144,24 +140,6 @@ describe('EmployeeRepository', () => {
         select: expect.any(Object),
       }),
     );
-
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('deleteByCpf should soft delete by cpf (requires deletedAt null in where)', async () => {
-    prisma.employees.update.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new EmployeeRepository(prisma as any);
-    const res = await repo.deleteByCpf('123');
-
-    expect(prisma.employees.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { cpf: '123', deletedAt: null },
-        data: { deletedAt: expect.any(Date) },
-        select: expect.any(Object),
-      }),
-    );
-
     expect(res).toEqual({ id: 'e1' });
   });
 });

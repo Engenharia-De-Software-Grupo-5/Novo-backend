@@ -14,14 +14,12 @@ describe('ChargesService', () => {
     update: jest.fn(),
     cancel: jest.fn(),
     softDelete: jest.fn(),
+    getPaginated: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ChargesService,
-        { provide: ChargesRepository, useValue: mockRepo },
-      ],
+      providers: [ChargesService, { provide: ChargesRepository, useValue: mockRepo }],
     }).compile();
 
     service = module.get(ChargesService);
@@ -30,57 +28,57 @@ describe('ChargesService', () => {
     jest.clearAllMocks();
   });
 
-  it('create should call repo.create(dto)', async () => {
-    repo.create.mockResolvedValue({ id: 'c1' } as any);
+  it('create should call repo.create(condominiumId, dto)', async () => {
+    repo.create.mockResolvedValue({ id: 'ch1' } as any);
 
-    const res = await service.create({} as any);
+    const res = await service.create('c1', {} as any);
 
-    expect(repo.create).toHaveBeenCalledWith({});
-    expect(res).toEqual({ id: 'c1' });
+    expect(repo.create).toHaveBeenCalledWith('c1', {});
+    expect(res).toEqual({ id: 'ch1' });
   });
 
   it('list should call repo.list(params)', async () => {
-    repo.list.mockResolvedValue([{ id: 'c1' }] as any);
+    repo.list.mockResolvedValue([{ id: 'ch1' }] as any);
 
     const res = await service.list({ tenantId: 't1' } as any);
 
     expect(repo.list).toHaveBeenCalledWith({ tenantId: 't1' });
-    expect(res).toEqual([{ id: 'c1' }]);
+    expect(res).toEqual([{ id: 'ch1' }]);
   });
 
-  it('findOne should call repo.findOne(chargeId)', async () => {
-    repo.findOne.mockResolvedValue({ id: 'c1' } as any);
+  it('findOne should call repo.findOne(condominiumId, chargeId)', async () => {
+    repo.findOne.mockResolvedValue({ id: 'ch1' } as any);
 
-    const res = await service.findOne('c1');
+    const res = await service.findOne('c1', 'ch1');
 
-    expect(repo.findOne).toHaveBeenCalledWith('c1');
-    expect(res).toEqual({ id: 'c1' });
+    expect(repo.findOne).toHaveBeenCalledWith('c1', 'ch1');
+    expect(res).toEqual({ id: 'ch1' });
   });
 
-  it('update should call repo.update(chargeId, dto)', async () => {
-    repo.update.mockResolvedValue({ id: 'c1' } as any);
+  it('update should call repo.update(condominiumId, chargeId, dto)', async () => {
+    repo.update.mockResolvedValue({ id: 'ch1' } as any);
 
-    const res = await service.update('c1', { status: 'X' } as any);
+    const res = await service.update('c1', 'ch1', { status: 'X' } as any);
 
-    expect(repo.update).toHaveBeenCalledWith('c1', { status: 'X' });
-    expect(res).toEqual({ id: 'c1' });
+    expect(repo.update).toHaveBeenCalledWith('c1', 'ch1', { status: 'X' });
+    expect(res).toEqual({ id: 'ch1' });
   });
 
-  it('cancel should call repo.cancel(chargeId)', async () => {
-    repo.cancel.mockResolvedValue({ id: 'c1' } as any);
+  it('cancel should call repo.cancel(condominiumId, chargeId)', async () => {
+    repo.cancel.mockResolvedValue({ id: 'ch1' } as any);
 
-    const res = await service.cancel('c1');
+    const res = await service.cancel('c1', 'ch1');
 
-    expect(repo.cancel).toHaveBeenCalledWith('c1');
-    expect(res).toEqual({ id: 'c1' });
+    expect(repo.cancel).toHaveBeenCalledWith('c1', 'ch1');
+    expect(res).toEqual({ id: 'ch1' });
   });
 
   it('remove should soft delete and return message', async () => {
     repo.softDelete.mockResolvedValue(undefined as any);
 
-    const res = await service.remove('c1');
+    const res = await service.remove('c1', 'ch1');
 
-    expect(repo.softDelete).toHaveBeenCalledWith('c1');
+    expect(repo.softDelete).toHaveBeenCalledWith('c1', 'ch1');
     expect(res).toEqual({ message: 'Charge removed successfully.' });
   });
 });

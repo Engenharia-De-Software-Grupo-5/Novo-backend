@@ -13,14 +13,12 @@ describe('ExpenseService', () => {
     findByIdOrThrow: jest.fn(),
     update: jest.fn(),
     softDelete: jest.fn(),
+    getPaginated: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ExpenseService,
-        { provide: ExpenseRepository, useValue: mockRepo },
-      ],
+      providers: [ExpenseService, { provide: ExpenseRepository, useValue: mockRepo }],
     }).compile();
 
     service = module.get(ExpenseService);
@@ -29,16 +27,18 @@ describe('ExpenseService', () => {
     jest.clearAllMocks();
   });
 
-  it('create should convert expenseDate to Date before repo.create', async () => {
+  it('create should convert expenseDate to Date and include condominiumId before repo.create', async () => {
     repo.create.mockResolvedValue({ id: 'e1' } as any);
 
     const dto: any = { description: 'X', amount: 10, expenseDate: '2024-01-02' };
-    await service.create(dto);
+    await service.create(dto, 'c1');
 
     expect(repo.create).toHaveBeenCalledTimes(1);
     const arg = repo.create.mock.calls[0][0] as any;
+
     expect(arg.description).toBe('X');
     expect(arg.amount).toBe(10);
+    expect(arg.condominiumId).toBe('c1');
     expect(arg.expenseDate).toBeInstanceOf(Date);
     expect(arg.expenseDate.toISOString().slice(0, 10)).toBe('2024-01-02');
   });
@@ -69,6 +69,7 @@ describe('ExpenseService', () => {
 
     expect(repo.update).toHaveBeenCalledTimes(1);
     const [, arg] = repo.update.mock.calls[0] as any[];
+
     expect(arg.expenseDate).toBeInstanceOf(Date);
     expect(arg.expenseDate.toISOString().slice(0, 10)).toBe('2024-02-03');
   });

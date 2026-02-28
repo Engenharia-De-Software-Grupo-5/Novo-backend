@@ -24,29 +24,29 @@ describe('AppController', () => {
     expect(appService.getHello).toHaveBeenCalledTimes(1);
   });
 
-  it('getMe should return mapped user info (not the raw user)', () => {
-  const { controller } = makeController();
+  it('getMe should return mapped user info', () => {
+    const { controller } = makeController();
 
-  const reqUser = {
-    sub: '1',
-    email: 'test@test.com',
-    cpf: '12345678900',
-    name: 'Test User',
-    permission: [{ id: 'p1', name: 'ADMIN' }],
-    condominium: [{ id: 'c1', name: 'C1' }],
-  };
+    const reqUser = {
+      sub: '1',
+      email: 'test@test.com',
+      name: 'Test User',
+      isAdminMaster: true,
+      permission: [{ id: 'p1', name: 'ADMIN' }],
+      condominium: [{ id: 'c1', name: 'C1' }],
+    };
 
-  const result = controller.getMe(reqUser as any);
+    const result = controller.getMe(reqUser as any);
 
-  expect(result).toEqual({
-    id: '1',
-    email: 'test@test.com',
-    cpf: '12345678900',
-    name: 'Test User',
-    permission: [{ id: 'p1', name: 'ADMIN' }],
-    condominium: [{ id: 'c1', name: 'C1' }],
+    expect(result).toEqual({
+      id: '1',
+      email: 'test@test.com',
+      name: 'Test User',
+      isAdminMaster: true,
+      permission: [{ id: 'p1', name: 'ADMIN' }],
+      condominium: [{ id: 'c1', name: 'C1' }],
+    });
   });
-});
 
   it('uploadFile should throw if file is missing', async () => {
     const { controller } = makeController();

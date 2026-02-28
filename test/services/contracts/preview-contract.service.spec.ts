@@ -25,8 +25,12 @@ describe('PreviewContractService', () => {
     const service = new PreviewContractService(templateRepo as any, templateEngine as any);
 
     await expect(
-      service.execute({ templateId: 't1', data: {} } as any),
+      service.execute('c1', { templateId: 't1', data: {} } as any),
     ).rejects.toThrow(NotFoundException);
+
+    await expect(
+      service.execute('c1', { templateId: 't1', data: {} } as any),
+    ).rejects.toThrow('Template not found');
   });
 
   it('should use template.template when editedMarkdown not provided', async () => {
@@ -35,12 +39,12 @@ describe('PreviewContractService', () => {
 
     const service = new PreviewContractService(templateRepo as any, templateEngine as any);
 
-    const res = await service.execute({
+    const res = await service.execute('c1', {
       templateId: 't1',
       data: { name: 'Arthur' },
     } as any);
 
-    expect(templateRepo.getById).toHaveBeenCalledWith('t1');
+    expect(templateRepo.getById).toHaveBeenCalledWith('c1', 't1');
     expect(templateEngine.parse).toHaveBeenCalledWith('Hello {{name}}', { name: 'Arthur' });
     expect(res).toEqual({ previewHtml: '<p>HTML</p>' });
   });
@@ -51,12 +55,13 @@ describe('PreviewContractService', () => {
 
     const service = new PreviewContractService(templateRepo as any, templateEngine as any);
 
-    const res = await service.execute({
+    const res = await service.execute('c1', {
       templateId: 't1',
       editedMarkdown: 'Custom {{x}}',
       data: { x: 'ok' },
     } as any);
 
+    expect(templateRepo.getById).toHaveBeenCalledWith('c1', 't1');
     expect(templateEngine.parse).toHaveBeenCalledWith('Custom {{x}}', { x: 'ok' });
     expect(res).toEqual({ previewHtml: '<p>HTML</p>' });
   });

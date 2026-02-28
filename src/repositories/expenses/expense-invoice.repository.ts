@@ -6,7 +6,6 @@ type CreateExpenseInvoiceInput = {
   objectName: string;
   originalName: string;
   mimeType: string;
-  extension: string;
   size: number;
 };
 
@@ -19,6 +18,7 @@ export class ExpenseInvoiceRepository {
       where: { id: expenseId, deletedAt: null },
       select: { id: true },
     });
+
     if (!exp) throw new NotFoundException('Expense not found.');
   }
 
@@ -31,7 +31,6 @@ export class ExpenseInvoiceRepository {
         objectName: input.objectName,
         originalName: input.originalName,
         mimeType: input.mimeType,
-        extension: input.extension,
         size: input.size,
       },
     });
@@ -47,7 +46,6 @@ export class ExpenseInvoiceRepository {
   }
 
   async findOneOrThrow(expenseId: string, invoiceId: string) {
-
     const inv = await this.prisma.invoices.findFirst({
       where: { id: invoiceId, expenseId, deletedAt: null },
     });
@@ -57,7 +55,6 @@ export class ExpenseInvoiceRepository {
   }
 
   async softDelete(expenseId: string, invoiceId: string) {
-
     await this.findOneOrThrow(expenseId, invoiceId);
 
     await this.prisma.invoices.update({
