@@ -8,6 +8,7 @@ import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
 
 type CreateExpenseInput = {
+  files: Express.Multer.File[];
   targetType: ExpenseTargetType;
   condominiumId?: string;
   propertyId?: string;
@@ -103,12 +104,11 @@ export class ExpenseRepository {
     throw new BadRequestException('targetType invalid.');
   }
 
-  async create(input: CreateExpenseInput) { //listaLinks: String[]
+  async create(input: CreateExpenseInput, fileNameLinks: string[]) { //listaLinks: String[]
     const target = await this.assertTargetExists(input);
 
-    const response = this.prisma.expenses.create({
+    const response = await this.prisma.expenses.create({
       data: {
-  
         description: input.description,
         targetType: input.targetType,
         condominiumId: target.condominiumId,
@@ -119,13 +119,13 @@ export class ExpenseRepository {
         paymentMethod: input.paymentMethod,
       },
     });
-    //aqui dentro a gente precisa receber a lista de links e criar as expensesFiles
-    for(let i = 0; i < dot.files[].length; i++){
+    //falta arrumar isso aqui
+    for(let i = 0; i < dto.files.length; i++){
       this.prisma.expensesFiles.create({
         data: {
-          //link: listaLinks[i]
+          link: fileNameLinks[i],
           type: null,
-          expensesId: response.id;
+          expensesId: response.id
         }
     }
     )}

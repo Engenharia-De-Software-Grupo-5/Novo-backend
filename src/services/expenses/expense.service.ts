@@ -13,23 +13,25 @@ export class ExpenseService {
     private readonly minioClientService: MinioClientService
   ) {}
 
-  create(dto: ExpenseDto, condominiumId: string) {
+  async create(dto: ExpenseDto, condominiumId: string) {
+    let fileNamesList: string[]
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
     for(let i = 0; i < dto.files.length; i++){
-      this.minioClientService.uploadFile(
+      const minioResponse = await this.minioClientService.uploadFile(
         dto.files[i],
         allowedExtensions,
-        dto.files[i].originalname,
-    );
+        dto.files[i].originalname, //talvez precise adicionar o I
+      );
+      fileNamesList[i] = minioResponse.fileName  
     }
-    []// mandar a lista pro repository
-    this.repo.create({
+    const result = await this.repo.create({
       ...dto,
       expenseDate: new Date(dto.expenseDate),
-      condominiumId
-    } as any);
+      condominiumId,
+      fileNamesList
+    } as any, fileNamesList);
 
-   //update(response.id)
+    return result
   }
 
   list() {
