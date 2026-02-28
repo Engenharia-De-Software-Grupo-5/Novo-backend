@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>15/20</span>
+                <span class='fraction'>20/20</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.57% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/7</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">72.22% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/18</span>
+                <span class='fraction'>18/18</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -129,28 +129,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -166,11 +166,11 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { BadRequestException, Injectable } from '@nestjs/common';
@@ -186,18 +186,18 @@ import { AuthPayload, UserDto } from 'src/contracts/auth';
 export class CondominiumService {
   constructor(private readonly condominiumRepository: CondominiumRepository,
               private readonly userService: UserService) {}
-<span class="fstat-no" title="function not covered" >  getAll(</span>): Promise&lt;CondominiumResponse[]&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.condominiumRepository.getAll();</span>
+  getAll(): Promise&lt;CondominiumResponse[]&gt; {
+    return this.condominiumRepository.getAll();
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  getPaginated(</span>
+  getPaginated(
     data: PaginationDto,
   ): Promise&lt;PaginatedResult&lt;CondominiumResponse&gt;&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.condominiumRepository.getPaginated(data);</span>
+    return this.condominiumRepository.getPaginated(data);
   }
   
-<span class="fstat-no" title="function not covered" >  getById(</span>condominiumId: string): Promise&lt;CondominiumResponse&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.condominiumRepository.getById(condominiumId);</span>
+  getById(condominiumId: string): Promise&lt;CondominiumResponse&gt; {
+    return this.condominiumRepository.getById(condominiumId);
   }
 &nbsp;
   async create(dto: CondominiumDto, user: AuthPayload): Promise&lt;CondominiumResponse&gt; {
@@ -220,12 +220,12 @@ export class CondominiumService {
     
     return condominio
   }
-<span class="fstat-no" title="function not covered" >  update(</span>id: string, dto: CondominiumDto): Promise&lt;CondominiumResponse&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.condominiumRepository.update(id, dto);</span>
+  update(id: string, dto: CondominiumDto): Promise&lt;CondominiumResponse&gt; {
+    return this.condominiumRepository.update(id, dto);
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  delete(</span>condominiumId: string): Promise&lt;CondominiumResponse&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.condominiumRepository.delete(condominiumId);</span>
+  delete(condominiumId: string): Promise&lt;CondominiumResponse&gt; {
+    return this.condominiumRepository.delete(condominiumId);
   }
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -235,7 +235,7 @@ export class CondominiumService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-28T10:16:34.124Z
+                at 2026-02-28T10:45:45.023Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
