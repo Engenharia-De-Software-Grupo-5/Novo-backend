@@ -103,11 +103,12 @@ export class ExpenseRepository {
     throw new BadRequestException('targetType invalid.');
   }
 
-  async create(input: CreateExpenseInput) {
+  async create(input: CreateExpenseInput) { //listaLinks: String[]
     const target = await this.assertTargetExists(input);
 
-    return this.prisma.expenses.create({
+    const response = this.prisma.expenses.create({
       data: {
+  
         description: input.description,
         targetType: input.targetType,
         condominiumId: target.condominiumId,
@@ -118,6 +119,16 @@ export class ExpenseRepository {
         paymentMethod: input.paymentMethod,
       },
     });
+    //aqui dentro a gente precisa receber a lista de links e criar as expensesFiles
+    for(let i = 0; i < dot.files[].length; i++){
+      this.prisma.expensesFiles.create({
+        data: {
+          //link: listaLinks[i]
+          type: null,
+          expensesId: response.id;
+        }
+    }
+    )}
   }
 
   findAll() {

@@ -28,6 +28,10 @@ export class ExpenseDto {
   @IsDateString()
   expenseDate: string;
 
+  @ApiProperty()
+  files: Express.Multer.File[];
+  
+
   @ApiProperty({description: 'Payment method', enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
   @IsEnum(ExpensePaymentMethod)
   paymentMethod: ExpensePaymentMethod;

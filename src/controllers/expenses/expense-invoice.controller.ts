@@ -40,9 +40,9 @@ export class ExpenseInvoiceController {
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('expenseId') expenseId: string,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() files?: Express.Multer.File[],
   ) {
-    if (!file) throw new BadRequestException('Envie um arquivo no campo "file".');
+    if (files == null) throw new BadRequestException('Envie um arquivo no campo "file".');
     return this.service.upload(expenseId, file);
   }
 

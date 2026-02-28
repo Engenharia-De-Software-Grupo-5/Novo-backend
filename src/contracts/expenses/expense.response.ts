@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString, IsDateString, Min, IsDate } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsDateString, Min, IsDate, ValidateNested } from 'class-validator';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 
 export class ExpenseResponse {
@@ -19,6 +19,7 @@ export class ExpenseResponse {
   @ApiProperty({ description: 'Expense type', example: 'WATER' })
   @IsString()
   expenseType: string;
+
 
   @ApiProperty({ description: 'Expense value', example: 199.9, minimum: 0.01 })
   @IsNumber()

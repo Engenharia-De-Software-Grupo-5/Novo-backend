@@ -4,17 +4,32 @@ import { ExpenseDto } from 'src/contracts/expenses/expense.dto';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
+import { MinioClientService } from '../tools/minio-client.service';
 
 @Injectable()
 export class ExpenseService {
-  constructor(private readonly repo: ExpenseRepository) {}
+  constructor(
+    private readonly repo: ExpenseRepository,
+    private readonly minioClientService: MinioClientService
+  ) {}
 
   create(dto: ExpenseDto, condominiumId: string) {
-    return this.repo.create({
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
+    for(let i = 0; i < dto.files.length; i++){
+      this.minioClientService.uploadFile(
+        dto.files[i],
+        allowedExtensions,
+        dto.files[i].originalname,
+    );
+    }
+    []// mandar a lista pro repository
+    this.repo.create({
       ...dto,
       expenseDate: new Date(dto.expenseDate),
       condominiumId
     } as any);
+
+   //update(response.id)
   }
 
   list() {
