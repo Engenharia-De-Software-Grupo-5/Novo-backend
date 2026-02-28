@@ -8,7 +8,7 @@ import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
 
 type CreateExpenseInput = {
-  files: Express.Multer.File[];
+  expensesFiles: Express.Multer.File[];
   targetType: ExpenseTargetType;
   condominiumId?: string;
   propertyId?: string;
@@ -28,7 +28,7 @@ export class ExpenseRepository {
       data,
       { deletedAt: null },
       {
-        enumFields: ['status'], 
+        enumFields: ['status'],
         customMappings: {
           permissionName: (content) => ({
             permission: { name: { contains: content, mode: 'insensitive' } },
@@ -64,7 +64,7 @@ export class ExpenseRepository {
       },
     };
   }
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private async assertTargetExists(input: {
     targetType: ExpenseTargetType;
@@ -117,18 +117,16 @@ export class ExpenseRepository {
         value: input.value,
         expenseDate: input.expenseDate,
         paymentMethod: input.paymentMethod,
+        expenseFiles: {
+          create: fileNameLinks.map(link => ({
+            link,
+            type: null, // ou defina o tipo conforme necessário
+          }))
+        },
       },
+      include: { expenseFiles: true }
     });
-    //falta arrumar isso aqui
-    for(let i = 0; i < dto.files.length; i++){
-      this.prisma.expensesFiles.create({
-        data: {
-          link: fileNameLinks[i],
-          type: null,
-          expensesId: response.id
-        }
-    }
-    )}
+    return response;
   }
 
   findAll() {
@@ -168,7 +166,7 @@ export class ExpenseRepository {
     });
   }
 
- 
+
   async softDelete(id: string) {
     await this.findByIdOrThrow(id);
 

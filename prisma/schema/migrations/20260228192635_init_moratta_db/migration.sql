@@ -336,8 +336,19 @@ CREATE TABLE "employee_benefits" (
 );
 
 -- CreateTable
+CREATE TABLE "ExpensesFiles" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "link" TEXT NOT NULL,
+    "type" TEXT,
+    "expensesId" UUID,
+
+    CONSTRAINT "ExpensesFiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "expenses" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "description" TEXT NOT NULL,
     "targetType" "ExpenseTargetType" NOT NULL,
     "condominiumId" UUID,
     "propertyId" UUID,
@@ -359,7 +370,6 @@ CREATE TABLE "invoices" (
     "objectName" TEXT NOT NULL,
     "originalName" TEXT NOT NULL,
     "mimeType" TEXT NOT NULL,
-    "extension" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -534,9 +544,6 @@ CREATE UNIQUE INDEX "contracts_tenantId_propertyId_key" ON "contracts"("tenantId
 CREATE UNIQUE INDEX "contracttemplates_name_key" ON "contracttemplates"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "contracttemplates_condominiumId_key" ON "contracttemplates"("condominiumId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
 
 -- CreateIndex
@@ -627,13 +634,13 @@ ALTER TABLE "employee_payments" ADD CONSTRAINT "employee_payments_employeeId_fke
 ALTER TABLE "employee_benefits" ADD CONSTRAINT "employee_benefits_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ExpensesFiles" ADD CONSTRAINT "ExpensesFiles_expensesId_fkey" FOREIGN KEY ("expensesId") REFERENCES "expenses"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_expenseId_fkey" FOREIGN KEY ("expenseId") REFERENCES "expenses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tenants" ADD CONSTRAINT "tenants_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
