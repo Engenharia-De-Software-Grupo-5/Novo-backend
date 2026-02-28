@@ -27,6 +27,18 @@ export class TenantResponse {
   cpf: string;
 
   @ApiProperty({
+    description: 'Tenant RG (numbers only)',
+    example: '123456789',
+  })
+  rg: string;
+
+  @ApiProperty({
+    description: 'Tenant issuing authority for RG',
+    example: 'SSP/PE',
+  })
+  issuingAuthority: string;
+
+  @ApiProperty({
     description: 'Tenant marital status',
     example: 'Married',
   })
@@ -52,9 +64,9 @@ export class TenantResponse {
 
   @ApiProperty({
     description: 'Tenant birth date',
-    example: '1990-01-01T00:00:00.000Z',
+    example: '1995-03-15',
   })
-  birthDate: Date;
+  birthDate: string;
 
   @ApiProperty({
     description: 'Tenant monthly income',
@@ -106,9 +118,9 @@ export class TenantResponse {
 
   @ApiProperty({
     description: 'Tenant address',
-    type: () => AddressResponse,
+    example: '123 Main St, Apt 4B, Cityville',
   })
-  address?: AddressResponse;
+  address?: string;
 
   
   @ApiProperty({

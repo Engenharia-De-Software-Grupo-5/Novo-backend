@@ -28,6 +28,14 @@ export class SpouseDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
+    description: 'Spouse rg',
+    example: '123456789',
+  })
+  rg: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
     description: 'Spouse profession',
     example: 'Doctor',
   })
