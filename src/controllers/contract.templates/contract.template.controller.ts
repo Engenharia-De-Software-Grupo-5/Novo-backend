@@ -37,9 +37,10 @@ export class ContractTemplateController {
         schema: PaginatedResponseSchema(ContractTemplateResponse),
     })
     getPaginated(
-    @Query() data: PaginationDto,
+        @Param('condId') condominiumId: string,
+        @Query() data: PaginationDto,
     ): Promise<PaginatedResult<ContractTemplateResponse>> {
-        return this.contractTemplateService.getPaginated(data);
+        return this.contractTemplateService.getPaginated(condominiumId, data);
     }
 
     @Get(':id')
