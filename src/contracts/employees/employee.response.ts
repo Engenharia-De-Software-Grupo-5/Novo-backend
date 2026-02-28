@@ -85,4 +85,29 @@ export class EmployeeResponse {
     example: EmployeeStatus.ATIVO,
   })
   status?: EmployeeStatus;
+
+  contracts?: {
+      id: string;
+      name: string;
+      type: string;
+      size: number;
+      url: string;
+  }[];
+
+  lastContract?: {
+      id: string;
+      name: string;
+      type: string;
+      size: number;
+      url: string;
+  };
+}
+
+
+export interface EmployeeContract {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
 }

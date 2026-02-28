@@ -117,4 +117,22 @@ export class EmployeeDto {
     })
     status?: EmployeeStatus;
 
+    lastContract?: EmployeeContract;
+
+    contracts?: {
+        id: string;
+        name: string;
+        type: string;
+        size: number;
+        url: string;
+    }[];
+
+}
+
+export interface EmployeeContract {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
 }

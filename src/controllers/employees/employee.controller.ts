@@ -23,7 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { EmployeeDto } from 'src/contracts/employees/employee.dto';
-import { EmployeeDetailFrontResponse, EmployeeSummaryFrontResponse } from 'src/contracts/employees/employee.front.dto';
+import { EmployeeResponse } from 'src/contracts/employees/employee.response';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { EmployeeService } from 'src/services/employees/employee.service';
@@ -42,7 +42,7 @@ export class EmployeeController {
   })
   @ApiOkResponse({
     description: 'Success',
-    schema: PaginatedResponseSchema(EmployeeSummaryFrontResponse),
+    schema: PaginatedResponseSchema(EmployeeResponse),
   })
   getPaginated(
     @Param('condId') condId: string,
@@ -60,9 +60,9 @@ export class EmployeeController {
   })
   @ApiOkResponse({
     description: 'Successfully retrieved employee details',
-    type: EmployeeDetailFrontResponse,
+    type: EmployeeResponse,
   })
-  getById(@Param('condId') condId: string, @Param('id') employeeId: string): Promise<EmployeeDetailFrontResponse> {
+  getById(@Param('condId') condId: string, @Param('id') employeeId: string): Promise<EmployeeResponse> {
     return this.employeeService.getById(condId, employeeId);
   }
 
@@ -78,9 +78,9 @@ export class EmployeeController {
   })
   @ApiCreatedResponse({
     description: 'Employee successfully created',
-    type: EmployeeDetailFrontResponse,
+    type: EmployeeResponse,
   })
-  create(@Param('condId') condId: string, @Body() dto: EmployeeDto): Promise<EmployeeDetailFrontResponse> {
+  create(@Param('condId') condId: string, @Body() dto: EmployeeDto): Promise<EmployeeResponse> {
     return this.employeeService.create(condId, dto);
   }
 
@@ -99,7 +99,7 @@ export class EmployeeController {
   })
   @ApiOkResponse({
     description: 'Employee successfully updated',
-    type: EmployeeDetailFrontResponse,
+    type: EmployeeResponse,
   })
   update(
     @Param('condId') condId: string,
@@ -107,7 +107,7 @@ export class EmployeeController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body('data') data?: string,                
     @Body('existingFileIds') existingFileIds?: string[]
-  ): Promise<EmployeeDetailFrontResponse> {
+  ): Promise<EmployeeResponse> {
     const dto: EmployeeDto = data ? JSON.parse(data) : {};
     return this.employeeService.update(condId, employeeId, dto, files, existingFileIds);
   }
@@ -120,7 +120,7 @@ export class EmployeeController {
   })
   @ApiOkResponse({
     description: 'Employee successfully deleted',
-    type: EmployeeSummaryFrontResponse,
+    type: EmployeeResponse,
   })
   async delete(@Param('condId') condId: string, @Param('id') employeeId: string) {
     await this.employeeService.delete(condId, employeeId);

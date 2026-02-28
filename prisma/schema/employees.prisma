@@ -69,16 +69,16 @@ model BanksData {
 model EmployeeContracts {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  condominium       Condominiums        @relation(fields: [condId], references: [id])
-  condId            String              @db.Uuid
+  condominium  Condominiums @relation(fields: [condId], references: [id])
+  condId       String @db.Uuid
+
   employeeId   String    @db.Uuid
   employee     Employees @relation(fields: [employeeId], references: [id])
 
-  objectName   String @unique
-  originalName String
-  mimeType     String
-  extension    String
-  size         Int
+  name String
+  type String
+  size Int
+  url  String
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
