@@ -161,13 +161,14 @@ export class ContractRepository {
   constructor(private prisma: PrismaService) { }
 
   async getPaginated(
+    condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<ContractResponse>> {
     const where = buildDynamicWhere(
       data,
-      { deletedAt: null },
+      { deletedAt: null, property: { condominiumId } },
       {
-        enumFields: ['status'], 
+        enumFields: ['status'],
         customMappings: {
           permissionName: (content) => ({
             permission: { name: { contains: content, mode: 'insensitive' } },

@@ -10,13 +10,14 @@ import { buildDynamicWhere } from "src/contracts/pagination/prisma.utils";
 @Injectable()
 export class ContractTemplateRepository {
   async getPaginated(
+    condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<ContractTemplateResponse>> {
     const where = buildDynamicWhere(
       data,
-      { deletedAt: null },
+      { deletedAt: null, condominiumId },
       {
-        enumFields: ['status'], 
+        enumFields: ['status'],
         customMappings: {
           permissionName: (content) => ({
             permission: { name: { contains: content, mode: 'insensitive' } },

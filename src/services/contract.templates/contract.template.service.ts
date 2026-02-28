@@ -14,10 +14,11 @@ export class ContractTemplateService {
         return this.contractTemplateRepository.getAll(condominiumId, name)
     }
     getPaginated(
+        condominiumId: string,
         data: PaginationDto,
-      ): Promise<PaginatedResult<ContractTemplateResponse>> {
-        return this.contractTemplateRepository.getPaginated(data);
-      }
+    ): Promise<PaginatedResult<ContractTemplateResponse>> {
+        return this.contractTemplateRepository.getPaginated(condominiumId, data);
+    }
     getById(condominiumId: string, contractTemplateId: string): Promise<ContractTemplateResponse> {
         return this.contractTemplateRepository.getById(condominiumId, contractTemplateId)
     }

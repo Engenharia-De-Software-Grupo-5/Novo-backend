@@ -10,6 +10,5 @@ model ContractTemplates {
   deletedAt     DateTime?
   contract      Contracts[]
 
-  @@unique([condominiumId])
   @@map("contracttemplates")
 }
