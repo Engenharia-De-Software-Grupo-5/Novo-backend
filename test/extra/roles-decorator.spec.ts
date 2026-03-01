@@ -1,27 +1,22 @@
+import 'reflect-metadata';
 import { ROLES_KEY, Roles } from 'src/common/decorators/roles.decorator';
 
-
-jest.mock('@nestjs/common', () => {
-  const actual = jest.requireActual('@nestjs/common');
-  return {
-    ...actual,
-    SetMetadata: jest.fn(() => 'decorator-result'),
-  };
-});
-
-import { SetMetadata } from '@nestjs/common';
-
 describe('Roles decorator', () => {
-  beforeEach(() => jest.clearAllMocks());
+  it('should set roles metadata on method', () => {
+    class Dummy {
+      @Roles('admin', 'manager')
+      method() {}
+    }
 
-  it('should export ROLES_KEY = "roles"', () => {
-    expect(ROLES_KEY).toBe('roles');
+    const roles = Reflect.getMetadata(ROLES_KEY, Dummy.prototype.method);
+    expect(roles).toEqual(['admin', 'manager']);
   });
 
-  it('Roles(...) should call SetMetadata with key and roles and return its result', () => {
-    const out = Roles('ADMIN', 'MANAGER');
+  it('should set roles metadata on class', () => {
+    @Roles('admin')
+    class Dummy {}
 
-    expect(SetMetadata).toHaveBeenCalledWith('roles', ['ADMIN', 'MANAGER']);
-    expect(out).toBe('decorator-result');
+    const roles = Reflect.getMetadata(ROLES_KEY, Dummy);
+    expect(roles).toEqual(['admin']);
   });
 });

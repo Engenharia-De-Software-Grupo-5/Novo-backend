@@ -1,15 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmployeeContractsController } from 'src/controllers/employees/employee-contracts.controller';
 import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
-import { RolesGuard } from 'src/common/guards/roles.guard';
-import { PrismaService } from 'src/common/database/prisma.service';
+import { BadRequestException } from '@nestjs/common';
 
 describe('EmployeeContractsController', () => {
   let controller: EmployeeContractsController;
   let service: jest.Mocked<EmployeeContractsService>;
 
   beforeEach(async () => {
-    const moduleRef = Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       controllers: [EmployeeContractsController],
       providers: [
         {
@@ -22,33 +21,34 @@ describe('EmployeeContractsController', () => {
             remove: jest.fn(),
           },
         },
-
-        {
-          provide: PrismaService,
-          useValue: {},
-        },
       ],
-    });
-
-    moduleRef.overrideGuard(RolesGuard).useValue({
-      canActivate: jest.fn().mockReturnValue(true),
-    });
-
-    const module: TestingModule = await moduleRef.compile();
+    })
+      // importante: não deixar os guards reais rodarem no unit test
+      .overrideGuard(require('src/common/guards/jwt-auth.guard').JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(require('src/common/guards/roles.guard').RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get(EmployeeContractsController);
-    service = module.get(EmployeeContractsService) as any;
+    service = module.get(EmployeeContractsService);
+  });
+
+  it('upload should throw BadRequestException when file is missing', async () => {
+    await expect(controller.upload('e1', 'c1', undefined as any)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 
   it('upload should call service.upload', async () => {
-  service.upload.mockResolvedValue({ id: 'ct1' } as any);
-  const file = {} as any;
+    const file = { originalname: 'x.pdf' } as any;
+    service.upload.mockResolvedValue({ id: 'ct1' } as any);
 
-  const res = await controller.upload('c1', 'e1', file);
+    const res = await controller.upload('e1', 'c1', file);
 
-  expect(service.upload).toHaveBeenCalledWith('e1', 'c1', file);
-  expect(res).toEqual({ id: 'ct1' });
-});
+    expect(service.upload).toHaveBeenCalledWith('c1', 'e1', file);
+    expect(res).toEqual({ id: 'ct1' });
+  });
 
   it('list should call service.list', async () => {
     service.list.mockResolvedValue([{ id: 'ct1' }] as any);
@@ -78,7 +78,7 @@ describe('EmployeeContractsController', () => {
   });
 
   it('remove should call service.remove', async () => {
-    service.remove.mockResolvedValue(undefined as any);
+    service.remove.mockResolvedValue(undefined);
 
     await controller.remove('c1', 'e1', 'ct1');
 

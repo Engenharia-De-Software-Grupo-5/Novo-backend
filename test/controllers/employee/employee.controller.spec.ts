@@ -1,78 +1,69 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EmployeeContractsController } from 'src/controllers/employees/employee-contracts.controller';
-import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 
-describe('EmployeeContractsController', () => {
-  let controller: EmployeeContractsController;
-  let service: jest.Mocked<EmployeeContractsService>;
+import { EmployeeController } from 'src/controllers/employees/employee.controller';
+import { EmployeeService } from 'src/services/employees/employee.service';
+
+describe('EmployeeController', () => {
+  let controller: EmployeeController;
+  let service: jest.Mocked<EmployeeService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [EmployeeContractsController],
+      controllers: [EmployeeController],
       providers: [
         {
-          provide: EmployeeContractsService,
+          provide: EmployeeService,
           useValue: {
-            upload: jest.fn(),
-            list: jest.fn(),
-            findOne: jest.fn(),
-            getDownloadUrl: jest.fn(),
-            remove: jest.fn(),
+            getById: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
           },
         },
       ],
-    })
-      .overrideGuard(RolesGuard)
-      .useValue({ canActivate: jest.fn().mockResolvedValue(true) })
-      .compile();
+    }).compile();
 
-    controller = module.get(EmployeeContractsController);
-    service = module.get(EmployeeContractsService) as any;
+    controller = module.get<EmployeeController>(EmployeeController);
+    service = module.get(EmployeeService);
   });
 
-  it('upload should call service.upload', async () => {
-    service.upload.mockResolvedValue({ id: 'ct1' } as any);
+  it('getById should call service.getById', async () => {
+    service.getById.mockResolvedValue({ id: 'e1' } as any);
 
-    const file = {} as any;
-    const res = await controller.upload('c1', 'e1', file);
+    const res = await controller.getById('c1', 'e1');
 
-   expect(service.upload).toHaveBeenCalledWith('e1', 'c1', file);
-    expect(res).toEqual({ id: 'ct1' });
+    expect(service.getById).toHaveBeenCalledWith('c1', 'e1');
+    expect(res).toEqual({ id: 'e1' });
   });
 
-  it('list should call service.list', async () => {
-    service.list.mockResolvedValue([{ id: 'ct1' }] as any);
+  it('create should call service.create', async () => {
+    service.create.mockResolvedValue({ id: 'e1' } as any);
 
-    const res = await controller.list('c1', 'e1');
+    const res = await controller.create('c1', { name: 'A' } as any);
 
-    expect(service.list).toHaveBeenCalledWith('c1', 'e1');
-    expect(res).toEqual([{ id: 'ct1' }]);
+    expect(service.create).toHaveBeenCalledWith('c1', { name: 'A' });
+    expect(res).toEqual({ id: 'e1' });
   });
 
-  it('findOne should call service.findOne', async () => {
-    service.findOne.mockResolvedValue({ id: 'ct1' } as any);
+  it('update should call service.update', async () => {
+  service.update.mockResolvedValue({ id: 'e1' } as any);
 
-    const res = await controller.findOne('c1', 'e1', 'ct1');
+  const res = await controller.update('c1', 'e1', { name: 'B' } as any);
 
-    expect(service.findOne).toHaveBeenCalledWith('c1', 'e1', 'ct1');
-    expect(res).toEqual({ id: 'ct1' });
-  });
+  expect(service.update).toHaveBeenCalled();
+  expect(res).toEqual({ id: 'e1' });
+});
 
-  it('download should call service.getDownloadUrl', async () => {
-    service.getDownloadUrl.mockResolvedValue({ url: 'signed' } as any);
+  it('delete should call service.delete and return success message', async () => {
+  service.delete.mockResolvedValue({ id: 'e1' } as any);
 
-    const res = await controller.download('c1', 'e1', 'ct1');
+  const res = await controller.delete('c1', 'e1');
 
-    expect(service.getDownloadUrl).toHaveBeenCalledWith('c1', 'e1', 'ct1');
-    expect(res).toEqual({ url: 'signed' });
-  });
+  expect(service.delete).toHaveBeenCalledTimes(1);
+  expect(service.delete).toHaveBeenCalledWith('c1', 'e1');
 
-  it('remove should call service.remove', async () => {
-    service.remove.mockResolvedValue(undefined);
-
-    await controller.remove('c1', 'e1', 'ct1');
-
-    expect(service.remove).toHaveBeenCalledWith('c1', 'e1', 'ct1');
+  expect(res).toEqual({
+    message: 'Employee com id e1 deletado com sucesso.',
+    });
   });
 });
