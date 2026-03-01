@@ -1,57 +1,97 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-import { PropertyDto } from "src/contracts/condominiums/property.dto";
-import { PropertyResponse } from "src/contracts/condominiums/property.response";
-import { PaginatedResult } from "src/contracts/pagination/paginated.result";
-import { PaginationDto } from "src/contracts/pagination/pagination.dto";
-import { PropertyRepository } from "src/repositories/condominiums/property.repository";
-import { MinioClientService } from "../tools/minio-client.service";
-import { PropertyUpdateDto } from "src/contracts/condominiums/property.update.dto";
+import { ConflictException, Injectable } from '@nestjs/common';
+import { PropertyDto } from 'src/contracts/condominiums/property.dto';
+import { PropertyResponse } from 'src/contracts/condominiums/property.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PropertyRepository } from 'src/repositories/condominiums/property.repository';
+import { MinioClientService } from '../tools/minio-client.service';
+import { PropertyUpdateDto } from 'src/contracts/condominiums/property.update.dto';
 
 @Injectable()
 export class PropertyService {
   constructor(
     private readonly propertyRepository: PropertyRepository,
-    private readonly minioClienteService: MinioClientService) { }
+    private readonly minioClienteService: MinioClientService,
+  ) {}
   async getAll(condominiumId: string): Promise<PropertyResponse[]> {
     const result = await this.propertyRepository.getAll(condominiumId);
 
-    for (let i = 0; i < result.length; i++) {
-      for (let j = 0; j < result[i].files.length; i++) {
-        const tempUrl = await this.minioClienteService.getFileUrl(result[i][j])
-        result[i].files[j].link = tempUrl
-      }
-    }
-
-    return result;
+    return Promise.all(
+      result.map(async (property) => ({
+        ...property,
+        files: property.files
+          ? await Promise.all(
+              property.files.map(async (file) => ({
+                ...file,
+                link: await this.minioClienteService.getFileUrl(file.link),
+              })),
+            )
+          : [],
+      })),
+    );
   }
 
-  getPaginated(
+  async getPaginated(
     condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<PropertyResponse>> {
-    return this.propertyRepository.getPaginated(condominiumId, data);
+    const paginated = await this.propertyRepository.getPaginated(
+      condominiumId,
+      data,
+    );
+
+    paginated.items = await Promise.all(
+      paginated.items.map(async (property) => ({
+        ...property,
+        files: property.files
+          ? await Promise.all(
+              property.files.map(async (file) => ({
+                ...file,
+                link: await this.minioClienteService.getFileUrl(file.link),
+              })),
+            )
+          : [],
+      })),
+    );
+
+    return paginated;
   }
+  async getById(
+    condominiumId: string,
+    propertyId: string,
+  ): Promise<PropertyResponse> {
+    const result = await this.propertyRepository.getById(
+      condominiumId,
+      propertyId,
+    );
 
-  async getById(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
-    const result = await this.propertyRepository.getById(condominiumId, propertyId);
-
-    for (let i = 0; i < result.files.length; i++) {
-      const tempUrl = await this.minioClienteService.getFileUrl(result.files[i].link)
-      result.files[i].link = tempUrl;
+    if (result.files?.length) {
+      result.files = await Promise.all(
+        result.files.map(async (file) => ({
+          ...file,
+          link: await this.minioClienteService.getFileUrl(file.link),
+        })),
+      );
     }
 
     return result;
   }
 
-  getByIdentificador(condominiumId: string, identificador: string): Promise<PropertyResponse> {
-    return this.propertyRepository.getByIdentificador(condominiumId, identificador);
+  getByIdentificador(
+    condominiumId: string,
+    identificador: string,
+  ): Promise<PropertyResponse> {
+    return this.propertyRepository.getByIdentificador(
+      condominiumId,
+      identificador,
+    );
   }
 
   async create(
     condominiumId: string,
     dto: PropertyDto,
     inspections: Express.Multer.File[],
-    documents: Express.Multer.File[]
+    documents: Express.Multer.File[],
   ): Promise<PropertyResponse> {
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
 
@@ -60,7 +100,9 @@ export class PropertyService {
       dto.identifier,
     );
     if (propertyExistente) {
-      throw new ConflictException('Property with this identifier already exists in this condominium in the database.');
+      throw new ConflictException(
+        'Property with this identifier already exists in this condominium in the database.',
+      );
     }
 
     let inspectionFileNameList: string[] = [];
@@ -99,7 +141,7 @@ export class PropertyService {
       inspectionFileNameList,
       documentFileNameList,
       inspections,
-      documents
+      documents,
     );
   }
 
@@ -108,7 +150,7 @@ export class PropertyService {
     propertyId: string,
     dto: PropertyUpdateDto,
     inspections: Express.Multer.File[],
-    documents: Express.Multer.File[]
+    documents: Express.Multer.File[],
   ): Promise<PropertyResponse> {
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
 
@@ -143,7 +185,14 @@ export class PropertyService {
     }
 
     return this.propertyRepository.update(
-      condominiumId, propertyId, dto, inspections, documents, inspectionFileNameList, documentFileNameList);
+      condominiumId,
+      propertyId,
+      dto,
+      inspections,
+      documents,
+      inspectionFileNameList,
+      documentFileNameList,
+    );
   }
 
   delete(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
