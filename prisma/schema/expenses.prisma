@@ -16,6 +16,7 @@ enum ExpensePaymentMethod {
 model ExpensesFiles {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   link       String
+  name       String
   type       String?
   expenses   Expenses? @relation(fields: [expensesId], references: [id])
   expensesId String?   @db.Uuid
@@ -40,8 +41,8 @@ model Expenses {
 
   expenseFiles ExpensesFiles[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   // invoices  Invoices[]
 
@@ -51,7 +52,7 @@ model Expenses {
 model Invoices {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  expenseId String   @db.Uuid
+  expenseId String @db.Uuid
   // expense   Expenses @relation(fields: [expenseId], references: [id])
 
   objectName   String @unique
