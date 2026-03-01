@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsString, IsDateString, Min, isString } from 'class-validator';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 
-export class ExpenseDto {
-  @ApiProperty({ description: 'Expense target type', enum: ExpenseTargetType, example: ExpenseTargetType.CONDOMINIUM })
+export class ExpenseUpdateDto {
+  @ApiProperty({description: 'Expense target type', enum: ExpenseTargetType, example: ExpenseTargetType.CONDOMINIUM })
   @IsEnum(ExpenseTargetType)
   targetType: ExpenseTargetType;
 
@@ -30,11 +30,11 @@ export class ExpenseDto {
 
   @ApiProperty()
   files: Express.Multer.File[];
-
+  
   @ApiProperty()
-  filesToKeep: string[];
+  filesIds: string[]
 
-  @ApiProperty({ description: 'Payment method', enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
+  @ApiProperty({description: 'Payment method', enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
   @IsEnum(ExpensePaymentMethod)
   paymentMethod: ExpensePaymentMethod;
 }

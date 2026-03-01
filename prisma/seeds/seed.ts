@@ -12,17 +12,20 @@ const prisma = new PrismaClient();
 async function main() {
   const { permissionAdmin, permissionFinanceiro, permissionRH } =
     await seedPermissions(prisma);
+
   const { condominiumA, condominiumB } = await seedCondominiums(prisma);
+
   const { contractTemplate1 } = await seedContractTemplates(
     prisma,
     condominiumA.id,
   );
+
   const { property1, property2 } = await seedProperties(
     prisma,
     condominiumA.id,
   );
 
-  const { employee1, employee2 } = await seedEmployees(prisma);
+  const { employee1, employee2 } = await seedEmployees(condominiumA.id, prisma);
 
   const { tenantA, tenantB } = await seedTenants(prisma);
   const { admin, user } = await seedUsers(

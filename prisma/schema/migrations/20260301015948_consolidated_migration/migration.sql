@@ -20,7 +20,10 @@ CREATE TYPE "PropertySituation" AS ENUM ('ACTIVE', 'INACTIVE', 'UNAVAILABLE', 'M
 CREATE TYPE "ContractType" AS ENUM ('CLT', 'PJ', 'TEMPORARY', 'INTERNSHIP', 'OUTSOURCED');
 
 -- CreateEnum
-CREATE TYPE "EmployeeStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'TERMINATED', 'ON_LEAVE', 'VACATION');
+CREATE TYPE "EmployeeStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'PENDING');
+
+-- CreateEnum
+CREATE TYPE "EmployeeRoles" AS ENUM ('GERENTE', 'PORTEIRO', 'ZELADOR', 'FAXINEIRO');
 
 -- CreateEnum
 CREATE TYPE "PaymentType" AS ENUM ('SALARY', 'BONUS', 'ADVANCE', 'OTHER');
@@ -262,17 +265,22 @@ CREATE TABLE "employees" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "cpf" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "bankDataId" UUID NOT NULL,
+    "condId" UUID NOT NULL,
+    "email" TEXT,
+    "bankDataId" UUID,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
-    "role" TEXT NOT NULL,
-    "contractType" "ContractType" NOT NULL,
-    "hireDate" TIMESTAMP(3) NOT NULL,
+    "role" "EmployeeRoles" NOT NULL,
+    "contractType" "ContractType",
+    "admissionDate" TEXT,
+    "birthDate" TEXT NOT NULL,
+    "address" TEXT,
+    "phone" TEXT,
     "terminationDate" TIMESTAMP(3),
-    "baseSalary" DOUBLE PRECISION NOT NULL,
-    "workload" INTEGER NOT NULL,
-    "status" "EmployeeStatus" NOT NULL DEFAULT 'ACTIVE',
+    "baseSalary" DOUBLE PRECISION,
+    "workload" INTEGER,
+    "status" "EmployeeStatus" NOT NULL,
 
     CONSTRAINT "employees_pkey" PRIMARY KEY ("id")
 );
@@ -294,12 +302,12 @@ CREATE TABLE "banksdata" (
 -- CreateTable
 CREATE TABLE "employee_contracts" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "condId" UUID NOT NULL,
     "employeeId" UUID NOT NULL,
-    "objectName" TEXT NOT NULL,
-    "originalName" TEXT NOT NULL,
-    "mimeType" TEXT NOT NULL,
-    "extension" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
+    "url" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -336,8 +344,20 @@ CREATE TABLE "employee_benefits" (
 );
 
 -- CreateTable
+CREATE TABLE "ExpensesFiles" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "link" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" TEXT,
+    "expensesId" UUID,
+
+    CONSTRAINT "ExpensesFiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "expenses" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "description" TEXT NOT NULL,
     "targetType" "ExpenseTargetType" NOT NULL,
     "condominiumId" UUID,
     "propertyId" UUID,
@@ -359,7 +379,6 @@ CREATE TABLE "invoices" (
     "objectName" TEXT NOT NULL,
     "originalName" TEXT NOT NULL,
     "mimeType" TEXT NOT NULL,
-    "extension" TEXT NOT NULL,
     "size" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -384,17 +403,19 @@ CREATE TABLE "tenants" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "cpf" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "rg" TEXT NOT NULL,
+    "issuingAuthority" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
-    "birthDate" TIMESTAMP(3) NOT NULL,
+    "birthDate" TEXT NOT NULL,
     "maritalStatus" TEXT NOT NULL,
     "monthlyIncome" DOUBLE PRECISION NOT NULL,
     "email" TEXT NOT NULL,
     "primaryPhone" TEXT NOT NULL,
     "secondaryPhone" TEXT,
-    "addressId" UUID NOT NULL,
-    "condominiumId" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "condominiumId" UUID NOT NULL,
     "status" "TenantStatus" NOT NULL,
 
     CONSTRAINT "tenants_pkey" PRIMARY KEY ("id")
@@ -450,6 +471,7 @@ CREATE TABLE "spouses" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
     "cpf" TEXT NOT NULL,
+    "rg" TEXT NOT NULL,
     "profession" TEXT NOT NULL,
     "monthlyIncome" DOUBLE PRECISION NOT NULL,
     "birthDate" TIMESTAMP(3) NOT NULL,
@@ -534,16 +556,13 @@ CREATE UNIQUE INDEX "contracts_tenantId_propertyId_key" ON "contracts"("tenantId
 CREATE UNIQUE INDEX "contracttemplates_name_key" ON "contracttemplates"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "contracttemplates_condominiumId_key" ON "contracttemplates"("condominiumId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "employees_cpf_key" ON "employees"("cpf");
-
--- CreateIndex
 CREATE UNIQUE INDEX "employees_bankDataId_key" ON "employees"("bankDataId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "employee_contracts_objectName_key" ON "employee_contracts"("objectName");
+CREATE INDEX "employees_condId_deletedAt_idx" ON "employees"("condId", "deletedAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "employees_cpf_condId_key" ON "employees"("cpf", "condId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "invoices_objectName_key" ON "invoices"("objectName");
@@ -555,7 +574,7 @@ CREATE UNIQUE INDEX "owners_identifier_key" ON "owners"("identifier");
 CREATE UNIQUE INDEX "tenants_cpf_key" ON "tenants"("cpf");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tenants_name_key" ON "tenants"("name");
+CREATE UNIQUE INDEX "tenants_rg_key" ON "tenants"("rg");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "professional_info_tenantId_key" ON "professional_info"("tenantId");
@@ -615,7 +634,13 @@ ALTER TABLE "contracts" ADD CONSTRAINT "contracts_contractTemplateId_fkey" FOREI
 ALTER TABLE "contracttemplates" ADD CONSTRAINT "contracttemplates_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "employees" ADD CONSTRAINT "employees_condId_fkey" FOREIGN KEY ("condId") REFERENCES "condominiums"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "employees" ADD CONSTRAINT "employees_bankDataId_fkey" FOREIGN KEY ("bankDataId") REFERENCES "banksdata"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "employee_contracts" ADD CONSTRAINT "employee_contracts_condId_fkey" FOREIGN KEY ("condId") REFERENCES "condominiums"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "employee_contracts" ADD CONSTRAINT "employee_contracts_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -627,16 +652,16 @@ ALTER TABLE "employee_payments" ADD CONSTRAINT "employee_payments_employeeId_fke
 ALTER TABLE "employee_benefits" ADD CONSTRAINT "employee_benefits_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "employees"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ExpensesFiles" ADD CONSTRAINT "ExpensesFiles_expensesId_fkey" FOREIGN KEY ("expensesId") REFERENCES "expenses"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_expenseId_fkey" FOREIGN KEY ("expenseId") REFERENCES "expenses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "tenants" ADD CONSTRAINT "tenants_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tenants" ADD CONSTRAINT "tenants_condominiumId_fkey" FOREIGN KEY ("condominiumId") REFERENCES "condominiums"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "emergency_contacts" ADD CONSTRAINT "emergency_contacts_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;

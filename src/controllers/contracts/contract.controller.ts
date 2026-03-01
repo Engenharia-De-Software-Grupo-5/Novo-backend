@@ -64,9 +64,10 @@ export class ContractController {
     schema: PaginatedResponseSchema(ContractResponse),
   })
   getPaginated(
+    @Param('condId') condominiumId: string,
     @Query() data: PaginationDto,
   ): Promise<PaginatedResult<ContractResponse>> {
-    return this.contractService.listPaginated(data);
+    return this.contractService.listPaginated(condominiumId, data);
   }
 
   @Get(':id')
@@ -160,15 +161,29 @@ export class ContractController {
     return this.contractService.delete(condominiumId, ContractId);
   }
 
-  @Post('preview')
+  // @Post('preview')
+  // @HttpCode(HttpStatus.OK)
+  // @ApiOperation({
+  //   summary: 'Preview contract before creation',
+  //   description: 'Generate a temporary HTML preview of the contract',
+  // })
+
+  // async preview(
+  //   @Param('condId') condominiumId: string,
+  //   @Body() dto: PreviewContractDto) {
+  //   return this.previewContractService.execute(condominiumId, dto);
+  // }
+
+  @Post('previewUrl')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Preview contract before creation',
-    description: 'Generate a temporary HTML preview of the contract',
+    description: 'Generate a temporary PDF preview of the contract and return its URL',
   })
-  async preview(
+
+  async previewUrl(
     @Param('condId') condominiumId: string,
     @Body() dto: PreviewContractDto) {
-    return this.previewContractService.execute(condominiumId, dto);
+    return this.previewContractService.executeUrl(condominiumId, dto);
   }
 }

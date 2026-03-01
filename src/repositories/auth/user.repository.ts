@@ -22,6 +22,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },
@@ -38,6 +39,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },
@@ -73,6 +75,7 @@ export class UserRepository {
             select: {
               permission: { select: { id: true, name: true } },
               condominium: { select: { id: true, name: true } },
+              status: true,
             },
           },
         },
@@ -117,6 +120,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },
@@ -153,6 +157,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },
@@ -170,6 +175,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },
@@ -198,6 +204,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },
@@ -220,6 +227,7 @@ export class UserRepository {
           select: {
             permission: { select: { id: true, name: true } },
             condominium: { select: { id: true, name: true } },
+            status: true,
           },
         },
       },

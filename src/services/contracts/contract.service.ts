@@ -18,9 +18,10 @@ export class ContractService {
   ) { }
 
   listPaginated(
+    condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<ContractResponse>> {
-    return this.contractRepository.getPaginated(data);
+    return this.contractRepository.getPaginated(condominiumId, data);
   }
   getAll(condominiumId: string): Promise<ContractResponse[]> {
     return this.contractRepository.getAll(condominiumId);

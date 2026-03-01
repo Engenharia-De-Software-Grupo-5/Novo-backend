@@ -1,14 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString, IsDateString, Min, IsDate } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsDate, ValidateNested} from 'class-validator';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
+import { ExpenseFileResponse } from './expenseFile.reponse';
 
 export class ExpenseResponse {
   @ApiProperty({ description: 'Expense target type', enum: ExpenseTargetType, example: ExpenseTargetType.CONDOMINIUM })
   @IsEnum(ExpenseTargetType)
   targetType: ExpenseTargetType;
-
-  @ApiProperty({ description: 'Condominium id when targetType=CONDOMINIUM', required: false })
-  condominiumId?: string;
 
   @ApiProperty({ description: 'Property id when targetType=PROPERTY', required: false })
   propertyId?: string;
@@ -31,4 +29,8 @@ export class ExpenseResponse {
   @ApiProperty({ enum: ExpensePaymentMethod, example: ExpensePaymentMethod.PIX })
   @IsEnum(ExpensePaymentMethod)
   paymentMethod: ExpensePaymentMethod;
+
+  @ApiProperty()
+  @ValidateNested()
+  expenseFiles: ExpenseFileResponse[]
 }

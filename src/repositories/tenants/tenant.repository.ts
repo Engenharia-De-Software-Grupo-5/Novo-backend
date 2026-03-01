@@ -1,20 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { connect } from 'node:http2';
 import { PrismaService } from 'src/common/database/prisma.service';
-import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
+import { TenantPatchDto } from 'src/contracts/tenants/tenantPatch.dto';
 
 @Injectable()
 export class TenantRepository {
   async getPaginated(
+    condId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<TenantResponse>> {
     const where = buildDynamicWhere(
       data,
-      { deletedAt: null },
+      { deletedAt: null, condominiumId: condId },
       {
         enumFields: ['status'], 
         customMappings: {
@@ -56,6 +58,8 @@ export class TenantRepository {
     id: true,
     name: true,
     cpf: true,
+    rg: true,
+    issuingAuthority: true,
     email: true,
     birthDate: true,
     maritalStatus: true,
@@ -68,6 +72,7 @@ export class TenantRepository {
       select: {
         id: true,
         name: true,
+        rg: true,
         birthDate: true,
         cpf: true,
         profession: true,
@@ -118,18 +123,7 @@ export class TenantRepository {
         incomeProofId: true,
       },
     },
-    address: {
-      select: {
-        id: true,
-        street: true,
-        neighborhood: true,
-        number: true,
-        city: true,
-        zip: true,
-        uf: true,
-        complement: true,
-      },
-    },
+    address: true,
     bankingInfo: {
       select: {
         id: true,
@@ -143,27 +137,28 @@ export class TenantRepository {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  getAll(): Promise<TenantResponse[]> {
+  getAll(condId: string): Promise<TenantResponse[]> {
     return this.prisma.tenants.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, condominiumId: condId },
       select: this.tenantSelect,
     });
   }
-  getById(tenantId: string): Promise<TenantResponse> {
+  
+  getById(condId: string, tenantId: string): Promise<TenantResponse> {
     return this.prisma.tenants.findFirst({
-      where: { id: tenantId, deletedAt: null },
+      where: { id: tenantId, deletedAt: null, condominiumId: condId },
       select: this.tenantSelect,
     });
   }
 
-  getByCpf(cpf: string): Promise<TenantResponse> {
+  getByCpf(condId: string, cpf: string): Promise<TenantResponse> {
     return this.prisma.tenants.findFirst({
-      where: { cpf, deletedAt: null },
+      where: { cpf, deletedAt: null, condominiumId: condId },
       select: this.tenantSelect,
     });
   }
 
-  async create(dto: TenantDto): Promise<TenantResponse> {
+  async create(condId: string, dto: TenantDto): Promise<TenantResponse> {
     const {
       bankingInfo,
       spouse,
@@ -171,8 +166,6 @@ export class TenantRepository {
       professionalInfo,
       additionalResidents,
       documents,
-      addressId,
-      condominiumId,
       ...rest
     } = dto;
 
@@ -181,12 +174,8 @@ export class TenantRepository {
 
       update: {
         ...rest,
-        condominiumId,
+        condominiumId: condId,
         deletedAt: null,
-
-        address: {
-          connect: { id: addressId },
-        },
 
         spouse: spouse
           ? {
@@ -253,11 +242,7 @@ export class TenantRepository {
 
       create: {
         ...rest,
-        condominiumId,
-
-        address: {
-          connect: { id: addressId },
-        },
+        condominium: { connect: { id: condId } },
 
         spouse: spouse ? { create: spouse } : undefined,
         bankingInfo: bankingInfo ? { create: bankingInfo } : undefined,
@@ -288,28 +273,122 @@ export class TenantRepository {
       select: this.tenantSelect,
     });
   }
+
+  private buildUpdateData(dto: TenantPatchDto) {
+    return {
+      ...(dto.maritalStatus && { maritalStatus: dto.maritalStatus }),
+      ...(dto.monthlyIncome && { monthlyIncome: dto.monthlyIncome }),
+      ...(dto.email && { email: dto.email }),
+      ...(dto.primaryPhone && { primaryPhone: dto.primaryPhone }),
+      ...(dto.secondaryPhone && { secondaryPhone: dto.secondaryPhone }),
+      ...(dto.status && { status: dto.status }),
+
+      ...(dto.emergencyContacts && {
+        emergencyContacts: {
+          deleteMany: {}, 
+          create: dto.emergencyContacts.map(ec => ({
+            name: ec.name,
+            relationship: ec.relationship,
+            phone: ec.phone,
+          })),
+        },
+      }),
+
+      ...(dto.professionalInfo && {
+        professionalInfo: {
+          upsert: {
+            update: {
+              companyName: dto.professionalInfo.companyName,
+              companyPhone: dto.professionalInfo.companyPhone,
+              position: dto.professionalInfo.position,
+              monthsWorking: dto.professionalInfo.monthsWorking,
+            },
+            create: {
+              companyName: dto.professionalInfo.companyName,
+              companyPhone: dto.professionalInfo.companyPhone,
+              position: dto.professionalInfo.position,
+              monthsWorking: dto.professionalInfo.monthsWorking,
+              companyAddress: {
+                connect: { id: dto.professionalInfo.companyAddressId },
+              },
+            },
+          },
+        },
+      }),
+
+      ...(dto.bankingInfo && {
+        bankingInfo: {
+          upsert: {
+            update: { ...dto.bankingInfo },
+            create: { ...dto.bankingInfo },
+          },
+        },
+      }),
+
+      ...(dto.spouse && {
+        spouse: {
+          upsert: {
+            update: { ...dto.spouse },
+            create: { ...dto.spouse },
+          },
+        },
+      }),
+
+      ...(dto.additionalResidents && {
+        additionalResidents: {
+          deleteMany: {},
+          create: dto.additionalResidents.map(ar => ({
+            name: ar.name,
+            relationship: ar.relationship,
+            birthDate: ar.birthDate,
+          })),
+        },
+      }),
+
+      ...(dto.documents && {
+        documents: {
+          upsert: {
+            update: { ...dto.documents },
+            create: { ...dto.documents },
+          },
+        },
+      }),
+    };
+  }
   
 
-  update(tenantId: string, dto: TenantDto): Promise<TenantResponse> {
+  async update(condId: string, tenantId: string, dto: TenantPatchDto): Promise<TenantResponse> {
+    const tenant = await this.prisma.tenants.findFirst({
+      where: {
+        id: tenantId,
+        condominiumId: condId,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+
     return this.prisma.tenants.update({
       where: { id: tenantId },
-      data: {
-        name: dto.name,
-        cpf: dto.cpf,
+      data: this.buildUpdateData(dto),
+      select: this.tenantSelect,
+    });
+  }
+
+  async deleteById(condId: string, tenantId: string) {
+    const tenant = await this.prisma.tenants.findFirst({
+      where: {
+        id: tenantId,
+        condominiumId: condId,
+        deletedAt: null,
       },
-      select: this.tenantSelect,
     });
-  }
 
-  deleteByCpf(cpf: string): Promise<TenantResponse> {
-    return this.prisma.tenants.update({
-      where: { cpf, deletedAt: null },
-      data: { deletedAt: new Date() },
-      select: this.tenantSelect,
-    });
-  }
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
 
-  deleteById(tenantId: string): Promise<TenantResponse> {
     return this.prisma.tenants.update({
       where: { id: tenantId },
       data: { deletedAt: new Date() },

@@ -13,9 +13,9 @@ export class EmployeeContractsService {
     private readonly minio: MinioClientService,
   ) {}
 
-  async upload(employeeId: string, file: Express.Multer.File) {
+  async upload(condId: string, employeeId: string, file: Express.Multer.File) {
 
-    const employee = await this.repo.employeeExists(employeeId);
+    const employee = await this.repo.employeeExists(condId, employeeId);
     if (!employee) throw new NotFoundException('Employee not found.');
 
     const extension = (file.originalname.split('.').pop() || '').toLowerCase();
@@ -28,46 +28,86 @@ export class EmployeeContractsService {
     const { fileName } = await this.minio.uploadFile(file, this.allowedExtensions, objectName);
 
     return this.repo.create({
+      condId,
       employeeId,
-      objectName: fileName,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-      extension: 'pdf',
+      name: fileName,
+      type: file.mimetype,
       size: file.size,
+      url: await this.minio.getFileUrl(fileName),
     });
   }
 
-  async list(employeeId: string) {
-    const employee = await this.repo.employeeExists(employeeId);
+  async list(condId: string, employeeId: string) {
+    const employee = await this.repo.employeeExists(condId, employeeId);
     if (!employee) throw new NotFoundException('Employee not found.');
 
     return this.repo.listByEmployee(employeeId);
   }
 
-  async findOne(employeeId: string, contractId: string) {
-    const contract = await this.repo.findForEmployee(employeeId, contractId);
+  async findOne(condId: string, employeeId: string, contractId: string) {
+    const contract = await this.repo.findForEmployee(condId, employeeId, contractId);
     if (!contract) throw new NotFoundException('Contract not found.');
 
-    const url = await this.minio.getFileUrl(contract.objectName);
+    const url = await this.minio.getFileUrl(contract.name);
     return { ...contract, url };
   }
 
-  async getDownloadUrl(employeeId: string, contractId: string) {
-    const contract = await this.repo.findForEmployee(employeeId, contractId);
+  async getDownloadUrl(condId: string, employeeId: string, contractId: string) {
+    const contract = await this.repo.findForEmployee(condId, employeeId, contractId);
     if (!contract) throw new NotFoundException('Contract not found.');
 
-    const url = await this.minio.getFileUrl(contract.objectName);
+    const url = await this.minio.getFileUrl(contract.name);
     return { url };
   }
 
-  async remove(employeeId: string, contractId: string) {
-    const contract = await this.repo.findForEmployee(employeeId, contractId);
+  async remove(condId: string, employeeId: string, contractId: string) {
+    const contract = await this.repo.findForEmployee(condId, employeeId, contractId);
     if (!contract) throw new NotFoundException('Contract not found.');
     try {
-      await this.minio.deleteFile(contract.objectName);
+      await this.minio.deleteFile(contract.name);
     } catch {
     }
 
     await this.repo.softDelete(contractId);
+  }
+
+  async updateEmployeeContracts(
+    condId: string,
+    employeeId: string,
+    files: Express.Multer.File[] = [],
+    existingIds: string[] = []
+  ) {
+    const currentContracts = await this.repo.listByEmployee(employeeId);
+
+    const contractsToRemove = currentContracts.filter(c => !existingIds.includes(c.id));
+    for (const c of contractsToRemove) {
+      try { await this.minio.deleteFile(c.name); } catch {}
+      await this.repo.softDelete(c.id);
+    }
+
+    const uploadedContracts = [];
+    for (const file of files) {
+      const uploaded = await this.upload(condId, employeeId, file);
+      uploadedContracts.push({
+        condId: uploaded.condId,
+        employeeId: uploaded.employeeId,
+        name: uploaded.name,
+        type: uploaded.type,
+        size: uploaded.size,
+        url: await this.minio.getFileUrl(uploaded.name),
+      });
+    }
+
+    const keptContracts = currentContracts.filter(c => existingIds.includes(c.id))
+      .map(async c => ({
+        condId: c.condId,
+        employeeId: c.employeeId,
+        name: c.name,
+        type: c.type,
+        size: c.size,
+        url: await this.minio.getFileUrl(c.name),
+      }));
+
+    return [...keptContracts, ...uploadedContracts];
   }
 }

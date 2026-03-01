@@ -69,6 +69,8 @@ export class ContractRepository {
         id: true,
         name: true,
         cpf: true,
+        rg: true,
+        issuingAuthority: true,
         email: true,
         birthDate: true,
         maritalStatus: true,
@@ -81,6 +83,7 @@ export class ContractRepository {
           select: {
             id: true,
             name: true,
+            rg: true,
             birthDate: true,
             cpf: true,
             profession: true,
@@ -131,18 +134,7 @@ export class ContractRepository {
             incomeProofId: true,
           },
         },
-        address: {
-          select: {
-            id: true,
-            street: true,
-            neighborhood: true,
-            number: true,
-            city: true,
-            zip: true,
-            uf: true,
-            complement: true,
-          },
-        },
+        address: true,
         bankingInfo: {
           select: {
             id: true,
@@ -161,13 +153,14 @@ export class ContractRepository {
   constructor(private prisma: PrismaService) { }
 
   async getPaginated(
+    condominiumId: string,
     data: PaginationDto,
   ): Promise<PaginatedResult<ContractResponse>> {
     const where = buildDynamicWhere(
       data,
-      { deletedAt: null },
+      { deletedAt: null, property: { condominiumId } },
       {
-        enumFields: ['status'], 
+        enumFields: ['status'],
         customMappings: {
           permissionName: (content) => ({
             permission: { name: { contains: content, mode: 'insensitive' } },
