@@ -21,6 +21,14 @@ export class ContractRepository {
         unityType: true,
         propertySituation: true,
         observations: true,
+        files: {
+          select: {
+            id: true,
+            link: true,
+            name: true,
+            type: true,
+          },
+        },
         propertyAddress: {
           select: {
             id: true,

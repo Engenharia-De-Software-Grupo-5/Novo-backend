@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/database/prisma.service";
 import { PropertyDto } from "src/contracts/condominiums/property.dto";
 import { PropertyResponse } from "src/contracts/condominiums/property.response";
+import { PropertyUpdateDto } from "src/contracts/condominiums/property.update.dto";
 import { PaginatedResult } from "src/contracts/pagination/paginated.result";
 import { PaginationDto } from "src/contracts/pagination/pagination.dto";
 import { buildDynamicWhere } from "src/contracts/pagination/prisma.utils";
@@ -12,22 +13,22 @@ export class PropertyRepository {
   private readonly propertySelect = {
     id: true,
     identifier: true,
-    propertyAddress:{
-          select:{
-            block:true,
-            city:true,
-            complement:true,
-            floor:true,
-            id:true,
-            neighborhood:true,
-            number:true,
-            street:true,
-            uf:true,
-            totalArea:true,
-            zip:true
-          }
-        },
-    files:{
+    propertyAddress: {
+      select: {
+        block: true,
+        city: true,
+        complement: true,
+        floor: true,
+        id: true,
+        neighborhood: true,
+        number: true,
+        street: true,
+        uf: true,
+        totalArea: true,
+        zip: true
+      }
+    },
+    files: {
       select: {
         link: true,
         name: true,
@@ -42,8 +43,19 @@ export class PropertyRepository {
       select: {
         id: true,
         name: true,
-        cnpj: true,
-        address: true,
+        description: true,
+        address: {
+          select: {
+            id: true,
+            city: true,
+            complement: true,
+            neighborhood: true,
+            number: true,
+            street: true,
+            uf: true,
+            zip: true
+          }
+        }
       }
     },
   };
@@ -56,7 +68,7 @@ export class PropertyRepository {
       data,
       { deletedAt: null, condominiumId },
       {
-        enumFields: ['status'], 
+        enumFields: ['status'],
         customMappings: {
           permissionName: (content) => ({
             permission: { name: { contains: content, mode: 'insensitive' } },
@@ -88,7 +100,7 @@ export class PropertyRepository {
       },
     };
   }
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // getAll, getById, create, update, delete
   getAll(condominiumId: string): Promise<PropertyResponse[]> {
@@ -97,7 +109,7 @@ export class PropertyRepository {
       select: {
         ...this.propertySelect
       }
-      })
+    })
   }
 
   getById(
@@ -137,23 +149,23 @@ export class PropertyRepository {
         ...propertyData,
         condominium: { connect: { id: condominiumId } },
         propertyAddress: {
-          create: { ...address } 
+          create: { ...address }
         },
         files: {
-          create:[
+          create: [
 
             ...inspectionFileNameList.map((link, i) => ({
-            link,
-            type:'INSPECTION',
-            name: inspectionFiles[i].originalname  
-          })),
+              link,
+              type: 'INSPECTION',
+              name: inspectionFiles[i].originalname
+            })),
 
-          ...documentFileNameList.map((link, i) => ({
-            link,
-            type: 'DOCUMENT',
-            name: documentFiles[i].originalname
-          }))
-        ]
+            ...documentFileNameList.map((link, i) => ({
+              link,
+              type: 'DOCUMENT',
+              name: documentFiles[i].originalname
+            }))
+          ]
         }
       },
       select: this.propertySelect,
@@ -162,15 +174,45 @@ export class PropertyRepository {
   update(
     condominiumId: string,
     propertyId: string,
-    dto: PropertyDto,
+    dto: PropertyUpdateDto,
+    inspections: Express.Multer.File[],
+    documents: Express.Multer.File[],
+    inspectionFileNameList: string[],
+    documentFileNameList: string[],
   ): Promise<PropertyResponse> {
+
+    const { filesToKeep, ...propertyData } = dto;
+
     return this.prisma.properties.update({
       where: { id: propertyId, condominiumId, deletedAt: null },
-      data: { ...dto },
-      select: {
-        ...this.propertySelect,
+      data: {
+        ...propertyData,
+
+        files: {
+          deleteMany: filesToKeep
+            ? {
+              id: {
+                notIn: filesToKeep,
+              },
+            }
+            : {},
+          create: [
+            ...inspectionFileNameList.map((link, i) => ({
+              link,
+              type: 'INSPECTION',
+              name: inspections[i].originalname
+            })),
+
+            ...documentFileNameList.map((link, i) => ({
+              link,
+              type: 'DOCUMENT',
+              name: documents[i].originalname
+            }))
+          ],
+        },
       },
-    });
+      select: this.propertySelect,
+    }) as Promise<PropertyResponse>
   }
   delete(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
     return this.prisma.properties.update({
