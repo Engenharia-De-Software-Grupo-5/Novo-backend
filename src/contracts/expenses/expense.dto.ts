@@ -49,6 +49,9 @@ export class ExpenseDto {
 
   @IsArray()
   @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : [value].filter(Boolean),
+  )
   @IsString({ each: true })
   @ApiProperty({
     description: 'Lista de strings simples',
