@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { PropertySituation, UnityType } from "@prisma/client";
 import { CondominiumResponse } from "./condominium.response";
 import { PropertyAddressResponse } from "./propertyaddress.response";
+import { PropertyFilesResponse } from "./propertyfiles.response.dto";
 
 export class PropertyResponse {
      @ApiProperty({
@@ -29,6 +30,7 @@ export class PropertyResponse {
         example: 'APARTMENT',
       })
     unityType: UnityType;
+    
     propertySituation: PropertySituation;
         @ApiPropertyOptional({
         description: 'Additional observations about the property',
@@ -41,4 +43,7 @@ export class PropertyResponse {
       example: 'This is a corner unit with great natural light.',
     })
     condominium: CondominiumResponse;
+
+    @ApiProperty()
+    files: PropertyFilesResponse[]
 }

@@ -1,20 +1,20 @@
 model Condominiums {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String       @unique
-  description String?
-  address     Addresses    @relation(fields: [addressId], references: [id])
-  addressId   String       @db.Uuid
-  properties  Properties[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
-  expenses    Expenses[]
-  accesses    Access[]
-  tenants     Tenants[]
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String              @unique
+  description       String?
+  address           Addresses           @relation(fields: [addressId], references: [id])
+  addressId         String              @db.Uuid
+  properties        Properties[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  expenses          Expenses[]
+  accesses          Access[]
+  tenants           Tenants[]
   contractTemplates ContractTemplates[]
   employees         Employees[]
   employeeContracts EmployeeContracts[]
-  
+
   @@map("condominiums")
 }
 
@@ -57,30 +57,27 @@ model PropertyAddress {
 }
 
 model Properties {
-  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  identifier        String                @unique
-  // address           String
-  propertyAddress   PropertyAddress       @relation(fields: [propertyAddressId], references: [id])
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier        String            @unique
+  propertyAddress   PropertyAddress   @relation(fields: [propertyAddressId], references: [id])
   unityNumber       String
-  unityType         UnityType             @default(APARTMENT)
+  unityType         UnityType         @default(APARTMENT)
   block             String?
   floor             Int?
   name              String
   totalArea         Float?
-  propertySituation PropertySituation     @default(ACTIVE)
+  propertySituation PropertySituation @default(ACTIVE)
   observations      String?
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
   deletedAt         DateTime?
-  condominium       Condominiums?         @relation(fields: [condominiumId], references: [id])
-  condominiumId     String?               @db.Uuid
+  condominium       Condominiums?     @relation(fields: [condominiumId], references: [id])
+  condominiumId     String?           @db.Uuid
   expenses          Expenses[]
   contracts         Contracts[]
-  inspections       PropertyInspections[]
-  documents         PropertyDocuments[]
+  files             PropertyFiles[]
   charges           Charges[]
-  propertyAddressId String                @db.Uuid
-
+  propertyAddressId String            @db.Uuid
   @@map("properties")
 }
 
@@ -97,40 +94,37 @@ enum PropertySituation {
   MAINTENANCE
 }
 
-model PropertyInspections {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+// model PropertyInspections {
+//   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+//   propertyId String     @db.Uuid
+//   property   Properties @relation(fields: [propertyId], references: [id])
+
+//   objectName   String @unique
+//   originalName String
+//   mimeType     String
+//   extension    String
+//   size         Int
+
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   deletedAt DateTime?
+
+//   @@map("property_inspections")
+// }
+
+model PropertyFiles {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  link String
+  type String
+  name String
 
   propertyId String     @db.Uuid
   property   Properties @relation(fields: [propertyId], references: [id])
-
-  objectName   String @unique
-  originalName String
-  mimeType     String
-  extension    String
-  size         Int
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@map("property_inspections")
-}
-
-model PropertyDocuments {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  propertyId String     @db.Uuid
-  property   Properties @relation(fields: [propertyId], references: [id])
-
-  objectName   String @unique
-  originalName String
-  mimeType     String
-  extension    String
-  size         Int
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@map("property_documents")
+  @@map("propertyfiles")
 }
