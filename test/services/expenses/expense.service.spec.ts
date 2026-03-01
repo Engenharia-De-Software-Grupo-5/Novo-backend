@@ -1,31 +1,36 @@
 import { ExpenseService } from 'src/services/expenses/expense.service';
 
 describe('ExpenseService', () => {
-  const repo = {
-    create: jest.fn(),
-  };
-
-  const minio = {
-    uploadFile: jest.fn(),
-  };
-
-  const service = new ExpenseService(repo as any, minio as any);
+  let service: ExpenseService;
+  let repo: any;
+  let minio: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    repo = { create: jest.fn() };
+    minio = {
+      uploadFile: jest.fn(),
+      getFileUrl: jest.fn(),
+      deleteFile: jest.fn(),
+    };
+
+    service = new ExpenseService(repo, minio);
   });
 
-  it('create should call repo.create', async () => {
-    minio.uploadFile.mockResolvedValue({ fileName: 'f1' });
-    repo.create.mockResolvedValue({ id: 'e1' });
+  it('create should throw when dto.files is undefined (current behavior)', async () => {
+    await expect((service as any).create({} as any, 'c1')).rejects.toBeInstanceOf(
+      TypeError,
+    );
+  });
 
-    const dto = {
-      files: [], 
-    } as any;
+  it('create should work when dto.files is empty array', async () => {
+    repo.create.mockResolvedValue({ id: 'ex1' });
 
-    const res = await service.create(dto, 'c1');
+    const dto = { files: [] } as any;
 
+    const res = await (service as any).create(dto, 'c1');
+
+    expect(minio.uploadFile).not.toHaveBeenCalled();
     expect(repo.create).toHaveBeenCalled();
-    expect(res).toEqual({ id: 'e1' });
+    expect(res).toEqual({ id: 'ex1' });
   });
 });

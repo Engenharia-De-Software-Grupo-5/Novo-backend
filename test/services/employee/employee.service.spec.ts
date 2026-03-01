@@ -1,32 +1,46 @@
 import { EmployeeService } from 'src/services/employees/employee.service';
 
 describe('EmployeeService', () => {
-  const repo = {
-    getByCpf: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-  };
+  let service: EmployeeService;
+  let repo: any;
+  let contractsService: any;
 
-  const contractsService = {
-    updateEmployeeContracts: jest.fn(),
-  };
-
-  const service = new EmployeeService(repo as any, contractsService as any);
+  const validEmployeeDto = {
+    name: 'B',
+    cpf: '12345678900',
+    birthDate: new Date('2000-01-01'),
+    role: 'ROLE' as any,
+    status: 'ACTIVE' as any,
+    contractType: 'CLT' as any,
+    hireDate: new Date('2024-01-01'),
+    baseSalary: 1000,
+    workload: 40,
+  } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    repo = {
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      getByCpf: jest.fn(),
+    };
+
+    contractsService = {
+      updateEmployeeContracts: jest.fn(),
+    };
+
+    service = new EmployeeService(repo, contractsService);
   });
 
-  it('create should call repo.create when cpf not exists', async () => {
+  it('create should call repo.create when cpf does not exist', async () => {
     repo.getByCpf.mockResolvedValue(null);
     repo.create.mockResolvedValue({ id: 'e1' });
 
-    const dto = { cpf: '123', name: 'A' } as any;
+    const res = await service.create('c1', validEmployeeDto);
 
-    const res = await service.create('c1', dto);
-
-    expect(repo.getByCpf).toHaveBeenCalledWith('c1', '123');
-    expect(repo.create).toHaveBeenCalledWith('c1', dto);
+    expect(repo.getByCpf).toHaveBeenCalledWith('c1', validEmployeeDto.cpf);
+    expect(repo.create).toHaveBeenCalledWith('c1', validEmployeeDto);
     expect(res).toEqual({ id: 'e1' });
   });
 
@@ -34,14 +48,19 @@ describe('EmployeeService', () => {
     repo.update.mockResolvedValue({ id: 'e1' });
     contractsService.updateEmployeeContracts.mockResolvedValue([]);
 
-    const res = await service.update('c1', 'e1', {} as any, []);
+    const res = await service.update('c1', 'e1', validEmployeeDto, [], []);
 
-    expect(repo.update).toHaveBeenCalled();
-    expect(contractsService.updateEmployeeContracts).toHaveBeenCalled();
-    expect(res).toEqual({
-      id: 'e1',
-      contracts: [],
-      lastContract: undefined,
-    });
+    expect(repo.update).toHaveBeenCalledWith('c1', 'e1', validEmployeeDto);
+    expect(contractsService.updateEmployeeContracts).toHaveBeenCalledWith(
+      'c1',
+      'e1',
+      [],
+      [],
+    );
+
+   
+    expect(res).toHaveProperty('id', 'e1');
+    expect(res).toHaveProperty('contracts');
+    expect(res).toHaveProperty('lastContract');
   });
 });

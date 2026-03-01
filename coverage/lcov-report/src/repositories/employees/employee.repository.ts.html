@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">55% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>10/20</span>
+                <span class='fraction'>11/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>2/6</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">44.44% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>8/18</span>
+                <span class='fraction'>9/18</span>
             </div>
         
             
@@ -235,17 +235,17 @@
 <a name='L170'></a><a href='#L170'>170</a>
 <a name='L171'></a><a href='#L171'>171</a>
 <a name='L172'></a><a href='#L172'>172</a>
-<a name='L173'></a><a href='#L173'>173</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<a name='L173'></a><a href='#L173'>173</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -327,23 +327,23 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -498,8 +498,8 @@ export class EmployeeRepository {
 &nbsp;
   constructor(private readonly prisma: PrismaService) {}
 &nbsp;
-  getById(condId: string, employeeId: string): Promise&lt;EmployeeResponse | null&gt; {
-    return this.prisma.employees.findFirst({
+<span class="fstat-no" title="function not covered" >  getById(</span>condId: string, employeeId: string): Promise&lt;EmployeeResponse | null&gt; {
+<span class="cstat-no" title="statement not covered" >    return this.prisma.employees.findFirst({</span>
       where: { id: employeeId, deletedAt: null, condId: condId },
       select: this.employeeSelect,
     });
@@ -512,10 +512,10 @@ export class EmployeeRepository {
     });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>create(condId: string, dto: EmployeeDto): Promise&lt;EmployeeResponse&gt; {
-    const { bankData, ...rest } = <span class="cstat-no" title="statement not covered" >dto;</span>
+  async create(condId: string, dto: EmployeeDto): Promise&lt;EmployeeResponse&gt; {
+    const { bankData, ...rest } = dto;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return this.prisma.employees.upsert({</span>
+    return this.prisma.employees.upsert({
       where: {
         cpf_condId: {
           cpf: dto.cpf,
@@ -525,7 +525,7 @@ export class EmployeeRepository {
 &nbsp;
       update: {
         ...rest,
-        ...(bankData &amp;&amp; {
+        ...(bankData &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >{</span>
           bankData: {
             upsert: {
               update: { ...bankData },
@@ -539,7 +539,7 @@ export class EmployeeRepository {
       create: {
         ...rest,
         condominium: { connect: { id: condId } },
-        ...(bankData &amp;&amp; {
+        ...(bankData &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >{</span>
           bankData: {
             create: { ...bankData },
           },
@@ -586,7 +586,7 @@ export class EmployeeRepository {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-01T12:16:06.750Z
+                at 2026-03-01T12:56:27.383Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
