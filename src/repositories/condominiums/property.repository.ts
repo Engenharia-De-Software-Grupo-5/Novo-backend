@@ -134,8 +134,8 @@ export class PropertyRepository {
     dto: PropertyDto,
     inspectionFileNameList: string[],
     documentFileNameList: string[],
-    inspectionFiles: Express.Multer.file[],
-    documentFiles: Express.Multer.file[]
+    inspectionFiles: Express.Multer.File[],
+    documentFiles: Express.Multer.File[]
   ): Promise<PropertyResponse> {
     const { address, ...propertyData } = dto;
 

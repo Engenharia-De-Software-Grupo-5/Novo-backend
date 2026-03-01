@@ -11,8 +11,17 @@ export class PropertyService {
   constructor(
     private readonly propertyRepository: PropertyRepository,
     private readonly minioClienteService: MinioClientService) {}
-  getAll(condominiumId: string): Promise<PropertyResponse[]> {
-    return this.propertyRepository.getAll(condominiumId);
+  async getAll(condominiumId: string): Promise<PropertyResponse[]> {
+    const result = await this.propertyRepository.getAll(condominiumId);
+    
+    for(let i = 0; i < result.length; i++){
+      for(let j = 0; j < result[i].files.length; i++){
+        const tempUrl = await this.minioClienteService.getFileUrl( result[i][j] )
+        result[i].files[j].link = tempUrl
+      }
+    }
+
+    return result;
   }
 
   getPaginated(
@@ -22,8 +31,15 @@ export class PropertyService {
     return this.propertyRepository.getPaginated(condominiumId, data);
   }
 
-  getById(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
-    return this.propertyRepository.getById(condominiumId, propertyId);
+  async getById(condominiumId: string, propertyId: string): Promise<PropertyResponse> {
+    const result = await this.propertyRepository.getById(condominiumId, propertyId);
+
+    for(let i = 0; i < result.files.length; i++){
+      const tempUrl = await this.minioClienteService.getFileUrl(result.files[i].link)
+      result.files[i].link = tempUrl;
+    }
+
+    return result;
   }
 
   getByIdentificador(condominiumId: string, identificador: string): Promise<PropertyResponse> {
@@ -76,7 +92,14 @@ export class PropertyService {
       documentFileNameList = uploadResponses.map((r) => r.fileName);
     }
 
-    return this.propertyRepository.create(condominiumId, dto, inspectionFileNameList, documentFileNameList);
+    return this.propertyRepository.create(
+      condominiumId,
+      dto, 
+      inspectionFileNameList, 
+      documentFileNameList, 
+      inspections,
+      documents
+    );
   }
 
   update(condominiumId  : string, propertyId: string, dto: PropertyDto): Promise<PropertyResponse> {
