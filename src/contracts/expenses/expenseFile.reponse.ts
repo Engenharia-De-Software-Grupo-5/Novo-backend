@@ -5,7 +5,10 @@ import { IsOptional, isString } from "class-validator";
 export class expenseFileReponse {
     @ApiProperty({ description: 'Expense file id ' })
     id: string;
-    
+  
+    @ApiProperty({ description: 'Expense file id ' })
+    name: string;
+  
     @ApiProperty({ description: 'orginal link'})
     link: string;
     

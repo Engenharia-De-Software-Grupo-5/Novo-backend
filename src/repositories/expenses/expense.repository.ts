@@ -2,11 +2,9 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/common/database/prisma.service';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
-import { ContractResponse } from 'src/contracts/contracts/contract.response';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 import { buildDynamicWhere } from 'src/contracts/pagination/prisma.utils';
 import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
-import { link } from 'fs';
 
 type CreateExpenseInput = {
   expensesFiles: Express.Multer.File[];
@@ -137,8 +135,9 @@ export class ExpenseRepository {
         expenseDate: input.expenseDate,
         paymentMethod: input.paymentMethod,
         expenseFiles: {
-          create: fileNameLinks.map(link => ({
+          create: fileNameLinks.map((link, i) => ({
             link,
+            name:input.expensesFiles[i].originalname, 
             type: null, // ou defina o tipo conforme necessário
           }))
         },
@@ -187,8 +186,9 @@ export class ExpenseRepository {
             },
           },
 
-          create: newFileNameLinks.map(link => ({
+          create: newFileNameLinks.map((link, i) => ({
             link,
+            name: input.newFiles[i].originalname,
             type: null,
           }))
         }
