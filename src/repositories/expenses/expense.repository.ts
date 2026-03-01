@@ -111,25 +111,24 @@ export class ExpenseRepository {
     throw new BadRequestException('targetType invalid.');
   }
 
-  private readonly expenseSelect: {
-    description: true;
-    id: true;
-    propertyId: true;
-    value: true;
+  private readonly expenseSelect = {
+    description: true,
+    id: true,
+    propertyId: true,
+    value: true,
+    expenseType: true,
+    expenseDate: true,
+    paymentMethod: true,
+    targetType: true,
     expenseFiles: {
       select: {
-        id: true;
-        link: true;
-        name: true;
-        type: true;
-      };
-    };
-    expenseType: true;
-    expenseDate: true;
-    paymentMethod: true;
-    targetType: true;
+        id: true,
+        link: true,
+        name: true,
+        type: true,
+      },
+    },
   };
-
   async create(
     input: CreateExpenseInput,
     uploadedFiles: { link: string; originalName: string; type: string }[],
@@ -182,8 +181,12 @@ export class ExpenseRepository {
 
   async update(
     id: string,
-    input: UpdateExpenseInput,
-    newFileNameLinks: string[],
+    input: Omit<UpdateExpenseInput, 'newFiles'>,
+    uploadedFiles: {
+      link: string;
+      originalName: string;
+      type: string;
+    }[],
   ) {
     await this.findByIdOrThrow(id);
 
@@ -192,6 +195,7 @@ export class ExpenseRepository {
     return this.prisma.expenses.update({
       where: { id },
       data: {
+        description: input.description,
         targetType: input.targetType,
         condominiumId: target.condominiumId,
         propertyId: target.propertyId,
@@ -199,7 +203,9 @@ export class ExpenseRepository {
         value: input.value,
         expenseDate: input.expenseDate,
         paymentMethod: input.paymentMethod,
+
         expenseFiles: {
+          // 1️⃣ Remove os que não estão na lista de manter
           deleteMany: {
             link: {
               notIn:
@@ -208,14 +214,16 @@ export class ExpenseRepository {
                   : [''],
             },
           },
-          create: newFileNameLinks.map((link, i) => ({
-            link,
-            name: input.newFiles[i].originalname,
-            type: null,
+
+          // 2️⃣ Cria novos arquivos
+          create: uploadedFiles.map((file) => ({
+            link: file.link,
+            name: file.originalName,
+            type: file.type,
           })),
         },
       },
-      select: this.expenseSelect,
+      include: { expenseFiles: true },
     });
   }
 
