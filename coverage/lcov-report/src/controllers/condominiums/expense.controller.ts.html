@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>24/25</span>
+                <span class='fraction'>20/25</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">28.57% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>6/7</span>
+                <span class='fraction'>2/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95.65% </span>
+                <span class="strong">78.26% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>22/23</span>
+                <span class='fraction'>18/23</span>
             </div>
         
             
@@ -171,7 +171,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -184,7 +184,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -207,21 +207,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {
   Body,
@@ -251,7 +251,7 @@ import { ExpenseService } from 'src/services/expenses/expense.service';
 @Controller('condominios/:condId/expenses')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ExpenseController {
-  constructor(private readonly service: ExpenseService) {}
+  constructor(private readonly service: ExpenseService) { }
 &nbsp;
   @Post()
   @HttpCode(HttpStatus.OK)
@@ -263,8 +263,8 @@ export class ExpenseController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List expenses' })
-  list() {
-    return this.service.list();
+<span class="fstat-no" title="function not covered" >  list(</span>): Promise&lt;ExpenseResponse[]&gt; {
+<span class="cstat-no" title="statement not covered" >    return this.service.getAll();</span>
   }
 &nbsp;
   @Get('paginated')
@@ -286,22 +286,22 @@ export class ExpenseController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get expense details' })
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+<span class="fstat-no" title="function not covered" >  findOne(</span>@Param('id') id: string) {
+<span class="cstat-no" title="statement not covered" >    return this.service.findOne(id);</span>
   }
 &nbsp;
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update expense' })
-  update(@Param('id') id: string, @Body() dto: ExpenseDto) {
-    return this.service.update(id, dto);
+<span class="fstat-no" title="function not covered" >  update(</span>@Param('id') id: string, @Body() dto: ExpenseDto) {
+<span class="cstat-no" title="statement not covered" >    return this.service.update(id, dto);</span>
   }
 &nbsp;
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete expense (soft delete)' })
-  async remove(@Param('id') id: string) {
-    await this.service.remove(id);
+<span class="fstat-no" title="function not covered" >  async </span>remove(@Param('id') id: string) {
+<span class="cstat-no" title="statement not covered" >    await this.service.remove(id);</span>
   }
 }</pre></td></tr></table></pre>
 
@@ -310,7 +310,7 @@ export class ExpenseController {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-28T10:45:45.023Z
+                at 2026-03-01T11:17:24.708Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

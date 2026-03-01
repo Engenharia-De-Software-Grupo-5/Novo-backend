@@ -1,104 +1,78 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EmployeeContractsController } from 'src/controllers/employees/employee-contracts.controller';
+import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
-import { EmployeeController } from 'src/controllers/employees/employee.controller';
-import { EmployeeService } from 'src/services/employees/employee.service';
-
-describe('EmployeeController', () => {
-  let controller: EmployeeController;
-  let service: jest.Mocked<EmployeeService>;
-
-  const mockService = {
-    getAll: jest.fn(),
-    getByCpf: jest.fn(),
-    getById: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    updateByCpf: jest.fn(),
-    delete: jest.fn(),
-    deleteByCpf: jest.fn(),
-  };
+describe('EmployeeContractsController', () => {
+  let controller: EmployeeContractsController;
+  let service: jest.Mocked<EmployeeContractsService>;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [EmployeeController],
-      providers: [{ provide: EmployeeService, useValue: mockService }],
-    }).compile();
+      controllers: [EmployeeContractsController],
+      providers: [
+        {
+          provide: EmployeeContractsService,
+          useValue: {
+            upload: jest.fn(),
+            list: jest.fn(),
+            findOne: jest.fn(),
+            getDownloadUrl: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
+      ],
+    })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: jest.fn().mockResolvedValue(true) })
+      .compile();
 
-    controller = module.get(EmployeeController);
-    service = module.get(EmployeeService);
+    controller = module.get(EmployeeContractsController);
+    service = module.get(EmployeeContractsService) as any;
   });
 
-  it('getAll should call employeeService.getAll()', async () => {
-    service.getAll.mockResolvedValue([{ id: 'e1' }] as any);
+  it('upload should call service.upload', async () => {
+    service.upload.mockResolvedValue({ id: 'ct1' } as any);
 
-    const res = await controller.getAll();
+    const file = {} as any;
+    const res = await controller.upload('c1', 'e1', file);
 
-    expect(service.getAll).toHaveBeenCalledTimes(1);
-    expect(res).toEqual([{ id: 'e1' }]);
+   expect(service.upload).toHaveBeenCalledWith('e1', 'c1', file);
+    expect(res).toEqual({ id: 'ct1' });
   });
 
-  it('getByCpf should call employeeService.getByCpf(cpf)', async () => {
-    service.getByCpf.mockResolvedValue({ id: 'e1' } as any);
+  it('list should call service.list', async () => {
+    service.list.mockResolvedValue([{ id: 'ct1' }] as any);
 
-    const res = await controller.getByCpf('123');
+    const res = await controller.list('c1', 'e1');
 
-    expect(service.getByCpf).toHaveBeenCalledWith('123');
-    expect(res).toEqual({ id: 'e1' });
+    expect(service.list).toHaveBeenCalledWith('c1', 'e1');
+    expect(res).toEqual([{ id: 'ct1' }]);
   });
 
-  it('getById should call employeeService.getById(employeeId)', async () => {
-    service.getById.mockResolvedValue({ id: 'e1' } as any);
+  it('findOne should call service.findOne', async () => {
+    service.findOne.mockResolvedValue({ id: 'ct1' } as any);
 
-    const res = await controller.getById('e1');
+    const res = await controller.findOne('c1', 'e1', 'ct1');
 
-    expect(service.getById).toHaveBeenCalledWith('e1');
-    expect(res).toEqual({ id: 'e1' });
+    expect(service.findOne).toHaveBeenCalledWith('c1', 'e1', 'ct1');
+    expect(res).toEqual({ id: 'ct1' });
   });
 
-  it('create should call employeeService.create(dto)', async () => {
-    service.create.mockResolvedValue({ id: 'e1' } as any);
+  it('download should call service.getDownloadUrl', async () => {
+    service.getDownloadUrl.mockResolvedValue({ url: 'signed' } as any);
 
-    const res = await controller.create({ name: 'A' } as any);
+    const res = await controller.download('c1', 'e1', 'ct1');
 
-    expect(service.create).toHaveBeenCalledWith({ name: 'A' });
-    expect(res).toEqual({ id: 'e1' });
+    expect(service.getDownloadUrl).toHaveBeenCalledWith('c1', 'e1', 'ct1');
+    expect(res).toEqual({ url: 'signed' });
   });
 
-  it('update should call employeeService.update(id, dto)', async () => {
-    service.update.mockResolvedValue({ id: 'e1' } as any);
+  it('remove should call service.remove', async () => {
+    service.remove.mockResolvedValue(undefined);
 
-    const res = await controller.update('e1', { name: 'B' } as any);
+    await controller.remove('c1', 'e1', 'ct1');
 
-    expect(service.update).toHaveBeenCalledWith('e1', { name: 'B' });
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('updateByCpf should call employeeService.updateByCpf(cpf, dto)', async () => {
-    service.updateByCpf.mockResolvedValue({ id: 'e1' } as any);
-
-    const res = await controller.updateByCpf('123', { name: 'C' } as any);
-
-    expect(service.updateByCpf).toHaveBeenCalledWith('123', { name: 'C' });
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('delete should call employeeService.delete(employeeId)', async () => {
-    service.delete.mockResolvedValue({ id: 'e1' } as any);
-
-    const res = await controller.delete('e1');
-
-    expect(service.delete).toHaveBeenCalledWith('e1');
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('deleteByCpf should call employeeService.deleteByCpf(cpf)', async () => {
-    service.deleteByCpf.mockResolvedValue({ id: 'e1' } as any);
-
-    const res = await controller.deleteByCpf('123');
-
-    expect(service.deleteByCpf).toHaveBeenCalledWith('123');
-    expect(res).toEqual({ id: 'e1' });
+    expect(service.remove).toHaveBeenCalledWith('c1', 'e1', 'ct1');
   });
 });
