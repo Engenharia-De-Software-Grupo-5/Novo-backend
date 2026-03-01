@@ -188,17 +188,21 @@ export class ExpenseRepository {
       type: string;
     }[],
   ) {
-    await this.findByIdOrThrow(id);
-
-    const target = await this.assertTargetExists(input);
+    const existing = await this.findByIdOrThrow(id);
 
     return this.prisma.expenses.update({
       where: { id },
       data: {
         description: input.description,
-        targetType: input.targetType,
-        condominiumId: target.condominiumId,
-        propertyId: target.propertyId,
+        targetType: existing.targetType,
+        condominiumId:
+          existing.targetType === ExpenseTargetType.CONDOMINIUM
+            ? existing['condominiumId']
+            : null,
+        propertyId:
+          existing.targetType === ExpenseTargetType.PROPERTY
+            ? existing.propertyId
+            : null,
         expenseType: input.expenseType,
         value: input.value,
         expenseDate: input.expenseDate,
