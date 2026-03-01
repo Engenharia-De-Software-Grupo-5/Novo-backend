@@ -130,8 +130,10 @@ export class ExpenseRepository {
     targetType: true;
   };
 
-  async create(input: CreateExpenseInput, fileNameLinks: string[]) {
-    //listaLinks: String[]
+  async create(
+    input: CreateExpenseInput,
+    uploadedFiles: { link: string; originalName: string; type: string }[],
+  ) {
     const target = await this.assertTargetExists(input);
 
     const response = await this.prisma.expenses.create({
@@ -144,16 +146,19 @@ export class ExpenseRepository {
         value: input.value,
         expenseDate: input.expenseDate,
         paymentMethod: input.paymentMethod,
+
+        // Mapeia diretamente os dados passados pelo Service
         expenseFiles: {
-          create: fileNameLinks.map((link, i) => ({
-            link,
-            name: input.expensesFiles[i].originalname,
-            type: null, // ou defina o tipo conforme necessário
+          create: uploadedFiles.map((file) => ({
+            link: file.link,
+            name: file.originalName,
+            type: file.type, // Salva o tipo real (ex: 'application/pdf', 'image/jpeg')
           })),
         },
       },
       include: { expenseFiles: true },
     });
+
     return response;
   }
 
