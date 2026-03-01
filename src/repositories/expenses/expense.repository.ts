@@ -188,38 +188,41 @@ export class ExpenseRepository {
       type: string;
     }[],
   ) {
-    const existing = await this.findByIdOrThrow(id);
+    const existing = await this.prisma.expenses.findUnique({
+      where: { id },
+      include: { expenseFiles: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Expense not found');
+    }
+
+    // 1️⃣ Descobrir quais arquivos devem ser deletados
+    const filesToDelete = existing.expenseFiles
+      .filter(
+        (file) => !input.filesToKeep || !input.filesToKeep.includes(file.id), // 🔥 comparar por ID
+      )
+      .map((file) => file.id);
 
     return this.prisma.expenses.update({
       where: { id },
       data: {
         description: input.description,
         targetType: existing.targetType,
-        condominiumId:
-          existing.targetType === ExpenseTargetType.CONDOMINIUM
-            ? existing['condominiumId']
-            : null,
-        propertyId:
-          existing.targetType === ExpenseTargetType.PROPERTY
-            ? existing.propertyId
-            : null,
+        condominiumId: existing.condominiumId,
+        propertyId: existing.propertyId,
         expenseType: input.expenseType,
         value: input.value,
         expenseDate: input.expenseDate,
         paymentMethod: input.paymentMethod,
 
         expenseFiles: {
-          // 1️⃣ Remove os que não estão na lista de manter
+          // 2️⃣ Deleta somente os realmente necessários
           deleteMany: {
-            link: {
-              notIn:
-                input.filesToKeep && input.filesToKeep.length > 0
-                  ? input.filesToKeep
-                  : [''],
-            },
+            id: { in: filesToDelete },
           },
 
-          // 2️⃣ Cria novos arquivos
+          // 3️⃣ Cria os novos
           create: uploadedFiles.map((file) => ({
             link: file.link,
             name: file.originalName,
