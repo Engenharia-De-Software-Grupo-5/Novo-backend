@@ -113,6 +113,7 @@ export class ExpenseRepository {
       select: {
         id: true,
         link: true,
+        name: true,
         type: true,
       }
     },
