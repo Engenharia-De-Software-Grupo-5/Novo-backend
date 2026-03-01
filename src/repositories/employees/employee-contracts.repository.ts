@@ -5,20 +5,20 @@ import { PrismaService } from 'src/common/database/prisma.service';
 export class EmployeeContractsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  employeeExists(id: string) {
+  employeeExists(condId: string, id: string) {
     return this.prisma.employees.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, condId, deletedAt: null },
       select: { id: true },
     });
   }
 
   create(data: {
+    condId: string;
     employeeId: string;
-    objectName: string;
-    originalName: string;
-    mimeType: string;
-    extension: string;
+    name: string;
+    type: string;
     size: number;
+    url: string;
   }) {
     return this.prisma.employeeContracts.create({ data });
   }
@@ -30,9 +30,9 @@ export class EmployeeContractsRepository {
     });
   }
 
-  findForEmployee(employeeId: string, contractId: string) {
+  findForEmployee(condId: string, employeeId: string, contractId: string) {
     return this.prisma.employeeContracts.findFirst({
-      where: { id: contractId, employeeId, deletedAt: null },
+      where: { id: contractId, employeeId, condId, deletedAt: null },
     });
   }
 
