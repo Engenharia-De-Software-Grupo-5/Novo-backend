@@ -18,7 +18,7 @@ export class PropertyResponse {
         description: 'Property address',
         example: 'Monitas Street, 123',
       })
-    propertyAddress: PropertyAddressResponse
+    propertyAddress: PropertyAddressResponse;
         @ApiProperty({
         description: 'Property unity number',
         example: '101',
