@@ -6,6 +6,7 @@ import {
   IsDateString,
   Min,
   isString,
+  IsOptional,
 } from 'class-validator';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 import { Transform } from 'class-transformer';
@@ -45,8 +46,9 @@ export class ExpenseDto {
   @IsDateString()
   expenseDate: string;
 
-  @ApiProperty()
-  filesToKeep: string[];
+  @IsOptional()
+  @ApiProperty({ required: false, type: [String] })
+  filesToKeep?: string[];
 
   @ApiProperty({
     description: 'Payment method',

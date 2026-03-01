@@ -54,9 +54,10 @@ export class ExpenseController {
       allOf: [
         { $ref: getSchemaPath(ExpenseDto) },
         {
+          type: 'object',
           properties: {
             files: {
-              type: 'array', // <-- Definido como array para aceitar lista
+              type: 'array',
               items: {
                 type: 'string',
                 format: 'binary',
@@ -70,7 +71,7 @@ export class ExpenseController {
   create(
     @Param('condId') condominiumId: string,
     @Body() dto: ExpenseDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles() files?: Express.Multer.File[],
   ) {
     return this.service.create(dto, files, condominiumId);
   }
