@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
@@ -51,7 +55,7 @@ export class ExpenseRepository {
         take: data.limit,
         skip: (data.page - 1) * data.limit,
         orderBy: { id: 'asc' },
-      })
+      }),
     ]);
 
     return {
@@ -64,7 +68,7 @@ export class ExpenseRepository {
       },
     };
   }
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   private async assertTargetExists(input: {
     targetType: ExpenseTargetType;
@@ -74,11 +78,14 @@ export class ExpenseRepository {
     const { targetType, condominiumId, propertyId } = input;
 
     if (condominiumId && propertyId) {
-      throw new BadRequestException('condominiumId and propertyId cannot be provided at the same time.');
+      throw new BadRequestException(
+        'condominiumId and propertyId cannot be provided at the same time.',
+      );
     }
 
     if (targetType === ExpenseTargetType.CONDOMINIUM) {
-      if (!condominiumId) throw new BadRequestException('condominiumId is required.');
+      if (!condominiumId)
+        throw new BadRequestException('condominiumId is required.');
 
       const condo = await this.prisma.condominiums.findFirst({
         where: { id: condominiumId, deletedAt: null },
@@ -105,27 +112,27 @@ export class ExpenseRepository {
   }
 
   private readonly expenseSelect: {
-    description: true,
-    id: true,
-    propertyId: true,
-    value: true,
+    description: true;
+    id: true;
+    propertyId: true;
+    value: true;
     expenseFiles: {
       select: {
-        id: true,
-        link: true,
-        name: true,
-        type: true,
-      }
-    },
-    expenseType: true,
-    expenseDate: true,
-    paymentMethod: true,
-    targetType: true,
-  }
+        id: true;
+        link: true;
+        name: true;
+        type: true;
+      };
+    };
+    expenseType: true;
+    expenseDate: true;
+    paymentMethod: true;
+    targetType: true;
+  };
 
-  async create(input: CreateExpenseInput, fileNameLinks: string[]) { //listaLinks: String[]
+  async create(input: CreateExpenseInput, fileNameLinks: string[]) {
+    //listaLinks: String[]
     const target = await this.assertTargetExists(input);
-
 
     const response = await this.prisma.expenses.create({
       data: {
@@ -140,34 +147,39 @@ export class ExpenseRepository {
         expenseFiles: {
           create: fileNameLinks.map((link, i) => ({
             link,
-            name:input.expensesFiles[i].originalname, 
+            name: input.expensesFiles[i].originalname,
             type: null, // ou defina o tipo conforme necessário
-          }))
+          })),
         },
       },
-      include: { expenseFiles: true }
+      include: { expenseFiles: true },
     });
     return response;
   }
 
   getAll(): Promise<ExpenseResponse[]> {
-    return this.prisma.condominiums.findMany({
+    // A query deve ser na tabela de expenses!
+    return this.prisma.expenses.findMany({
       where: { deletedAt: null },
       select: this.expenseSelect,
-    });
+    }) as any;
   }
 
   async findByIdOrThrow(id: string): Promise<ExpenseResponse> {
     const exp = await this.prisma.expenses.findFirst({
       where: { id, deletedAt: null },
-      select: this.expenseSelect
+      select: this.expenseSelect,
     });
 
     if (!exp) throw new NotFoundException('Expense not found.');
-    return exp
+    return exp;
   }
 
-  async update(id: string, input: UpdateExpenseInput, newFileNameLinks: string[]) {
+  async update(
+    id: string,
+    input: UpdateExpenseInput,
+    newFileNameLinks: string[],
+  ) {
     await this.findByIdOrThrow(id);
 
     const target = await this.assertTargetExists(input);
@@ -185,20 +197,22 @@ export class ExpenseRepository {
         expenseFiles: {
           deleteMany: {
             link: {
-              notIn: input.filesToKeep,
+              notIn:
+                input.filesToKeep && input.filesToKeep.length > 0
+                  ? input.filesToKeep
+                  : [''],
             },
           },
-
           create: newFileNameLinks.map((link, i) => ({
             link,
             name: input.newFiles[i].originalname,
             type: null,
-          }))
-        }
+          })),
+        },
       },
+      select: this.expenseSelect,
     });
   }
-
 
   async softDelete(id: string) {
     await this.findByIdOrThrow(id);

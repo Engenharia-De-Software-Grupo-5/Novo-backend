@@ -9,9 +9,21 @@ import {
   Post,
   Put,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  getSchemaPath, // <-- 1. Importado aqui
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ExpenseDto } from 'src/contracts/expenses/expense.dto';
@@ -23,22 +35,50 @@ import { ExpenseService } from 'src/services/expenses/expense.service';
 
 @ApiTags('Expenses')
 @ApiBearerAuth('access-token')
+// 2. ExpenseDto adicionado ao ApiExtraModels para o getSchemaPath funcionar
+@ApiExtraModels(PaginatedResult, ExpenseResponse, ExpenseDto)
 @Controller('condominios/:condId/expenses')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ExpenseController {
-  constructor(private readonly service: ExpenseService) { }
+  constructor(private readonly service: ExpenseService) {}
 
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Create expense' })
-  create(@Param('condId') condominiumId: string, @Body() dto: ExpenseDto) {
-    return this.service.create(dto, condominiumId);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiBody({
+    description: 'Expense data and files',
+    schema: {
+      type: 'object',
+      allOf: [
+        { $ref: getSchemaPath(ExpenseDto) },
+        {
+          properties: {
+            files: {
+              type: 'array', // <-- Definido como array para aceitar lista
+              items: {
+                type: 'string',
+                format: 'binary',
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  create(
+    @Param('condId') condominiumId: string,
+    @Body() dto: ExpenseDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.service.create(dto, files, condominiumId);
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List expenses' })
-  list(): Promise<ExpenseResponse[]> {
+  list(@Param('condId') condominiumId: string): Promise<ExpenseResponse[]> {
     return this.service.getAll();
   }
 
@@ -53,6 +93,7 @@ export class ExpenseController {
     schema: PaginatedResponseSchema(ExpenseResponse),
   })
   getPaginated(
+    @Param('condId') condominiumId: string,
     @Query() data: PaginationDto,
   ): Promise<PaginatedResult<ExpenseResponse>> {
     return this.service.listPaginated(data);
@@ -61,21 +102,51 @@ export class ExpenseController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get expense details' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('condId') condominiumId: string, @Param('id') id: string) {
     return this.service.findOne(id);
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update expense' })
-  update(@Param('id') id: string, @Body() dto: ExpenseDto) {
-    return this.service.update(id, dto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiBody({
+    description: 'Expense data and new files',
+    schema: {
+      type: 'object',
+      allOf: [
+        { $ref: getSchemaPath(ExpenseDto) },
+        {
+          properties: {
+            files: {
+              type: 'array', // <-- Definido como array para aceitar lista
+              items: {
+                type: 'string',
+                format: 'binary',
+              },
+            },
+          },
+        },
+      ],
+    },
+  })
+  update(
+    @Param('condId') condominiumId: string,
+    @Param('id') id: string,
+    @Body() dto: ExpenseDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.service.update(id, dto, files);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete expense (soft delete)' })
-  async remove(@Param('id') id: string) {
+  async remove(
+    @Param('condId') condominiumId: string,
+    @Param('id') id: string,
+  ) {
     await this.service.remove(id);
   }
 }
