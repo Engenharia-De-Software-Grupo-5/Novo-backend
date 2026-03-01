@@ -106,35 +106,59 @@ export class ExpenseService {
 
   async update(id: string, dto: ExpenseDto, files: Express.Multer.File[]) {
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
-    let newFileNamesList: string[] = [];
 
-    // Proteção: Verifica se tem arquivos novos
+    let uploadedFilesData: {
+      link: string;
+      originalName: string;
+      type: string;
+    }[] = [];
+
+    // 1️⃣ Upload dos novos arquivos
     if (files && files.length > 0) {
-      const uploadResponses = await Promise.all(
-        files.map((file) =>
-          this.minioClientService.uploadFile(
+      uploadedFilesData = await Promise.all(
+        files.map(async (file) => {
+          const timestamp = Date.now();
+          const lastDotIndex = file.originalname.lastIndexOf('.');
+
+          const namePart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(0, lastDotIndex)
+              : file.originalname;
+
+          const extPart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(lastDotIndex)
+              : '';
+
+          const newFileName = `${namePart}_${timestamp}${extPart}`;
+
+          const uploadResponse = await this.minioClientService.uploadFile(
             file,
             allowedExtensions,
-            file.originalname,
-          ),
-        ),
+            newFileName,
+          );
+
+          return {
+            link: uploadResponse.fileName,
+            originalName: file.originalname,
+            type: file.mimetype,
+          };
+        }),
       );
-      newFileNamesList = uploadResponses.map((r) => r.fileName);
     }
 
-    // Salvamos o resultado da atualização numa variável
+    // 2️⃣ Chama repository passando estrutura pronta
     const updatedExpense = await this.repo.update(
       id,
       {
         ...dto,
         expenseDate: new Date(dto.expenseDate),
-        newFiles: files, // CORREÇÃO AQUI: Passar a variável 'files' em vez de 'dto.files'
-        filesToKeep: dto.filesToKeep || [], // Proteção garantindo array
-      },
-      newFileNamesList,
+        filesToKeep: dto.filesToKeep || [],
+      } as any,
+      uploadedFilesData,
     );
 
-    // ADIÇÃO AQUI: Traduzir os links internos do banco para URLs temporárias do MinIO
+    // 3️⃣ Converter links para URL temporária
     for (let i = 0; i < updatedExpense.expenseFiles.length; i++) {
       const tempUrl = await this.minioClientService.getFileUrl(
         updatedExpense.expenseFiles[i].link,
