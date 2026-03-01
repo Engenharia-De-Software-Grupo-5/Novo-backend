@@ -1,17 +1,20 @@
 model Condominiums {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name              String              @unique
-  description       String?
-  address           Addresses?          @relation(fields: [addressId], references: [id])
-  addressId         String              @db.Uuid
-  properties        Properties[]
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String       @unique
+  description String?
+  address     Addresses    @relation(fields: [addressId], references: [id])
+  addressId   String       @db.Uuid
+  properties  Properties[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  expenses    Expenses[]
+  accesses    Access[]
+  tenants     Tenants[]
   contractTemplates ContractTemplates[]
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  deletedAt         DateTime?
-  expenses          Expenses[]
-  accesses          Access[]
-
+  employees         Employees[]
+  employeeContracts EmployeeContracts[]
+  
   @@map("condominiums")
 }
 
@@ -27,8 +30,6 @@ model Addresses {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   deletedAt        DateTime?
-  // condominiums     Condominiums[]
-  tenants          Tenants[]
   professionalInfo ProfessionalInfo[]
   condominiums     Condominiums[]
 
@@ -50,9 +51,6 @@ model PropertyAddress {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
-  // condominiums     Condominiums[]
-  // tenants          Tenants[]
-  // professionalInfo ProfessionalInfo[]
   properties   Properties[]
 
   @@map("propertyaddress")

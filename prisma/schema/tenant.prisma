@@ -1,22 +1,24 @@
 model Tenants {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cpf       String      @unique
-  name      String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  deletedAt DateTime?
-  contracts Contracts[]
+  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cpf                 String      @unique
+  name                String
+  rg                  String      @unique
+  issuingAuthority    String
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  deletedAt           DateTime?
+  contracts           Contracts[]
 
-  birthDate      DateTime
-  maritalStatus  String
-  monthlyIncome  Float
-  email          String
-  primaryPhone   String
-  secondaryPhone String?
-  addressId      String    @db.Uuid
-  address        Addresses @relation(fields: [addressId], references: [id])
-
-  condominiumId String
+  birthDate           String
+  maritalStatus       String
+  monthlyIncome       Float
+  email               String
+  primaryPhone        String
+  secondaryPhone      String?
+  address             String
+  
+  condominiumId       String       @db.Uuid
+  condominium         Condominiums @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
 
   emergencyContacts   EmergencyContact[]
   professionalInfo    ProfessionalInfo?
@@ -26,7 +28,7 @@ model Tenants {
   documents           TenantDocument?
   charges             Charges[]
 
-  status TenantStatus
+  status              TenantStatus
 
   @@map("tenants")
 }
@@ -93,6 +95,7 @@ model Spouse {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   cpf           String
+  rg            String
   profession    String
   monthlyIncome Float
   birthDate     DateTime

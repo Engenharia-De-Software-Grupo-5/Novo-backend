@@ -69,6 +69,8 @@ export class ContractRepository {
         id: true,
         name: true,
         cpf: true,
+        rg: true,
+        issuingAuthority: true,
         email: true,
         birthDate: true,
         maritalStatus: true,
@@ -81,6 +83,7 @@ export class ContractRepository {
           select: {
             id: true,
             name: true,
+            rg: true,
             birthDate: true,
             cpf: true,
             profession: true,
@@ -131,18 +134,7 @@ export class ContractRepository {
             incomeProofId: true,
           },
         },
-        address: {
-          select: {
-            id: true,
-            street: true,
-            neighborhood: true,
-            number: true,
-            city: true,
-            zip: true,
-            uf: true,
-            complement: true,
-          },
-        },
+        address: true,
         bankingInfo: {
           select: {
             id: true,

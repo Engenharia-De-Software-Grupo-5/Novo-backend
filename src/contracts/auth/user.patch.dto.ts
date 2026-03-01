@@ -1,13 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { UserStatus } from '@prisma/client';
+import { SkipUppercase } from 'src/common/decorators';
 
 export class UserPatchDto {
   @IsString()
   @IsOptional()
+  @SkipUppercase()
   @ApiPropertyOptional({
     description: 'Nome da permissão ou perfil de acesso associado',
-    example: 'ADMIN',
+    example: 'Admin',
   })
   role?: string;
 

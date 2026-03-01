@@ -20,6 +20,12 @@ export class SpouseResponse {
   cpf: string;
 
   @ApiProperty({
+    description: 'Spouse RG',
+    example: '123456789',
+  })
+  rg: string;
+
+  @ApiProperty({
     description: 'Spouse profession',
     example: 'Doctor',
   })

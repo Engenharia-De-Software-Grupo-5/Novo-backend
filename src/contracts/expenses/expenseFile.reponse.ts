@@ -1,8 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ExpenseTargetType } from "@prisma/client";
-import { IsOptional, isString } from "class-validator";
+import { IsOptional } from "class-validator";
 
-export class expenseFileReponse {
+export class ExpenseFileResponse {
     @ApiProperty({ description: 'Expense file id ' })
     id: string;
   

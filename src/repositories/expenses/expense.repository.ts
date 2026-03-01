@@ -47,15 +47,11 @@ export class ExpenseRepository {
       }),
       this.prisma.expenses.findMany({
         where,
-        omit: {
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
+        select: this.expenseSelect,
         take: data.limit,
         skip: (data.page - 1) * data.limit,
         orderBy: { id: 'asc' },
-      }),
+      })
     ]);
 
     return {
@@ -113,7 +109,13 @@ export class ExpenseRepository {
     id: true,
     propertyId: true,
     value: true,
-    expenseFiles: true,
+    expenseFiles: {
+      select: {
+        id: true,
+        link: true,
+        type: true,
+      }
+    },
     expenseType: true,
     expenseDate: true,
     paymentMethod: true,
