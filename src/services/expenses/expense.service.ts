@@ -52,14 +52,14 @@ export class ExpenseService {
 
           return {
             link: uploadResponse.fileName,
-            originalName: file.originalname,
+            originalName: uploadResponse.fileName,
             type: '',
           };
         }),
       );
     }
 
-    // Passamos o DTO formatado e a lista de arquivos estruturada
+    // 1️⃣ Salva no banco com nome físico
     const result = await this.repo.create(
       {
         ...dto,
@@ -68,6 +68,14 @@ export class ExpenseService {
       } as any,
       uploadedFilesData,
     );
+
+    // 2️⃣ Converte para URL temporária antes de retornar
+    for (let i = 0; i < result.expenseFiles.length; i++) {
+      const tempUrl = await this.minioClientService.getFileUrl(
+        result.expenseFiles[i].link,
+      );
+      result.expenseFiles[i].link = tempUrl;
+    }
 
     return result;
   }
@@ -140,8 +148,8 @@ export class ExpenseService {
 
           return {
             link: uploadResponse.fileName,
-            originalName: file.originalname,
-            type: file.mimetype,
+            originalName: uploadResponse.fileName,
+            type: '',
           };
         }),
       );
