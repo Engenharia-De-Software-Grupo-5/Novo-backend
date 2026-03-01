@@ -111,25 +111,24 @@ export class ExpenseRepository {
     throw new BadRequestException('targetType invalid.');
   }
 
-  private readonly expenseSelect: {
-    description: true;
-    id: true;
-    propertyId: true;
-    value: true;
+  private readonly expenseSelect = {
+    description: true,
+    id: true,
+    propertyId: true,
+    value: true,
+    expenseType: true,
+    expenseDate: true,
+    paymentMethod: true,
+    targetType: true,
     expenseFiles: {
       select: {
-        id: true;
-        link: true;
-        name: true;
-        type: true;
-      };
-    };
-    expenseType: true;
-    expenseDate: true;
-    paymentMethod: true;
-    targetType: true;
+        id: true,
+        link: true,
+        name: true,
+        type: true,
+      },
+    },
   };
-
   async create(
     input: CreateExpenseInput,
     uploadedFiles: { link: string; originalName: string; type: string }[],
