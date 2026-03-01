@@ -30,6 +30,7 @@ export class PropertyResponse {
         example: 'APARTMENT',
       })
     unityType: UnityType;
+    
     propertySituation: PropertySituation;
         @ApiPropertyOptional({
         description: 'Additional observations about the property',

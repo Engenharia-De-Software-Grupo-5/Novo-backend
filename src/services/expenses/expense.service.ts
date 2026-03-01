@@ -19,30 +19,54 @@ export class ExpenseService {
     condominiumId: string,
   ) {
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
-    let fileNamesList: string[] = [];
 
-    // Proteção: Só tenta fazer upload se a array de arquivos existir e tiver itens
+    // Array de objetos para guardar o link do minio e as infos originais
+    let uploadedFilesData: {
+      link: string;
+      originalName: string;
+      type: string;
+    }[] = [];
+
     if (files && files.length > 0) {
-      const uploadResponses = await Promise.all(
-        files.map((file) =>
-          this.minioClientService.uploadFile(
+      uploadedFilesData = await Promise.all(
+        files.map(async (file) => {
+          const timestamp = Date.now();
+          const lastDotIndex = file.originalname.lastIndexOf('.');
+
+          const namePart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(0, lastDotIndex)
+              : file.originalname;
+          const extPart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(lastDotIndex)
+              : '';
+
+          const newFileName = `${namePart}_${timestamp}${extPart}`;
+
+          const uploadResponse = await this.minioClientService.uploadFile(
             file,
             allowedExtensions,
-            file.originalname,
-          ),
-        ),
+            newFileName,
+          );
+
+          return {
+            link: uploadResponse.fileName,
+            originalName: file.originalname,
+            type: '',
+          };
+        }),
       );
-      fileNamesList = uploadResponses.map((r) => r.fileName);
     }
 
+    // Passamos o DTO formatado e a lista de arquivos estruturada
     const result = await this.repo.create(
       {
         ...dto,
         expenseDate: new Date(dto.expenseDate),
         condominiumId,
-        fileNamesList,
       } as any,
-      fileNamesList,
+      uploadedFilesData,
     );
 
     return result;

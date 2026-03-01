@@ -10,14 +10,18 @@ import {
   Put,
   Query,
   UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { UserResponse } from 'src/contracts/auth/user.response';
 import { PropertyDto } from 'src/contracts/condominiums/property.dto';
@@ -78,17 +82,32 @@ export class PropertyController {
     return this.propertyService.getById(condominiumId, propertyId);
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create a new property',
-    description: 'Create a new property in the system.',
-  })
-  @ApiBody({ type: PropertyDto })
-  @ApiCreatedResponse({
-    description: 'Successfully created the property',
-    type: PropertyResponse,
-  })
+ @Post()
+   @HttpCode(HttpStatus.OK)
+   @ApiOperation({ summary: 'Create expense' })
+   @ApiConsumes('multipart/form-data')
+   @UseInterceptors(FilesInterceptor('files'))
+   @ApiBody({
+     description: 'Expense data and files',
+     schema: {
+       type: 'object',
+       allOf: [
+         { $ref: getSchemaPath(PropertyDto) },
+         {
+           type: 'object',
+           properties: {
+             files: {
+               type: 'array',
+               items: {
+                 type: 'string',
+                 format: 'binary',
+               },
+             },
+           },
+         },
+       ],
+     },
+   })
   create(
     @Param('condId') condominiumId: string,
     @Body() dto: PropertyDto,

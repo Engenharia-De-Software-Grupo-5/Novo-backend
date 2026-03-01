@@ -35,16 +35,9 @@ export class PropertyRepository {
         type: true
       }
     },
-    name: true,
-    description: true,
-    address: true,
     unityNumber: true,
     unityType: true,
-    block: true,
-    floor: true,
-    totalArea: true,
     propertySituation: true,
-    observations: true,
     condominium: {
       select: {
         id: true,
