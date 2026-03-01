@@ -1,179 +1,124 @@
-import { ExpenseService } from 'src/services/expenses/expense.service';
-import { ExpenseRepository } from 'src/repositories/expenses/expense.repository';
-import { MinioClientService } from 'src/services/tools/minio-client.service';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
+import { EmployeeService } from 'src/services/employees/employee.service';
+import { EmployeeRepository } from 'src/repositories/employees/employee.repository';
+import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
+import { EmployeeResponse } from 'src/contracts/employees/employee.response';
 
-describe('ExpenseService', () => {
-  let service: ExpenseService;
-  let repo: jest.Mocked<ExpenseRepository>;
-  let minio: jest.Mocked<MinioClientService>;
-
-  const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
+describe('EmployeeService', () => {
+  let service: EmployeeService;
+  let repo: jest.Mocked<EmployeeRepository>;
+  let contractsService: jest.Mocked<EmployeeContractsService>;
 
   beforeEach(() => {
     repo = {
+      getById: jest.fn(),
       create: jest.fn(),
-      getAll: jest.fn(),
-      getPaginated: jest.fn(),
-      findByIdOrThrow: jest.fn(),
       update: jest.fn(),
-      softDelete: jest.fn(),
+      delete: jest.fn(),
+      getPaginated: jest.fn(),
+      getByCpf: jest.fn(),
     } as any;
 
-    minio = {
-      uploadFile: jest.fn(),
-      deleteFile: jest.fn(),
-      getFileUrl: jest.fn(),
+    contractsService = {
+      updateEmployeeContracts: jest.fn(),
     } as any;
 
-    service = new ExpenseService(repo as any, minio as any);
+    service = new EmployeeService(repo as any, contractsService as any);
   });
 
-  it('create should upload files and call repo.create(dto, fileUrls)', async () => {
-    const files = [
-      { originalname: 'a.pdf' } as any,
-      { originalname: 'b.pdf' } as any,
-    ];
-
-    minio.uploadFile
-      .mockResolvedValueOnce({ fileName: 'k1' } as any)
-      .mockResolvedValueOnce({ fileName: 'k2' } as any);
-
-    repo.create.mockResolvedValue({ id: 'ex1' } as any);
+  it('create should throw BadRequestException when employee with cpf already exists', async () => {
+    repo.getByCpf.mockResolvedValue({ id: 'e1' } as any);
 
     const dto = {
-      files,
-      description: 'd',
-      value: 10,
-      expenseType: 'X',
-      expenseDate: new Date(),
-      paymentMethod: 'PIX',
-      targetType: 'CONDOMINIUM',
-      condominiumId: 'c1',
+      cpf: '123',
+      birthDate: new Date(),
+      role: 'X',
+      status: 'ACTIVE',
+      name: 'A',
     } as any;
 
-    const res = await service.create(dto, 'c1');
-
-    expect(minio.uploadFile).toHaveBeenCalledTimes(2);
-    expect(minio.uploadFile).toHaveBeenNthCalledWith(
-      1,
-      files[0],
-      allowedExtensions,
-      'a.pdf',
-    );
-    expect(minio.uploadFile).toHaveBeenNthCalledWith(
-      2,
-      files[1],
-      allowedExtensions,
-      'b.pdf',
-    );
-
-
-    expect(repo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        condominiumId: 'c1',
-        description: 'd',
-        fileNamesList: ['k1', 'k2'],
-      }),
-      ['k1', 'k2'],
-    );
-
-    expect(res).toEqual({ id: 'ex1' });
+    await expect(service.create('c1', dto)).rejects.toBeInstanceOf(BadRequestException);
+    expect(repo.getByCpf).toHaveBeenCalledWith('c1', '123');
+    expect(repo.create).not.toHaveBeenCalled();
   });
 
-  it('getAll should call repo.getAll and replace expenseFiles[].link with signed urls', async () => {
-    repo.getAll.mockResolvedValue([
-      { id: 'ex1', expenseFiles: [{ link: 'k1' }, { link: 'k2' }] },
-      { id: 'ex2', expenseFiles: [] },
-    ] as any);
+  it('create should call repo.create when cpf does not exist', async () => {
+    repo.getByCpf.mockResolvedValue(null);
+    repo.create.mockResolvedValue({ id: 'e1' } as any);
 
-    minio.getFileUrl
-      .mockResolvedValueOnce('signed-k1' as any)
-      .mockResolvedValueOnce('signed-k2' as any);
+    const dto = {
+      cpf: '123',
+      birthDate: new Date(),
+      role: 'X',
+      status: 'ACTIVE',
+      name: 'A',
+    } as any;
 
-    const res = await service.getAll();
+    const res = await service.create('c1', dto);
 
-    expect(repo.getAll).toHaveBeenCalledTimes(1);
-    expect(minio.getFileUrl).toHaveBeenCalledWith('k1');
-    expect(minio.getFileUrl).toHaveBeenCalledWith('k2');
-
-    expect((res as any)[0].expenseFiles[0].link).toBe('signed-k1');
-    expect((res as any)[0].expenseFiles[1].link).toBe('signed-k2');
+    expect(repo.getByCpf).toHaveBeenCalledWith('c1', '123');
+    expect(repo.create).toHaveBeenCalledWith('c1', dto);
+    expect(res).toEqual({ id: 'e1' });
   });
 
-  it('findOne should call repo.findByIdOrThrow(id) and replace expenseFiles[].link with signed urls', async () => {
-    repo.findByIdOrThrow.mockResolvedValue({
-      id: 'ex1',
-      expenseFiles: [{ link: 'k1' }],
+  it('update should call repo.update and contractsService.updateEmployeeContracts and return merged object', async () => {
+    repo.update.mockResolvedValue({
+      id: 'e1',
+      employeeContracts: [{ id: 'ct1' }, { id: 'ct2' }],
     } as any);
 
-    minio.getFileUrl.mockResolvedValue('signed-k1' as any);
+    contractsService.updateEmployeeContracts.mockResolvedValue([
+      { id: 'ct1', condId: 'c1', employeeId: 'e1' },
+      { id: 'ct2', condId: 'c1', employeeId: 'e1' },
+    ] as any);
 
-    const res = await service.findOne('ex1');
+    const dto = { name: 'B' } as any;
+    const files = [{ originalname: 'a.pdf' } as any];
+    const existingIds = ['ct1', 'ct2'];
 
-    expect(repo.findByIdOrThrow).toHaveBeenCalledWith('ex1');
-    expect(minio.getFileUrl).toHaveBeenCalledWith('k1');
-    expect((res as any).expenseFiles[0].link).toBe('signed-k1');
+    const res = await service.update('c1', 'e1', dto, files as any, existingIds);
+
+    expect(repo.update).toHaveBeenCalledWith('c1', 'e1', dto);
+    expect(contractsService.updateEmployeeContracts).toHaveBeenCalledWith(
+      'c1',
+      'e1',
+      files,
+      existingIds,
+    );
+
+    const anyRes = res as any;
+    expect(anyRes.id).toBe('e1');
+    expect(anyRes.employeeContracts).toEqual([{ id: 'ct1' }, { id: 'ct2' }]);
+
+    expect(anyRes.contracts).toHaveLength(2);
+    expect(anyRes.contracts[0].id).toBe('ct1');
+    expect(anyRes.contracts[1].id).toBe('ct2');
+    expect(anyRes.lastContract.id).toBe('ct2');
   });
 
-  it('update should upload dto.files and call repo.update(id, dto, newLinks)', async () => {
-    minio.uploadFile
-      .mockResolvedValueOnce({ fileName: 'newK1' } as any)
-      .mockResolvedValueOnce({ fileName: 'newK2' } as any);
+  it('delete should call repo.delete and return {id} (current behavior)', async () => {
+    repo.delete.mockResolvedValue({ id: 'e1' } as any);
 
-    repo.update.mockResolvedValue({ id: 'ex1' } as any);
+    const res = await service.delete('c1', 'e1');
 
-    const dto = {
-      files: [
-        { originalname: 'n1.pdf' } as any,
-        { originalname: 'n2.pdf' } as any,
-      ],
-      description: 'updated',
-    } as any;
-
-    const res = await service.update('ex1', dto);
-
-    expect(minio.uploadFile).toHaveBeenCalledTimes(2);
-    expect(minio.uploadFile).toHaveBeenNthCalledWith(
-      1,
-      dto.files[0],
-      allowedExtensions,
-      'n1.pdf',
-    );
-    expect(minio.uploadFile).toHaveBeenNthCalledWith(
-      2,
-      dto.files[1],
-      allowedExtensions,
-      'n2.pdf',
-    );
-
-    
-    expect(repo.update).toHaveBeenCalledWith(
-      'ex1',
-      expect.objectContaining({
-        description: 'updated',
-      }),
-      ['newK1', 'newK2'],
-    );
-
-    expect(res).toEqual({ id: 'ex1' });
+    expect(repo.delete).toHaveBeenCalledWith('c1', 'e1');
+    expect(res).toEqual({ id: 'e1' });
   });
 
-  it('update should throw NotFoundException when repo.update throws NotFoundException', async () => {
-    repo.update.mockRejectedValue(new NotFoundException('Expense not found.'));
+  it('getPaginated should call repo.getPaginated and return { data: EmployeeResponse, meta }', async () => {
+    repo.getPaginated.mockResolvedValue({
+      items: [{ id: 'e1' }],
+      meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+    } as any);
 
-    await expect(service.update('ex1', { files: [] } as any)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
-  });
+    const res = await service.getPaginated('c1', { page: 1, limit: 10 } as any);
 
-  it('remove should call repo.softDelete(id) and return its value (current behavior)', async () => {
+    expect(repo.getPaginated).toHaveBeenCalledWith('c1', { page: 1, limit: 10 });
 
-    repo.softDelete.mockResolvedValue({ message: 'Expense removed successfully.' } as any);
 
-    const res = await service.remove('ex1');
-
-    expect(repo.softDelete).toHaveBeenCalledWith('ex1');
-    expect(res).toEqual({ message: 'Expense removed successfully.' });
+    expect(res).toEqual({
+      data: EmployeeResponse,
+      meta: { page: 1, limit: 10, total: 1, totalPages: 1 },
+    });
   });
 });
