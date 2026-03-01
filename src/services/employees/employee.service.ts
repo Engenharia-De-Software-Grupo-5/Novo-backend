@@ -15,7 +15,7 @@ export class EmployeeService {
     const result = await this.employeeRepository.getPaginated(condId, data);
 
     return {
-      data: EmployeeResponse,
+      data: result.items,
       meta: {
         total: result.meta.totalItems,
         page: result.meta.page,
@@ -33,7 +33,7 @@ export class EmployeeService {
     return employee;
   }
 
-  async create(condId: string, dto: EmployeeDto): Promise<EmployeeResponse> {
+  async create(condId: string, dto: EmployeeDto, files?: Express.Multer.File[]): Promise<EmployeeResponse> {
     const employeeExistente = await this.employeeRepository.getByCpf(
       condId,
       dto.cpf,
@@ -44,7 +44,31 @@ export class EmployeeService {
     }
 
     const employee = await this.employeeRepository.create(condId, dto);
-    return employee;
+
+    let contracts: EmployeeContractDto[] = [];
+
+    if (files?.length) {
+      const createdContracts =
+        await this.employeeContractsService.updateEmployeeContracts(
+          condId,
+          employee.id,
+          files,
+        );
+
+      contracts = createdContracts.map(c => ({
+        id: c.id,
+        name: c.originalName,
+        type: c.mimeType,
+        size: c.size,
+        url: `/condominios/contracts/${c.id}`,
+      }));
+    }
+
+    return {
+      ...employee,
+      contracts,
+      lastContract: contracts.at(-1),
+    };
   }
   
   async update(condId: string, employeeId: string, dto: EmployeeDto, files?: Express.Multer.File[], existingFileIds?: string[]): Promise<EmployeeResponse> {

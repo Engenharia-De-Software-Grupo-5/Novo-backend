@@ -31,7 +31,7 @@ export class ExpenseInvoiceRepository {
         objectName: input.objectName,
         originalName: input.originalName,
         mimeType: input.mimeType,
-        extension: input.extension,
+        //extension: input.extension,
         size: input.size,
       },
     });

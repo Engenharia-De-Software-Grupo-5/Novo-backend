@@ -20,7 +20,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags,
+  ApiTags, 
 } from '@nestjs/swagger';
 import { EmployeeDto } from 'src/contracts/employees/employee.dto';
 import { EmployeeResponse } from 'src/contracts/employees/employee.response';
@@ -68,6 +68,8 @@ export class EmployeeController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FilesInterceptor('files'))
   @ApiOperation({
     summary: 'Create a new employee',
     description: 'Register a new employee in the system.',
@@ -80,8 +82,8 @@ export class EmployeeController {
     description: 'Employee successfully created',
     type: EmployeeResponse,
   })
-  create(@Param('condId') condId: string, @Body() dto: EmployeeDto): Promise<EmployeeResponse> {
-    return this.employeeService.create(condId, dto);
+  create(@Param('condId') condId: string, @UploadedFiles() files: Express.Multer.File[], @Body() dto: EmployeeDto): Promise<EmployeeResponse> {
+    return this.employeeService.create(condId, dto, files);
   }
 
   @Put(':id')
