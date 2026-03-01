@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PermissionResponse } from './permission.response';
+import { UserStatus } from '@prisma/client';
 
 export class CondominiumSimpleResponse {
   @ApiProperty({
@@ -27,6 +28,7 @@ export class AccessData {
     type: () => CondominiumSimpleResponse,
   })
   condominium: CondominiumSimpleResponse;
+  status?: UserStatus;
 }
 
 export class AuthDataModel {
