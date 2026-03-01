@@ -27,6 +27,14 @@ export class PropertyRepository {
             zip:true
           }
         },
+    files:{
+      select: {
+        link: true,
+        name: true,
+        id: true,
+        type: true
+      }
+    },
     name: true,
     description: true,
     address: true,
@@ -121,7 +129,14 @@ export class PropertyRepository {
       },
     });
   }
-  create(condominiumId: string, dto: PropertyDto): Promise<PropertyResponse> {
+  create(
+    condominiumId: string,
+    dto: PropertyDto,
+    inspectionFileNameList: string[],
+    documentFileNameList: string[],
+    inspectionFiles: Express.Multer.file[],
+    documentFiles: Express.Multer.file[]
+  ): Promise<PropertyResponse> {
     const { address, ...propertyData } = dto;
 
     return this.prisma.properties.create({
@@ -130,6 +145,22 @@ export class PropertyRepository {
         condominium: { connect: { id: condominiumId } },
         propertyAddress: {
           create: { ...address } 
+        },
+        files: {
+          create:[
+
+            ...inspectionFileNameList.map((link, i) => ({
+            link,
+            type:'INSPECTION',
+            name: inspectionFiles[i].originalname  
+          })),
+
+          ...documentFileNameList.map((link, i) => ({
+            link,
+            type: 'DOCUMENT',
+            name: documentFiles[i].originalname
+          }))
+        ]
         }
       },
       select: this.propertySelect,

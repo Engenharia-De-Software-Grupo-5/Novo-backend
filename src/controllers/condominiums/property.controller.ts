@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -88,8 +89,14 @@ export class PropertyController {
     description: 'Successfully created the property',
     type: PropertyResponse,
   })
-  create(@Param('condId') condominiumId: string, @Body() dto: PropertyDto) {
-    return this.propertyService.create(condominiumId, dto);
+  create(
+    @Param('condId') condominiumId: string,
+    @Body() dto: PropertyDto,
+    @UploadedFile() inspections: Express.Multer.File[],
+    @UploadedFile() documents: Express.Multer.File[]
+  ) {
+
+    return this.propertyService.create(condominiumId, dto, inspections, documents);
   }
 
   @Put(':id')

@@ -131,7 +131,6 @@ export class ExpenseRepository {
   };
 
   async create(input: CreateExpenseInput, fileNameLinks: string[]) {
-    //listaLinks: String[]
     const target = await this.assertTargetExists(input);
 
     const response = await this.prisma.expenses.create({
