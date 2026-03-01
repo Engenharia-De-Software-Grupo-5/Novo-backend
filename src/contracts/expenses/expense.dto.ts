@@ -47,9 +47,14 @@ export class ExpenseDto {
   @IsDateString()
   expenseDate: string;
 
-  @IsOptional()
   @IsArray()
-  @ApiProperty({ required: false, type: [String] })
+  @IsOptional()
+  @IsString({ each: true })
+  @ApiProperty({
+    description: 'Lista de strings simples',
+    example: ['item1', 'item2', 'item3'],
+    isArray: true,
+  })
   filesToKeep?: string[];
 
   @ApiProperty({
