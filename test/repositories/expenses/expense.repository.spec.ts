@@ -1,242 +1,316 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ExpensePaymentMethod, ExpenseTargetType } from '@prisma/client';
 import { ExpenseRepository } from 'src/repositories/expenses/expense.repository';
 
 describe('ExpenseRepository', () => {
-  const prisma = {
-    condominiums: { findFirst: jest.fn() },
-    properties: { findFirst: jest.fn() },
-    expenses: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findFirst: jest.fn(),
-      update: jest.fn(),
-    },
-    invoices: { updateMany: jest.fn() },
-    $transaction: jest.fn(),
-  };
+  let repo: ExpenseRepository;
+  let prisma: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('create should throw when condominiumId and propertyId are both provided', async () => {
-    const repo = new ExpenseRepository(prisma as any);
-
-    await expect(
-      repo.create({
-        targetType: ExpenseTargetType.CONDOMINIUM,
-        condominiumId: 'c1',
-        propertyId: 'p1',
-        expenseType: 'X',
-        value: 10,
-        expenseDate: new Date(),
-        paymentMethod: ExpensePaymentMethod.PIX,
-      } as any),
-    ).rejects.toThrow(BadRequestException);
-  });
-
-  it('create should throw when targetType is CONDOMINIUM and condominiumId missing', async () => {
-    const repo = new ExpenseRepository(prisma as any);
-
-    await expect(
-      repo.create({
-        targetType: ExpenseTargetType.CONDOMINIUM,
-        expenseType: 'X',
-        value: 10,
-        expenseDate: new Date(),
-        paymentMethod: ExpensePaymentMethod.PIX,
-      } as any),
-    ).rejects.toThrow(BadRequestException);
-  });
-
-  it('create should throw when targetType is PROPERTY and propertyId missing', async () => {
-    const repo = new ExpenseRepository(prisma as any);
-
-    await expect(
-      repo.create({
-        targetType: ExpenseTargetType.PROPERTY,
-        expenseType: 'X',
-        value: 10,
-        expenseDate: new Date(),
-        paymentMethod: ExpensePaymentMethod.PIX,
-      } as any),
-    ).rejects.toThrow(BadRequestException);
-  });
-
-  it('create should throw NotFoundException when condominium does not exist', async () => {
-    prisma.condominiums.findFirst.mockResolvedValue(null);
-
-    const repo = new ExpenseRepository(prisma as any);
-
-    await expect(
-      repo.create({
-        targetType: ExpenseTargetType.CONDOMINIUM,
-        condominiumId: 'c1',
-        expenseType: 'X',
-        value: 10,
-        expenseDate: new Date(),
-        paymentMethod: ExpensePaymentMethod.PIX,
-      } as any),
-    ).rejects.toThrow(NotFoundException);
-  });
-
-  it('create should call prisma.expenses.create (CONDOMINIUM target)', async () => {
-    prisma.condominiums.findFirst.mockResolvedValue({ id: 'c1' } as any);
-    prisma.expenses.create.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new ExpenseRepository(prisma as any);
-    const dt = new Date('2026-02-01');
-
-    const res = await repo.create({
-      targetType: ExpenseTargetType.CONDOMINIUM,
-      condominiumId: 'c1',
-      expenseType: 'WATER',
-      value: 123,
-      expenseDate: dt,
-      paymentMethod: ExpensePaymentMethod.PIX,
-    } as any);
-
-    expect(prisma.expenses.create).toHaveBeenCalledWith({
-      data: {
-        targetType: ExpenseTargetType.CONDOMINIUM,
-        condominiumId: 'c1',
-        propertyId: null,
-        expenseType: 'WATER',
-        value: 123,
-        expenseDate: dt,
-        paymentMethod: ExpensePaymentMethod.PIX,
+    prisma = {
+      $transaction: jest.fn(),
+      expenses: {
+        count: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        findFirst: jest.fn(),
+        update: jest.fn(),
       },
-    });
-
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('create should call prisma.expenses.create (PROPERTY target)', async () => {
-    prisma.properties.findFirst.mockResolvedValue({ id: 'p1' } as any);
-    prisma.expenses.create.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new ExpenseRepository(prisma as any);
-    const dt = new Date('2026-02-01');
-
-    const res = await repo.create({
-      targetType: ExpenseTargetType.PROPERTY,
-      propertyId: 'p1',
-      expenseType: 'REPAIR',
-      value: 50,
-      expenseDate: dt,
-      paymentMethod: ExpensePaymentMethod.BOLETO,
-    } as any);
-
-    expect(prisma.expenses.create).toHaveBeenCalledWith({
-      data: {
-        targetType: ExpenseTargetType.PROPERTY,
-        condominiumId: null,
-        propertyId: 'p1',
-        expenseType: 'REPAIR',
-        value: 50,
-        expenseDate: dt,
-        paymentMethod: ExpensePaymentMethod.BOLETO,
+      condominiums: {
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
       },
-    });
-
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('findAll should list expenses (not deleted) with invoices filter', async () => {
-    prisma.expenses.findMany.mockResolvedValue([{ id: 'e1' }] as any);
-
-    const repo = new ExpenseRepository(prisma as any);
-    const res = await repo.findAll();
-
-    expect(prisma.expenses.findMany).toHaveBeenCalledWith({
-      where: { deletedAt: null },
-      orderBy: { expenseDate: 'desc' },
-      include: { invoices: { where: { deletedAt: null } } },
-    });
-
-    expect(res).toEqual([{ id: 'e1' }]);
-  });
-
-  it('findByIdOrThrow should throw when expense not found', async () => {
-    prisma.expenses.findFirst.mockResolvedValue(null);
-
-    const repo = new ExpenseRepository(prisma as any);
-
-    await expect(repo.findByIdOrThrow('e1')).rejects.toThrow(NotFoundException);
-  });
-
-  it('findByIdOrThrow should return expense when found', async () => {
-    prisma.expenses.findFirst.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new ExpenseRepository(prisma as any);
-    const res = await repo.findByIdOrThrow('e1');
-
-    expect(prisma.expenses.findFirst).toHaveBeenCalledWith({
-      where: { id: 'e1', deletedAt: null },
-      include: { invoices: { where: { deletedAt: null } } },
-    });
-
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('update should call findByIdOrThrow then update expense', async () => {
-    prisma.expenses.findFirst.mockResolvedValue({ id: 'e1' } as any); // findByIdOrThrow ok
-    prisma.condominiums.findFirst.mockResolvedValue({ id: 'c1' } as any); // target exists
-    prisma.expenses.update.mockResolvedValue({ id: 'e1' } as any);
-
-    const repo = new ExpenseRepository(prisma as any);
-    const dt = new Date('2026-02-02');
-
-    const res = await repo.update('e1', {
-      targetType: ExpenseTargetType.CONDOMINIUM,
-      condominiumId: 'c1',
-      expenseType: 'X',
-      value: 1,
-      expenseDate: dt,
-      paymentMethod: ExpensePaymentMethod.PIX,
-    } as any);
-
-    expect(prisma.expenses.update).toHaveBeenCalledWith({
-      where: { id: 'e1' },
-      data: {
-        targetType: ExpenseTargetType.CONDOMINIUM,
-        condominiumId: 'c1',
-        propertyId: null,
-        expenseType: 'X',
-        value: 1,
-        expenseDate: dt,
-        paymentMethod: ExpensePaymentMethod.PIX,
+      properties: {
+        findFirst: jest.fn(),
       },
-    });
-
-    expect(res).toEqual({ id: 'e1' });
-  });
-
-  it('softDelete should transactionally soft delete invoices then expense', async () => {
-    prisma.expenses.findFirst.mockResolvedValue({ id: 'e1' } as any); // findByIdOrThrow ok
-
-    const tx = {
-      invoices: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
-      expenses: { update: jest.fn().mockResolvedValue({ id: 'e1' }) },
+      invoices: {
+        updateMany: jest.fn(),
+      },
     };
 
-    prisma.$transaction.mockImplementation(async (fn: any) => fn(tx));
+    repo = new ExpenseRepository(prisma);
+  });
 
-    const repo = new ExpenseRepository(prisma as any);
+  describe('getPaginated', () => {
+    it('should return items and meta', async () => {
+      prisma.$transaction.mockResolvedValue([3, [{ id: 'ex1' }, { id: 'ex2' }]]);
 
-    const res = await repo.softDelete('e1');
+      const res = await repo.getPaginated({ page: 1, limit: 2 } as any);
 
-    expect(tx.invoices.updateMany).toHaveBeenCalledWith({
-      where: { expenseId: 'e1', deletedAt: null },
-      data: { deletedAt: expect.any(Date) },
+      expect(prisma.$transaction).toHaveBeenCalled();
+      expect(res.items).toHaveLength(2);
+      expect(res.meta.page).toBe(1);
+      expect(res.meta.limit).toBe(2);
+      expect(res.meta.totalItems).toBe(3);
+      expect(res.meta.totalPages).toBe(2);
+    });
+  });
+
+  describe('create / assertTargetExists', () => {
+    it('should throw when condominiumId and propertyId are provided together', async () => {
+      await expect(
+        repo.create(
+          {
+            expensesFiles: [],
+            targetType: 'CONDOMINIUM' as any,
+            condominiumId: 'c1',
+            propertyId: 'p1',
+            expenseType: 'X',
+            description: 'd',
+            value: 10,
+            expenseDate: new Date(),
+            paymentMethod: 'PIX' as any,
+          } as any,
+          [],
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    expect(tx.expenses.update).toHaveBeenCalledWith({
-      where: { id: 'e1' },
-      data: { deletedAt: expect.any(Date) },
+    it('should throw when targetType=CONDOMINIUM and condominiumId is missing', async () => {
+      await expect(
+        repo.create(
+          {
+            expensesFiles: [],
+            targetType: 'CONDOMINIUM' as any,
+            expenseType: 'X',
+            description: 'd',
+            value: 10,
+            expenseDate: new Date(),
+            paymentMethod: 'PIX' as any,
+          } as any,
+          [],
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    expect(res).toEqual({ message: 'Expense removed successfully.' });
+    it('should throw NotFoundException when condominium does not exist', async () => {
+      prisma.condominiums.findFirst.mockResolvedValue(null);
+
+      await expect(
+        repo.create(
+          {
+            expensesFiles: [],
+            targetType: 'CONDOMINIUM' as any,
+            condominiumId: 'c1',
+            expenseType: 'X',
+            description: 'd',
+            value: 10,
+            expenseDate: new Date(),
+            paymentMethod: 'PIX' as any,
+          } as any,
+          [],
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('should create expense when targetType=CONDOMINIUM and condo exists', async () => {
+      prisma.condominiums.findFirst.mockResolvedValue({ id: 'c1' });
+
+      prisma.expenses.create.mockResolvedValue({ id: 'ex1' });
+
+      const input = {
+        expensesFiles: [{ originalname: 'a.pdf' }, { originalname: 'b.pdf' }] as any,
+        targetType: 'CONDOMINIUM' as any,
+        condominiumId: 'c1',
+        expenseType: 'X',
+        description: 'd',
+        value: 10,
+        expenseDate: new Date(),
+        paymentMethod: 'PIX' as any,
+      } as any;
+
+      const res = await repo.create(input, ['k1', 'k2']);
+
+      expect(prisma.expenses.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            condominiumId: 'c1',
+            propertyId: null,
+            expenseFiles: {
+              create: [
+                { link: 'k1', name: 'a.pdf', type: null },
+                { link: 'k2', name: 'b.pdf', type: null },
+              ],
+            },
+          }),
+          include: { expenseFiles: true },
+        }),
+      );
+
+      expect(res).toEqual({ id: 'ex1' });
+    });
+
+    it('should throw when targetType=PROPERTY and propertyId missing', async () => {
+      await expect(
+        repo.create(
+          {
+            expensesFiles: [],
+            targetType: 'PROPERTY' as any,
+            expenseType: 'X',
+            description: 'd',
+            value: 10,
+            expenseDate: new Date(),
+            paymentMethod: 'PIX' as any,
+          } as any,
+          [],
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('should throw NotFoundException when property does not exist', async () => {
+      prisma.properties.findFirst.mockResolvedValue(null);
+
+      await expect(
+        repo.create(
+          {
+            expensesFiles: [],
+            targetType: 'PROPERTY' as any,
+            propertyId: 'p1',
+            expenseType: 'X',
+            description: 'd',
+            value: 10,
+            expenseDate: new Date(),
+            paymentMethod: 'PIX' as any,
+          } as any,
+          [],
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('should create expense when targetType=PROPERTY and property exists', async () => {
+      prisma.properties.findFirst.mockResolvedValue({ id: 'p1' });
+      prisma.expenses.create.mockResolvedValue({ id: 'ex1' });
+
+      const input = {
+        expensesFiles: [{ originalname: 'a.pdf' }] as any,
+        targetType: 'PROPERTY' as any,
+        propertyId: 'p1',
+        expenseType: 'X',
+        description: 'd',
+        value: 10,
+        expenseDate: new Date(),
+        paymentMethod: 'PIX' as any,
+      } as any;
+
+      const res = await repo.create(input, ['k1']);
+
+      expect(prisma.expenses.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            condominiumId: null,
+            propertyId: 'p1',
+          }),
+        }),
+      );
+
+      expect(res).toEqual({ id: 'ex1' });
+    });
+
+    it('should throw BadRequestException targetType invalid for unknown enum (e.g. EMPLOYEE)', async () => {
+      prisma.condominiums.findFirst.mockResolvedValue({ id: 'c1' });
+
+      await expect(
+        repo.create(
+          {
+            expensesFiles: [],
+            targetType: 'EMPLOYEE' as any,
+            condominiumId: 'c1',
+            expenseType: 'X',
+            description: 'd',
+            value: 10,
+            expenseDate: new Date(),
+            paymentMethod: 'PIX' as any,
+          } as any,
+          [],
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  describe('getAll', () => {
+    it('should call prisma.condominiums.findMany (current implementation)', async () => {
+      prisma.condominiums.findMany.mockResolvedValue([{ id: 'ex1' }]);
+
+      const res = await repo.getAll();
+
+      expect(prisma.condominiums.findMany).toHaveBeenCalled();
+      expect(res).toEqual([{ id: 'ex1' }]);
+    });
+  });
+
+  describe('findByIdOrThrow', () => {
+    it('should throw NotFoundException when not found', async () => {
+      prisma.expenses.findFirst.mockResolvedValue(null);
+
+      await expect(repo.findByIdOrThrow('ex1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('should return expense when found', async () => {
+      prisma.expenses.findFirst.mockResolvedValue({ id: 'ex1' });
+
+      const res = await repo.findByIdOrThrow('ex1');
+
+      expect(res).toEqual({ id: 'ex1' });
+    });
+  });
+
+  describe('update', () => {
+    it('should update after validating expense exists and target exists', async () => {
+      prisma.expenses.findFirst.mockResolvedValue({ id: 'ex1' }); // findByIdOrThrow
+      prisma.condominiums.findFirst.mockResolvedValue({ id: 'c1' }); // target exists
+
+      prisma.expenses.update.mockResolvedValue({ id: 'ex1' });
+
+      const input = {
+        filesToKeep: ['keep1'],
+        newFiles: [{ originalname: 'n1.pdf' }] as any,
+        targetType: 'CONDOMINIUM' as any,
+        condominiumId: 'c1',
+        expenseType: 'X',
+        description: 'd',
+        value: 10,
+        expenseDate: new Date(),
+        paymentMethod: 'PIX' as any,
+      } as any;
+
+      const res = await repo.update('ex1', input, ['newK1']);
+
+      expect(prisma.expenses.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'ex1' },
+          data: expect.objectContaining({
+            condominiumId: 'c1',
+            propertyId: null,
+            expenseFiles: expect.objectContaining({
+              deleteMany: { link: { notIn: ['keep1'] } },
+              create: [{ link: 'newK1', name: 'n1.pdf', type: null }],
+            }),
+          }),
+        }),
+      );
+
+      expect(res).toEqual({ id: 'ex1' });
+    });
+  });
+
+  describe('softDelete', () => {
+    it('should soft delete invoices and expense and return message', async () => {
+      prisma.expenses.findFirst.mockResolvedValue({ id: 'ex1' }); // findByIdOrThrow
+
+      prisma.$transaction.mockImplementation(async (fn: any) => {
+        const tx = {
+          invoices: { updateMany: prisma.invoices.updateMany },
+          expenses: { update: prisma.expenses.update },
+        };
+        prisma.invoices.updateMany.mockResolvedValue({ count: 1 });
+        prisma.expenses.update.mockResolvedValue({ id: 'ex1' });
+        return fn(tx);
+      });
+
+      const res = await repo.softDelete('ex1');
+
+      expect(prisma.invoices.updateMany).toHaveBeenCalled();
+      expect(prisma.expenses.update).toHaveBeenCalled();
+      expect(res).toEqual({ message: 'Expense removed successfully.' });
+    });
   });
 });

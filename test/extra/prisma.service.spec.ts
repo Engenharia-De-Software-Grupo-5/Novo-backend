@@ -1,39 +1,19 @@
+import { PrismaService } from 'src/common/database/prisma.service';
+
 describe('PrismaService', () => {
-  const load = () => {
-    jest.resetModules();
+  it('onModuleInit should connect', async () => {
+    const prisma = new PrismaService() as any;
+    prisma.$connect = jest.fn().mockResolvedValue(undefined);
 
-  
-    jest.doMock('@prisma/client', () => {
-      class PrismaClientMock {
-        $connect = jest.fn();
-        $disconnect = jest.fn();
-      }
-      return { PrismaClient: PrismaClientMock };
-    });
-
-    let PrismaService: any;
-
-    jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      PrismaService = require('src/common/database/prisma.service').PrismaService;
-    });
-
-    return { PrismaService };
-  };
-
-  it('onModuleInit should call $connect', async () => {
-    const { PrismaService } = load();
-
-    const prisma = new PrismaService();
     await prisma.onModuleInit();
 
     expect(prisma.$connect).toHaveBeenCalledTimes(1);
   });
 
-  it('onModuleDestroy should call $disconnect', async () => {
-    const { PrismaService } = load();
+  it('onModuleDestroy should disconnect', async () => {
+    const prisma = new PrismaService() as any;
+    prisma.$disconnect = jest.fn().mockResolvedValue(undefined);
 
-    const prisma = new PrismaService();
     await prisma.onModuleDestroy();
 
     expect(prisma.$disconnect).toHaveBeenCalledTimes(1);

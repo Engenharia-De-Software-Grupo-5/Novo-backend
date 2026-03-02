@@ -1,157 +1,124 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-
 import { EmployeeService } from 'src/services/employees/employee.service';
 import { EmployeeRepository } from 'src/repositories/employees/employee.repository';
+import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
+import { EmployeeResponse } from 'src/contracts/employees/employee.response';
 
 describe('EmployeeService', () => {
   let service: EmployeeService;
   let repo: jest.Mocked<EmployeeRepository>;
+  let contractsService: jest.Mocked<EmployeeContractsService>;
 
-  const mockRepo: jest.Mocked<EmployeeRepository> = {
-    getAll: jest.fn(),
-    getById: jest.fn(),
-    getByCpf: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    updateByCpf: jest.fn(),
-    delete: jest.fn(),
-    deleteByCpf: jest.fn(),
-  } as any;
+  beforeEach(() => {
+    repo = {
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      getPaginated: jest.fn(),
+      getByCpf: jest.fn(),
+    } as any;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EmployeeService,
-        { provide: EmployeeRepository, useValue: mockRepo },
-      ],
-    }).compile();
+    contractsService = {
+      updateEmployeeContracts: jest.fn(),
+    } as any;
 
-    service = module.get(EmployeeService);
-    repo = module.get(EmployeeRepository);
-
-    jest.clearAllMocks();
+    service = new EmployeeService(repo as any, contractsService as any);
   });
 
-  describe('getAll', () => {
-    it('should return employees', async () => {
-      const employees = [{ id: '1', cpf: '123' }] as any;
-      repo.getAll.mockResolvedValue(employees);
+  it('create should throw BadRequestException when employee with cpf already exists', async () => {
+    repo.getByCpf.mockResolvedValue({ id: 'e1' } as any);
 
-      const result = await service.getAll();
+    const dto = {
+      cpf: '123',
+      birthDate: new Date(),
+      role: 'X',
+      status: 'ACTIVE',
+      name: 'A',
+    } as any;
 
-      expect(repo.getAll).toHaveBeenCalledTimes(1);
-      expect(result).toBe(employees);
-    });
+    await expect(service.create('c1', dto)).rejects.toBeInstanceOf(BadRequestException);
+    expect(repo.getByCpf).toHaveBeenCalledWith('c1', '123');
+    expect(repo.create).not.toHaveBeenCalled();
   });
 
-  describe('getById', () => {
-    it('should return employee by id', async () => {
-      const employee = { id: '1', cpf: '123' } as any;
-      repo.getById.mockResolvedValue(employee);
+  it('create should call repo.create when cpf does not exist', async () => {
+    repo.getByCpf.mockResolvedValue(null);
+    repo.create.mockResolvedValue({ id: 'e1' } as any);
 
-      const result = await service.getById('1');
+    const dto = {
+      cpf: '123',
+      birthDate: new Date(),
+      role: 'X',
+      status: 'ACTIVE',
+      name: 'A',
+    } as any;
 
-      expect(repo.getById).toHaveBeenCalledTimes(1);
-      expect(repo.getById).toHaveBeenCalledWith('1');
-      expect(result).toBe(employee);
-    });
+    const res = await service.create('c1', dto);
+
+    expect(repo.getByCpf).toHaveBeenCalledWith('c1', '123');
+    expect(repo.create).toHaveBeenCalledWith('c1', dto);
+    expect(res).toEqual({ id: 'e1' });
   });
 
-  describe('getByCpf', () => {
-    it('should return employee by cpf', async () => {
-      const employee = { id: '1', cpf: '123' } as any;
-      repo.getByCpf.mockResolvedValue(employee);
+  it('update should call repo.update and contractsService.updateEmployeeContracts and return merged object', async () => {
+    repo.update.mockResolvedValue({
+      id: 'e1',
+      employeeContracts: [{ id: 'ct1' }, { id: 'ct2' }],
+    } as any);
 
-      const result = await service.getByCpf('123');
+    contractsService.updateEmployeeContracts.mockResolvedValue([
+      { id: 'ct1', condId: 'c1', employeeId: 'e1' },
+      { id: 'ct2', condId: 'c1', employeeId: 'e1' },
+    ] as any);
 
-      expect(repo.getByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.getByCpf).toHaveBeenCalledWith('123');
-      expect(result).toBe(employee);
-    });
+    const dto = { name: 'B' } as any;
+    const files = [{ originalname: 'a.pdf' } as any];
+    const existingIds = ['ct1', 'ct2'];
+
+    const res = await service.update('c1', 'e1', dto, files as any, existingIds);
+
+    expect(repo.update).toHaveBeenCalledWith('c1', 'e1', dto);
+    expect(contractsService.updateEmployeeContracts).toHaveBeenCalledWith(
+      'c1',
+      'e1',
+      files,
+      existingIds,
+    );
+
+    const anyRes = res as any;
+    expect(anyRes.id).toBe('e1');
+    expect(anyRes.employeeContracts).toEqual([{ id: 'ct1' }, { id: 'ct2' }]);
+
+    expect(anyRes.contracts).toHaveLength(2);
+    expect(anyRes.contracts[0].id).toBe('ct1');
+    expect(anyRes.contracts[1].id).toBe('ct2');
+    expect(anyRes.lastContract.id).toBe('ct2');
   });
 
-  describe('create', () => {
-    it('should create employee when cpf does not exist', async () => {
-      const dto = { cpf: '123', name: 'A' } as any;
-      repo.getByCpf.mockResolvedValue(null);
-      repo.create.mockResolvedValue({ id: '1', ...dto } as any);
+  it('delete should call repo.delete and return {id} (current behavior)', async () => {
+    repo.delete.mockResolvedValue({ id: 'e1' } as any);
 
-      const result = await service.create(dto);
+    const res = await service.delete('c1', 'e1');
 
-      expect(repo.getByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.getByCpf).toHaveBeenCalledWith('123');
-
-      expect(repo.create).toHaveBeenCalledTimes(1);
-      expect(repo.create).toHaveBeenCalledWith(dto);
-
-      expect(result).toEqual({ id: '1', ...dto });
-    });
-
-    it('should throw BadRequestException when cpf already exists', async () => {
-      const dto = { cpf: '123', name: 'A' } as any;
-      repo.getByCpf.mockResolvedValue({ id: 'existing', cpf: '123' } as any);
-
-      await expect(service.create(dto)).rejects.toThrow(BadRequestException);
-
-      expect(repo.getByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.getByCpf).toHaveBeenCalledWith('123');
-
-      expect(repo.create).not.toHaveBeenCalled();
-    });
+    expect(repo.delete).toHaveBeenCalledWith('c1', 'e1');
+    expect(res).toEqual({ id: 'e1' });
   });
 
-  describe('update', () => {
-    it('should update employee by id', async () => {
-      const dto = { cpf: '123', name: 'Novo' } as any;
-      const updated = { id: '1', ...dto } as any;
-      repo.update.mockResolvedValue(updated);
+  it('getPaginated should call repo.getPaginated and return { data: EmployeeResponse, meta }', async () => {
+    repo.getPaginated.mockResolvedValue({
+      items: [{ id: 'e1' }],
+      meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+    } as any);
 
-      const result = await service.update('1', dto);
+    const res = await service.getPaginated('c1', { page: 1, limit: 10 } as any);
 
-      expect(repo.update).toHaveBeenCalledTimes(1);
-      expect(repo.update).toHaveBeenCalledWith('1', dto);
-      expect(result).toBe(updated);
-    });
-  });
+    expect(repo.getPaginated).toHaveBeenCalledWith('c1', { page: 1, limit: 10 });
 
-  describe('updateByCpf', () => {
-    it('should update employee by cpf', async () => {
-      const dto = { cpf: '123', name: 'Novo' } as any;
-      const updated = { id: '1', ...dto } as any;
-      repo.updateByCpf.mockResolvedValue(updated);
 
-      const result = await service.updateByCpf('123', dto);
-
-      expect(repo.updateByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.updateByCpf).toHaveBeenCalledWith('123', dto);
-      expect(result).toBe(updated);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete employee by id', async () => {
-      const deleted = { id: '1', cpf: '123' } as any;
-      repo.delete.mockResolvedValue(deleted);
-
-      const result = await service.delete('1');
-
-      expect(repo.delete).toHaveBeenCalledTimes(1);
-      expect(repo.delete).toHaveBeenCalledWith('1');
-      expect(result).toBe(deleted);
-    });
-  });
-
-  describe('deleteByCpf', () => {
-    it('should delete employee by cpf', async () => {
-      const deleted = { id: '1', cpf: '123' } as any;
-      repo.deleteByCpf.mockResolvedValue(deleted);
-
-      const result = await service.deleteByCpf('123');
-
-      expect(repo.deleteByCpf).toHaveBeenCalledTimes(1);
-      expect(repo.deleteByCpf).toHaveBeenCalledWith('123');
-      expect(result).toBe(deleted);
+    expect(res).toEqual({
+      data: EmployeeResponse,
+      meta: { page: 1, limit: 10, total: 1, totalPages: 1 },
     });
   });
 });

@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
-
+import {
+  NotFoundException,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
 import { EmployeeContractsService } from 'src/services/employees/employee-contracts.service';
 import { EmployeeContractsRepository } from 'src/repositories/employees/employee-contracts.repository';
 import { MinioClientService } from 'src/services/tools/minio-client.service';
 
-
 jest.mock('node:crypto', () => ({
-  randomUUID: () => 'uuid-fixed',
+  randomUUID: () => 'uuid',
 }));
 
 describe('EmployeeContractsService', () => {
@@ -15,177 +15,205 @@ describe('EmployeeContractsService', () => {
   let repo: jest.Mocked<EmployeeContractsRepository>;
   let minio: jest.Mocked<MinioClientService>;
 
-  const mockRepo = {
-    employeeExists: jest.fn(),
-    create: jest.fn(),
-    listByEmployee: jest.fn(),
-    findForEmployee: jest.fn(),
-    softDelete: jest.fn(),
-  };
+  beforeEach(() => {
+    repo = {
+      employeeExists: jest.fn(),
+      create: jest.fn(),
+      listByEmployee: jest.fn(),
+      findForEmployee: jest.fn(),
+      softDelete: jest.fn(),
+    } as any;
 
-  const mockMinio = {
-    uploadFile: jest.fn(),
-    getFileUrl: jest.fn(),
-    deleteFile: jest.fn(),
-  };
+    minio = {
+      uploadFile: jest.fn(),
+      getFileUrl: jest.fn(),
+      deleteFile: jest.fn(),
+    } as any;
 
-  const makeFile = (name = 'contract.pdf'): Express.Multer.File =>
-    ({
-      originalname: name,
-      mimetype: 'application/pdf',
-      size: 1234,
-      buffer: Buffer.from('x'),
-    } as any);
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EmployeeContractsService,
-        { provide: EmployeeContractsRepository, useValue: mockRepo },
-        { provide: MinioClientService, useValue: mockMinio },
-      ],
-    }).compile();
-
-    service = module.get(EmployeeContractsService);
-    repo = module.get(EmployeeContractsRepository);
-    minio = module.get(MinioClientService);
-
-    jest.clearAllMocks();
+    service = new EmployeeContractsService(repo as any, minio as any);
   });
 
   describe('upload', () => {
     it('should throw NotFoundException when employee does not exist', async () => {
       repo.employeeExists.mockResolvedValue(null);
 
-      await expect(service.upload('e1', makeFile())).rejects.toThrow(
-        NotFoundException,
-      );
-
-      expect(minio.uploadFile).not.toHaveBeenCalled();
-      expect(repo.create).not.toHaveBeenCalled();
+      await expect(
+        service.upload('c1', 'e1', { originalname: 'x.pdf' } as any),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should throw UnsupportedMediaTypeException when extension is not pdf', async () => {
+    it('should throw UnsupportedMediaTypeException when file is not pdf', async () => {
       repo.employeeExists.mockResolvedValue({ id: 'e1' } as any);
 
-      await expect(service.upload('e1', makeFile('x.png'))).rejects.toThrow(
-        UnsupportedMediaTypeException,
-      );
-
-      expect(minio.uploadFile).not.toHaveBeenCalled();
-      expect(repo.create).not.toHaveBeenCalled();
+      await expect(
+        service.upload('c1', 'e1', { originalname: 'x.png' } as any),
+      ).rejects.toBeInstanceOf(UnsupportedMediaTypeException);
     });
 
-    it('should upload to minio and create record', async () => {
+    it('should upload to minio and create contract', async () => {
       repo.employeeExists.mockResolvedValue({ id: 'e1' } as any);
-      minio.uploadFile.mockResolvedValue({ fileName: 'minio-file.pdf' } as any);
 
-      repo.create.mockResolvedValue({ id: 'c1' } as any);
+      const file = {
+        originalname: 'contrato.pdf',
+        mimetype: 'application/pdf',
+        size: 10,
+      } as any;
 
-      const res = await service.upload('e1', makeFile('my.pdf'));
+      minio.uploadFile.mockResolvedValue({ fileName: 'stored.pdf' } as any);
+      minio.getFileUrl.mockResolvedValue('signed-url' as any);
 
-      expect(minio.uploadFile).toHaveBeenCalledTimes(1);
-      const [fileArg, allowed, objectName] = minio.uploadFile.mock.calls[0];
-      expect(fileArg.originalname).toBe('my.pdf');
-      expect(allowed).toEqual(['pdf']);
-      expect(objectName).toBe('employees/e1/contracts/uuid-fixed.pdf');
+      repo.create.mockResolvedValue({ id: 'ct1' } as any);
 
-      expect(repo.create).toHaveBeenCalledWith({
-        employeeId: 'e1',
-        objectName: 'minio-file.pdf',
-        originalName: 'my.pdf',
-        mimeType: 'application/pdf',
-        extension: 'pdf',
-        size: 1234,
-      });
+      const res = await service.upload('c1', 'e1', file);
 
-      expect(res).toEqual({ id: 'c1' });
+      expect(minio.uploadFile).toHaveBeenCalled();
+      expect(minio.getFileUrl).toHaveBeenCalledWith('stored.pdf');
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          condId: 'c1',
+          employeeId: 'e1',
+          name: 'stored.pdf',
+          type: 'application/pdf',
+          size: 10,
+          url: 'signed-url',
+        }),
+      );
+
+      expect(res).toEqual({ id: 'ct1' });
     });
   });
 
   describe('list', () => {
-    it('should throw when employee does not exist', async () => {
+    it('should throw NotFoundException when employee does not exist', async () => {
       repo.employeeExists.mockResolvedValue(null);
 
-      await expect(service.list('e1')).rejects.toThrow(NotFoundException);
-      expect(repo.listByEmployee).not.toHaveBeenCalled();
+      await expect(service.list('c1', 'e1')).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should list contracts', async () => {
+    it('should call repo.listByEmployee with employeeId', async () => {
       repo.employeeExists.mockResolvedValue({ id: 'e1' } as any);
-      repo.listByEmployee.mockResolvedValue([{ id: 'c1' }] as any);
+      repo.listByEmployee.mockResolvedValue([{ id: 'ct1' }] as any);
 
-      const res = await service.list('e1');
+      const res = await service.list('c1', 'e1');
 
       expect(repo.listByEmployee).toHaveBeenCalledWith('e1');
-      expect(res).toEqual([{ id: 'c1' }]);
+      expect(res).toEqual([{ id: 'ct1' }]);
     });
   });
 
   describe('findOne', () => {
-    it('should throw when contract not found', async () => {
+    it('should throw NotFoundException when contract does not exist', async () => {
       repo.findForEmployee.mockResolvedValue(null);
 
-      await expect(service.findOne('e1', 'c1')).rejects.toThrow(
-        NotFoundException,
-      );
-
-      expect(minio.getFileUrl).not.toHaveBeenCalled();
+      await expect(service.findOne('c1', 'e1', 'ct1')).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should return contract with url', async () => {
-      repo.findForEmployee.mockResolvedValue({
-        id: 'c1',
-        objectName: 'obj.pdf',
-      } as any);
+    it('should return contract with signed url', async () => {
+      repo.findForEmployee.mockResolvedValue({ id: 'ct1', name: 'file.pdf' } as any);
+      minio.getFileUrl.mockResolvedValue('signed' as any);
 
-      minio.getFileUrl.mockResolvedValue('signed-url');
+      const res = await service.findOne('c1', 'e1', 'ct1');
 
-      const res = await service.findOne('e1', 'c1');
-
-      expect(minio.getFileUrl).toHaveBeenCalledWith('obj.pdf');
-      expect(res).toMatchObject({ id: 'c1', objectName: 'obj.pdf', url: 'signed-url' });
+      expect(minio.getFileUrl).toHaveBeenCalledWith('file.pdf');
+      expect(res).toEqual({ id: 'ct1', name: 'file.pdf', url: 'signed' });
     });
   });
 
   describe('getDownloadUrl', () => {
-    it('should throw when contract not found', async () => {
+    it('should throw NotFoundException when contract does not exist', async () => {
       repo.findForEmployee.mockResolvedValue(null);
 
-      await expect(service.getDownloadUrl('e1', 'c1')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.getDownloadUrl('c1', 'e1', 'ct1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should return url only', async () => {
-      repo.findForEmployee.mockResolvedValue({ objectName: 'obj.pdf' } as any);
-      minio.getFileUrl.mockResolvedValue('signed-url');
+    it('should return { url } using contract.name', async () => {
+      repo.findForEmployee.mockResolvedValue({ id: 'ct1', name: 'key' } as any);
+      minio.getFileUrl.mockResolvedValue('signed' as any);
 
-      const res = await service.getDownloadUrl('e1', 'c1');
+      const res = await service.getDownloadUrl('c1', 'e1', 'ct1');
 
-      expect(res).toEqual({ url: 'signed-url' });
+      expect(repo.findForEmployee).toHaveBeenCalledWith('c1', 'e1', 'ct1');
+      expect(minio.getFileUrl).toHaveBeenCalledWith('key');
+      expect(res).toEqual({ url: 'signed' });
     });
   });
 
   describe('remove', () => {
-    it('should throw when contract not found', async () => {
+    it('should throw NotFoundException when contract does not exist', async () => {
       repo.findForEmployee.mockResolvedValue(null);
 
-      await expect(service.remove('e1', 'c1')).rejects.toThrow(
-        NotFoundException,
-      );
-
-      expect(repo.softDelete).not.toHaveBeenCalled();
+      await expect(service.remove('c1', 'e1', 'ct1')).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should delete file (ignore errors) and soft delete', async () => {
-      repo.findForEmployee.mockResolvedValue({ objectName: 'obj.pdf' } as any);
+    it('should try to delete file and softDelete by contractId only (current code)', async () => {
+      repo.findForEmployee.mockResolvedValue({ id: 'ct1', name: 'file.pdf' } as any);
+      minio.deleteFile.mockResolvedValue(undefined);
+      repo.softDelete.mockResolvedValue(undefined);
+
+      await service.remove('c1', 'e1', 'ct1');
+
+      expect(minio.deleteFile).toHaveBeenCalledWith('file.pdf');
+      expect(repo.softDelete).toHaveBeenCalledWith('ct1');
+    });
+
+    it('should still softDelete even if minio.deleteFile throws', async () => {
+      repo.findForEmployee.mockResolvedValue({ id: 'ct1', name: 'file.pdf' } as any);
       minio.deleteFile.mockRejectedValue(new Error('minio down'));
+      repo.softDelete.mockResolvedValue(undefined);
 
-      await service.remove('e1', 'c1');
+      await service.remove('c1', 'e1', 'ct1');
 
-      expect(minio.deleteFile).toHaveBeenCalledWith('obj.pdf');
-      expect(repo.softDelete).toHaveBeenCalledWith('c1');
+      expect(repo.softDelete).toHaveBeenCalledWith('ct1');
+    });
+  });
+
+  describe('updateEmployeeContracts', () => {
+    it('should remove contracts not in existingIds, upload new files, and keep the rest', async () => {
+   
+      repo.listByEmployee.mockResolvedValue([
+        { id: 'old1', name: 'old1.pdf', condId: 'c1', employeeId: 'e1', type: 'application/pdf', size: 1 },
+        { id: 'keep1', name: 'keep1.pdf', condId: 'c1', employeeId: 'e1', type: 'application/pdf', size: 1 },
+      ] as any);
+
+   
+      minio.deleteFile.mockResolvedValue(undefined);
+      repo.softDelete.mockResolvedValue(undefined);
+
+
+      repo.employeeExists.mockResolvedValue({ id: 'e1' } as any);
+      minio.uploadFile.mockResolvedValue({ fileName: 'newStored.pdf' } as any);
+      minio.getFileUrl.mockResolvedValue('signed' as any);
+      repo.create.mockResolvedValue({
+        id: 'new1',
+        condId: 'c1',
+        employeeId: 'e1',
+        name: 'newStored.pdf',
+        type: 'application/pdf',
+        size: 10,
+      } as any);
+
+      const files = [
+        { originalname: 'new.pdf', mimetype: 'application/pdf', size: 10 } as any,
+      ];
+
+      const result = await service.updateEmployeeContracts('c1', 'e1', files, ['keep1']);
+
+     
+      const resolved = await Promise.all(result.map((x: any) => Promise.resolve(x)));
+
+
+      expect(minio.deleteFile).toHaveBeenCalledWith('old1.pdf');
+      expect(repo.softDelete).toHaveBeenCalledWith('old1');
+
+
+      expect(repo.create).toHaveBeenCalled();
+
+   
+      expect(resolved.some((x: any) => x.name === 'keep1.pdf')).toBe(true);
+      expect(resolved.some((x: any) => x.name === 'newStored.pdf')).toBe(true);
     });
   });
 });

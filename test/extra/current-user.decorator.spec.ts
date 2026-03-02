@@ -1,75 +1,48 @@
-import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants';
-import { ExecutionContext } from '@nestjs/common';
-
 describe('CurrentUser decorator', () => {
-  const load = () => {
+  beforeEach(() => {
     jest.resetModules();
-    let CurrentUser: any;
-
-    jest.isolateModules(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      CurrentUser = require('src/common/decorators/current.user.decorator').CurrentUser;
-    });
-
-    return { CurrentUser };
-  };
-
-  it('should define route args metadata for the parameter (so Nest can resolve req.user later)', () => {
-    const { CurrentUser } = load();
-
-    class DummyController {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      handler(_user: any) {
-        return true;
-      }
-    }
-
-    // aplica o decorator no parâmetro 0 do método handler
-    CurrentUser()(DummyController.prototype, 'handler', 0);
-
-    const meta = Reflect.getMetadata(ROUTE_ARGS_METADATA, DummyController.prototype.constructor, 'handler');
-    expect(meta).toBeDefined();
-
-    // deve existir alguma key de param para o índice 0
-    const keys = Object.keys(meta);
-    expect(keys.length).toBeGreaterThan(0);
-
-    // pega o primeiro registro e valida estrutura mínima (index / factory)
-    const first = meta[keys[0]];
-    expect(first).toHaveProperty('index', 0);
-
-    // O Nest guarda uma factory pra resolver o valor no request em runtime.
-    // Não chamamos a factory diretamente aqui porque o Nest injeta args internos.
-    expect(typeof first.factory).toBe('function');
   });
 
-  it('metadata factory should be callable with an ExecutionContext-like object (returns req.user)', () => {
-    const { CurrentUser } = load();
+  it('should return request.user from http context', async () => {
+    jest.doMock('@nestjs/common', () => {
+      const actual = jest.requireActual('@nestjs/common');
+      return {
+        ...actual,
+        createParamDecorator: (factory: any) => ({ factory }),
+      };
+    });
 
-    class DummyController {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      handler(_user: any) {
-        return true;
-      }
-    }
+    const { CurrentUser } = await import('src/common/decorators/current.user.decorator');
 
-    CurrentUser()(DummyController.prototype, 'handler', 0);
-
-    const meta = Reflect.getMetadata(ROUTE_ARGS_METADATA, DummyController.prototype.constructor, 'handler');
-    const key = Object.keys(meta)[0];
-    const { factory } = meta[key];
-
-    const user = { id: 'u1', email: 'a@a.com' };
-
+    const user = { id: 'u1' };
     const ctx = {
       switchToHttp: () => ({
         getRequest: () => ({ user }),
       }),
-    } as unknown as ExecutionContext;
+    } as any;
 
-    // a factory do Nest recebe (data, ctx)
-    const result = factory(undefined, ctx);
+    const res = (CurrentUser as any).factory(undefined, ctx);
+    expect(res).toEqual(user);
+  });
 
-    expect(result).toBe(user);
+  it('should return undefined when request has no user', async () => {
+    jest.doMock('@nestjs/common', () => {
+      const actual = jest.requireActual('@nestjs/common');
+      return {
+        ...actual,
+        createParamDecorator: (factory: any) => ({ factory }),
+      };
+    });
+
+    const { CurrentUser } = await import('src/common/decorators/current.user.decorator');
+
+    const ctx = {
+      switchToHttp: () => ({
+        getRequest: () => ({}),
+      }),
+    } as any;
+
+    const res = (CurrentUser as any).factory(undefined, ctx);
+    expect(res).toBeUndefined();
   });
 });

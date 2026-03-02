@@ -1,85 +1,179 @@
-import { Test, TestingModule } from '@nestjs/testing';
-
 import { ExpenseService } from 'src/services/expenses/expense.service';
 import { ExpenseRepository } from 'src/repositories/expenses/expense.repository';
+import { MinioClientService } from 'src/services/tools/minio-client.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('ExpenseService', () => {
   let service: ExpenseService;
   let repo: jest.Mocked<ExpenseRepository>;
+  let minio: jest.Mocked<MinioClientService>;
 
-  const mockRepo = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findByIdOrThrow: jest.fn(),
-    update: jest.fn(),
-    softDelete: jest.fn(),
-    getPaginated: jest.fn(),
-  };
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ExpenseService, { provide: ExpenseRepository, useValue: mockRepo }],
-    }).compile();
+  beforeEach(() => {
+    repo = {
+      create: jest.fn(),
+      getAll: jest.fn(),
+      getPaginated: jest.fn(),
+      findByIdOrThrow: jest.fn(),
+      update: jest.fn(),
+      softDelete: jest.fn(),
+    } as any;
 
-    service = module.get(ExpenseService);
-    repo = module.get(ExpenseRepository);
+    minio = {
+      uploadFile: jest.fn(),
+      deleteFile: jest.fn(),
+      getFileUrl: jest.fn(),
+    } as any;
 
-    jest.clearAllMocks();
+    service = new ExpenseService(repo as any, minio as any);
   });
 
-  it('create should convert expenseDate to Date and include condominiumId before repo.create', async () => {
-    repo.create.mockResolvedValue({ id: 'e1' } as any);
+  it('create should upload files and call repo.create(dto, fileUrls)', async () => {
+    const files = [
+      { originalname: 'a.pdf' } as any,
+      { originalname: 'b.pdf' } as any,
+    ];
 
-    const dto: any = { description: 'X', amount: 10, expenseDate: '2024-01-02' };
-    await service.create(dto, 'c1');
+    minio.uploadFile
+      .mockResolvedValueOnce({ fileName: 'k1' } as any)
+      .mockResolvedValueOnce({ fileName: 'k2' } as any);
 
-    expect(repo.create).toHaveBeenCalledTimes(1);
-    const arg = repo.create.mock.calls[0][0] as any;
+    repo.create.mockResolvedValue({ id: 'ex1' } as any);
 
-    expect(arg.description).toBe('X');
-    expect(arg.amount).toBe(10);
-    expect(arg.condominiumId).toBe('c1');
-    expect(arg.expenseDate).toBeInstanceOf(Date);
-    expect(arg.expenseDate.toISOString().slice(0, 10)).toBe('2024-01-02');
+    const dto = {
+      files,
+      description: 'd',
+      value: 10,
+      expenseType: 'X',
+      expenseDate: new Date(),
+      paymentMethod: 'PIX',
+      targetType: 'CONDOMINIUM',
+      condominiumId: 'c1',
+    } as any;
+
+    const res = await service.create(dto, 'c1');
+
+    expect(minio.uploadFile).toHaveBeenCalledTimes(2);
+    expect(minio.uploadFile).toHaveBeenNthCalledWith(
+      1,
+      files[0],
+      allowedExtensions,
+      'a.pdf',
+    );
+    expect(minio.uploadFile).toHaveBeenNthCalledWith(
+      2,
+      files[1],
+      allowedExtensions,
+      'b.pdf',
+    );
+
+
+    expect(repo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        condominiumId: 'c1',
+        description: 'd',
+        fileNamesList: ['k1', 'k2'],
+      }),
+      ['k1', 'k2'],
+    );
+
+    expect(res).toEqual({ id: 'ex1' });
   });
 
-  it('list should call repo.findAll', async () => {
-    repo.findAll.mockResolvedValue([{ id: 'e1' }] as any);
+  it('getAll should call repo.getAll and replace expenseFiles[].link with signed urls', async () => {
+    repo.getAll.mockResolvedValue([
+      { id: 'ex1', expenseFiles: [{ link: 'k1' }, { link: 'k2' }] },
+      { id: 'ex2', expenseFiles: [] },
+    ] as any);
 
-    const res = await service.list();
+    minio.getFileUrl
+      .mockResolvedValueOnce('signed-k1' as any)
+      .mockResolvedValueOnce('signed-k2' as any);
 
-    expect(repo.findAll).toHaveBeenCalledTimes(1);
-    expect(res).toEqual([{ id: 'e1' }]);
+    const res = await service.getAll();
+
+    expect(repo.getAll).toHaveBeenCalledTimes(1);
+    expect(minio.getFileUrl).toHaveBeenCalledWith('k1');
+    expect(minio.getFileUrl).toHaveBeenCalledWith('k2');
+
+    expect((res as any)[0].expenseFiles[0].link).toBe('signed-k1');
+    expect((res as any)[0].expenseFiles[1].link).toBe('signed-k2');
   });
 
-  it('findOne should call repo.findByIdOrThrow(id)', async () => {
-    repo.findByIdOrThrow.mockResolvedValue({ id: 'e1' } as any);
+  it('findOne should call repo.findByIdOrThrow(id) and replace expenseFiles[].link with signed urls', async () => {
+    repo.findByIdOrThrow.mockResolvedValue({
+      id: 'ex1',
+      expenseFiles: [{ link: 'k1' }],
+    } as any);
 
-    const res = await service.findOne('e1');
+    minio.getFileUrl.mockResolvedValue('signed-k1' as any);
 
-    expect(repo.findByIdOrThrow).toHaveBeenCalledWith('e1');
-    expect(res).toEqual({ id: 'e1' });
+    const res = await service.findOne('ex1');
+
+    expect(repo.findByIdOrThrow).toHaveBeenCalledWith('ex1');
+    expect(minio.getFileUrl).toHaveBeenCalledWith('k1');
+    expect((res as any).expenseFiles[0].link).toBe('signed-k1');
   });
 
-  it('update should convert expenseDate to Date before repo.update', async () => {
-    repo.update.mockResolvedValue({ id: 'e1' } as any);
+  it('update should upload dto.files and call repo.update(id, dto, newLinks)', async () => {
+    minio.uploadFile
+      .mockResolvedValueOnce({ fileName: 'newK1' } as any)
+      .mockResolvedValueOnce({ fileName: 'newK2' } as any);
 
-    const dto: any = { description: 'Y', amount: 20, expenseDate: '2024-02-03' };
-    await service.update('e1', dto);
+    repo.update.mockResolvedValue({ id: 'ex1' } as any);
 
-    expect(repo.update).toHaveBeenCalledTimes(1);
-    const [, arg] = repo.update.mock.calls[0] as any[];
+    const dto = {
+      files: [
+        { originalname: 'n1.pdf' } as any,
+        { originalname: 'n2.pdf' } as any,
+      ],
+      description: 'updated',
+    } as any;
 
-    expect(arg.expenseDate).toBeInstanceOf(Date);
-    expect(arg.expenseDate.toISOString().slice(0, 10)).toBe('2024-02-03');
+    const res = await service.update('ex1', dto);
+
+    expect(minio.uploadFile).toHaveBeenCalledTimes(2);
+    expect(minio.uploadFile).toHaveBeenNthCalledWith(
+      1,
+      dto.files[0],
+      allowedExtensions,
+      'n1.pdf',
+    );
+    expect(minio.uploadFile).toHaveBeenNthCalledWith(
+      2,
+      dto.files[1],
+      allowedExtensions,
+      'n2.pdf',
+    );
+
+
+    expect(repo.update).toHaveBeenCalledWith(
+      'ex1',
+      expect.objectContaining({
+        description: 'updated',
+      }),
+      ['newK1', 'newK2'],
+    );
+
+    expect(res).toEqual({ id: 'ex1' });
   });
 
-  it('remove should call repo.softDelete(id)', async () => {
-    repo.softDelete.mockResolvedValue({ ok: true } as any);
+  it('update should throw NotFoundException when repo.update throws NotFoundException', async () => {
+    repo.update.mockRejectedValue(new NotFoundException('Expense not found.'));
 
-    const res = await service.remove('e1');
+    await expect(service.update('ex1', { files: [] } as any)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
 
-    expect(repo.softDelete).toHaveBeenCalledWith('e1');
-    expect(res).toEqual({ ok: true });
+  it('remove should call repo.softDelete(id) and return its value (current behavior)', async () => {
+  
+    repo.softDelete.mockResolvedValue({ message: 'Expense removed successfully.' } as any);
+
+    const res = await service.remove('ex1');
+
+    expect(repo.softDelete).toHaveBeenCalledWith('ex1');
+    expect(res).toEqual({ message: 'Expense removed successfully.' });
   });
 });
