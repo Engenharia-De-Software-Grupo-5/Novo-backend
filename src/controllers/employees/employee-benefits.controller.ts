@@ -9,17 +9,23 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiBody,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { EmployeeBenefitsService } from 'src/services/employees/employee-benefits.service';
 import { EmployeeBenefitDto } from 'src/contracts/employees/employeeBenefit.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
+import { EmployeeBenefitResponse } from 'src/contracts/employees/employeeBenefit.response';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
 
 @ApiTags('Employee Benefits')
 @ApiBearerAuth('access-token')
@@ -37,6 +43,23 @@ export class EmployeeBenefitsController {
     @Body() dto: EmployeeBenefitDto,
   ) {
     return this.service.create(employeeId, dto);
+  }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get service types filtered and paginated',
+    description: 'Get service types filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(EmployeeBenefitResponse),
+  })
+  async listPaginated(
+    @Param('employeeId') employeeId: string,
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<EmployeeBenefitResponse>> {
+    return this.service.listPaginated(employeeId, data);
   }
 
   @Get()

@@ -8,7 +8,7 @@ export class ContractResponse {
     description: 'unique contract identifier',
     example: '123',
   })
-  id: string;
+  id: string; //
 
   @ApiProperty({
     description: 'Tenant object who detains a property',
@@ -20,13 +20,19 @@ export class ContractResponse {
     description: 'additional description about this contract',
     example: 'Sample content',
   })
-  description?: string;
+  description?: string; //
 
   @ApiProperty({
     description: 'property associated with this contract',
     type: () => PropertyResponse,
   })
   property: PropertyResponse;
+
+  @ApiProperty({
+    description: 'Content of the contract',
+    example: 'Contrato completo',
+  })
+  content?: string;
 
   @ApiProperty({
     description: 'Template associated with this contract',
@@ -38,5 +44,17 @@ export class ContractResponse {
     description: 'Contract URL',
     example: 'https://.../.../...',
   })
-  contractUrl: string;
+  contractUrl: string; //
+
+  @ApiProperty({
+    description: 'Contract URL',
+    example: 'XX/XX/XXXX',
+  })
+  startDate: string; //
+
+  @ApiProperty({
+    description: 'Contract URL',
+    example: 'XX/XX/XXXX',
+  })
+  dueDate: string; //
 }

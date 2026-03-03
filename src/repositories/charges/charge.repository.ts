@@ -1,24 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { ChargeStatus } from '@prisma/client';
-import { ChargeDto} from 'src/contracts/charges/charge.dto';
+import { ChargeDto } from 'src/contracts/charges/charge.dto';
 import { UpdateChargeDto } from 'src/contracts/charges/charge-update.dto';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 
 @Injectable()
 export class ChargesRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  getPaginated(condominiumId: string, data: PaginationDto): Promise<import("../../contracts/pagination/paginated.result").PaginatedResult<import("../../contracts/condominiums/property.response").PropertyResponse>> {
+    throw new Error('Method not implemented.');
+  }
+  constructor(private readonly prisma: PrismaService) { }
 
-  private async assertTenant(tenantId: string) {
+  private async assertTenant(condominiumId: string, tenantId: string) {
     const t = await this.prisma.tenants.findFirst({
-      where: { id: tenantId, deletedAt: null },
+      where: { id: tenantId, deletedAt: null, condominiumId },
       select: { id: true },
     });
     if (!t) throw new NotFoundException('Tenant not found.');
   }
 
-  private async assertProperty(propertyId: string) {
+  private async assertProperty(condominiumId: string, propertyId: string) {
     const p = await this.prisma.properties.findFirst({
-      where: { id: propertyId, deletedAt: null },
+      where: { id: propertyId, deletedAt: null, condominiumId },
       select: { id: true },
     });
     if (!p) throw new NotFoundException('Property not found.');
@@ -29,9 +33,9 @@ export class ChargesRepository {
     return now.getTime() > dueDate.getTime();
   }
 
-  private async recomputeChargeStatus(chargeId: string) {
+  private async recomputeChargeStatus(condominiumId: string, chargeId: string) {
     const charge = await this.prisma.charges.findFirst({
-      where: { id: chargeId, deletedAt: null },
+      where: { id: chargeId, deletedAt: null, property: { condominiumId } },
       select: { id: true, amount: true, dueDate: true, status: true },
     });
 
@@ -60,9 +64,9 @@ export class ChargesRepository {
     }
   }
 
-  async create(dto: ChargeDto) {
-    await this.assertTenant(dto.tenantId);
-    await this.assertProperty(dto.propertyId);
+  async create(condominiumId: string, dto: ChargeDto) {
+    await this.assertTenant(condominiumId, dto.tenantId);
+    await this.assertProperty(condominiumId, dto.propertyId);
 
     const created = await this.prisma.charges.create({
       data: {
@@ -80,10 +84,11 @@ export class ChargesRepository {
     return created;
   }
 
-  async list(params?: { tenantId?: string; propertyId?: string; status?: ChargeStatus }) {
+  async list(params?: { condominiumId?: string; tenantId?: string; propertyId?: string; status?: ChargeStatus }) {
     const charges = await this.prisma.charges.findMany({
       where: {
         deletedAt: null,
+        ...(params?.condominiumId ? { property: { condominiumId: params.condominiumId } } : {}),
         ...(params?.tenantId ? { tenantId: params.tenantId } : {}),
         ...(params?.propertyId ? { propertyId: params.propertyId } : {}),
         ...(params?.status ? { status: params.status } : {}),
@@ -92,7 +97,7 @@ export class ChargesRepository {
     });
 
 
-    await Promise.all(charges.map((c) => this.recomputeChargeStatus(c.id).catch(() => undefined)));
+    await Promise.all(charges.map((c) => this.recomputeChargeStatus(params.condominiumId, c.id).catch(() => undefined)));
 
 
     return this.prisma.charges.findMany({
@@ -106,16 +111,16 @@ export class ChargesRepository {
     });
   }
 
-  async findOne(chargeId: string) {
+  async findOne(condominiumId: string, chargeId: string) {
     const c = await this.prisma.charges.findFirst({
-      where: { id: chargeId, deletedAt: null },
+      where: { id: chargeId, deletedAt: null, property: { condominiumId } },
       include: {
         payments: { where: { deletedAt: null }, orderBy: { paymentDate: 'desc' } },
       },
     });
     if (!c) throw new NotFoundException('Charge not found.');
 
-    await this.recomputeChargeStatus(chargeId).catch(() => undefined);
+    await this.recomputeChargeStatus(condominiumId, chargeId).catch(() => undefined);
 
     return this.prisma.charges.findFirst({
       where: { id: chargeId, deletedAt: null },
@@ -125,8 +130,8 @@ export class ChargesRepository {
     });
   }
 
-  async update(chargeId: string, dto: UpdateChargeDto) {
-    await this.findOne(chargeId);
+  async update(condominiumId: string, chargeId: string, dto: UpdateChargeDto) {
+    await this.findOne(condominiumId, chargeId);
 
     const updated = await this.prisma.charges.update({
       where: { id: chargeId },
@@ -139,20 +144,20 @@ export class ChargesRepository {
       },
     });
 
-    await this.recomputeChargeStatus(chargeId).catch(() => undefined);
+    await this.recomputeChargeStatus(condominiumId, chargeId).catch(() => undefined);
     return updated;
   }
 
-  async cancel(chargeId: string) {
-    await this.findOne(chargeId);
+  async cancel(condominiumId: string, chargeId: string) {
+    await this.findOne(condominiumId, chargeId);
     return this.prisma.charges.update({
       where: { id: chargeId },
       data: { status: ChargeStatus.CANCELED },
     });
   }
 
-  async softDelete(chargeId: string) {
-    await this.findOne(chargeId);
+  async softDelete(condominiumId: string, chargeId: string) {
+    await this.findOne(condominiumId, chargeId);
 
     await this.prisma.charges.update({
       where: { id: chargeId },
@@ -160,7 +165,7 @@ export class ChargesRepository {
     });
   }
 
-  async recomputeStatusForCharge(chargeId: string) {
-    await this.recomputeChargeStatus(chargeId);
+  async recomputeStatusForCharge(condominiumId: string, chargeId: string) {
+    await this.recomputeChargeStatus(condominiumId, chargeId);
   }
 }

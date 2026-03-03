@@ -4,10 +4,12 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { PropertySituation, UnityType } from '@prisma/client';
+import { PropertyAddress } from './propertyaddress.dto';
 
 export class PropertyDto {
   @IsString()
@@ -21,10 +23,18 @@ export class PropertyDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
+    description: 'Property name',
+    example: '',
+  })
+    name: string;
+
+  @Type(() => PropertyAddress)
+  @ValidateNested()
+  @ApiProperty({
     description: 'Additional address information for the property, such as proximity to landmarks or specific location details within the condominium',
     example: 'Próximo à casa X, Rua Y, etc.',
   })
-    address: string;
+    address: PropertyAddress
 
   @IsString()
   @IsNotEmpty()

@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">91.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>11/11</span>
+                <span class='fraction'>11/12</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>6/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>9/9</span>
+                <span class='fraction'>9/10</span>
             </div>
         
             
@@ -89,20 +89,35 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -111,33 +126,45 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Injectable } from '@nestjs/common';
-import { ContractTemplateDto } from 'src/contracts/contract.templates/contract.template.dto';
-import { ContractTemplateResponse } from 'src/contracts/contract.templates/contract.template.response';
-import { ContractTemplateRepository } from 'src/repositories/contract.templates/contract.template.repository';
+import { PropertyResponse } from 'src/contracts/condominiums/property.response';
+import { ContractTemplateDto as ContractTemplateDto } from 'src/contracts/contract.templates/contract.template.dto';
+import { ContractTemplateResponse as ContractTemplateResponse } from 'src/contracts/contract.templates/contract.template.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { ContractTemplateRepository as ContractTemplateRepository } from 'src/repositories/contract.templates/contract.template.repository';
 &nbsp;
 @Injectable()
 export class ContractTemplateService {
     constructor(private readonly contractTemplateRepository: ContractTemplateRepository) { }
 &nbsp;
-    getAll(name?: string): Promise&lt;ContractTemplateResponse[]&gt; {
-        return this.contractTemplateRepository.getAll(name)
+    getAll(condominiumId: string, name?: string): Promise&lt;ContractTemplateResponse[]&gt; {
+        return this.contractTemplateRepository.getAll(condominiumId, name)
     }
-    getById(contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
-        return this.contractTemplateRepository.getById(contractTemplateId)
+<span class="fstat-no" title="function not covered" >    getPaginated(</span>
+        condominiumId: string,
+        data: PaginationDto,
+    ): Promise&lt;PaginatedResult&lt;ContractTemplateResponse&gt;&gt; {
+<span class="cstat-no" title="statement not covered" >        return this.contractTemplateRepository.getPaginated(condominiumId, data);</span>
     }
-    create(dto: ContractTemplateDto): Promise&lt;ContractTemplateResponse&gt; {
-        return this.contractTemplateRepository.create(dto)
+    getById(condominiumId: string, contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
+        return this.contractTemplateRepository.getById(condominiumId, contractTemplateId)
     }
-    update(contractTemplateId: string, dto: ContractTemplateDto): Promise&lt;ContractTemplateResponse&gt; {
-        return this.contractTemplateRepository.update(contractTemplateId, dto)
+    create(condominiumId: string, dto: ContractTemplateDto): Promise&lt;ContractTemplateResponse&gt; {
+        return this.contractTemplateRepository.create(condominiumId, dto)
     }
-    delete(contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
-        return this.contractTemplateRepository.delete(contractTemplateId)
+    update(condominiumId: string, contractTemplateId: string, dto: ContractTemplateDto): Promise&lt;ContractTemplateResponse&gt; {
+        return this.contractTemplateRepository.update(condominiumId, contractTemplateId, dto)
+    }
+    delete(condominiumId: string, contractTemplateId: string): Promise&lt;ContractTemplateResponse&gt; {
+        return this.contractTemplateRepository.delete(condominiumId, contractTemplateId)
     }
 }
 &nbsp;
@@ -148,7 +175,7 @@ export class ContractTemplateService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-22T10:03:41.192Z
+                at 2026-03-01T14:51:45.550Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

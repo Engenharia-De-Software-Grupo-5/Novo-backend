@@ -1,31 +1,180 @@
 import { Injectable } from '@nestjs/common';
 import { ExpenseRepository } from 'src/repositories/expenses/expense.repository';
 import { ExpenseDto } from 'src/contracts/expenses/expense.dto';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { ExpenseResponse } from 'src/contracts/expenses/expense.response';
+import { MinioClientService } from '../tools/minio-client.service';
 
 @Injectable()
 export class ExpenseService {
-  constructor(private readonly repo: ExpenseRepository) {}
+  constructor(
+    private readonly repo: ExpenseRepository,
+    private readonly minioClientService: MinioClientService,
+  ) {}
 
-  create(dto: ExpenseDto) {
-    return this.repo.create({
-      ...dto,
-      expenseDate: new Date(dto.expenseDate),
-    } as any);
+  async create(
+    dto: ExpenseDto,
+    files: Express.Multer.File[],
+    condominiumId: string,
+  ) {
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
+
+    // Array de objetos para guardar o link do minio e as infos originais
+    let uploadedFilesData: {
+      link: string;
+      originalName: string;
+      type: string;
+    }[] = [];
+
+    if (files && files.length > 0) {
+      uploadedFilesData = await Promise.all(
+        files.map(async (file) => {
+          const timestamp = Date.now();
+          const lastDotIndex = file.originalname.lastIndexOf('.');
+
+          const namePart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(0, lastDotIndex)
+              : file.originalname;
+          const extPart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(lastDotIndex)
+              : '';
+
+          const newFileName = `${namePart}_${timestamp}${extPart}`;
+
+          const uploadResponse = await this.minioClientService.uploadFile(
+            file,
+            allowedExtensions,
+            newFileName,
+          );
+
+          return {
+            link: uploadResponse.fileName,
+            originalName: uploadResponse.fileName,
+            type: '',
+          };
+        }),
+      );
+    }
+
+    // 1️⃣ Salva no banco com nome físico
+    const result = await this.repo.create(
+      {
+        ...dto,
+        expenseDate: new Date(dto.expenseDate),
+        condominiumId,
+      } as any,
+      uploadedFilesData,
+    );
+
+    // 2️⃣ Converte para URL temporária antes de retornar
+    for (let i = 0; i < result.expenseFiles.length; i++) {
+      const tempUrl = await this.minioClientService.getFileUrl(
+        result.expenseFiles[i].link,
+      );
+      result.expenseFiles[i].link = tempUrl;
+    }
+
+    return result;
   }
 
-  list() {
-    return this.repo.findAll();
+  async getAll(): Promise<ExpenseResponse[]> {
+    const result = await this.repo.getAll();
+    for (let i = 0; i < result.length; i++) {
+      for (let j = 0; j < result[i].expenseFiles.length; j++) {
+        const tempUrl = await this.minioClientService.getFileUrl(
+          result[i].expenseFiles[j].link,
+        );
+        result[i].expenseFiles[j].link = tempUrl;
+      }
+    }
+    return result;
   }
 
-  findOne(id: string) {
-    return this.repo.findByIdOrThrow(id);
+  listPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<ExpenseResponse>> {
+    return this.repo.getPaginated(data);
   }
 
-  update(id: string, dto: ExpenseDto) {
-    return this.repo.update(id, {
-      ...dto,
-      expenseDate: new Date(dto.expenseDate),
-    } as any);
+  async findOne(id: string): Promise<ExpenseResponse> {
+    const result = await this.repo.findByIdOrThrow(id);
+
+    for (let i = 0; i < result.expenseFiles.length; i++) {
+      const tempUrl = await this.minioClientService.getFileUrl(
+        result.expenseFiles[i].link,
+      );
+      result.expenseFiles[i].link = tempUrl;
+    }
+
+    return result;
+  }
+
+  async update(id: string, dto: ExpenseDto, files: Express.Multer.File[]) {
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'xlsx'];
+
+    let uploadedFilesData: {
+      link: string;
+      originalName: string;
+      type: string;
+    }[] = [];
+
+    // 1️⃣ Upload dos novos arquivos
+    if (files && files.length > 0) {
+      uploadedFilesData = await Promise.all(
+        files.map(async (file) => {
+          const timestamp = Date.now();
+          const lastDotIndex = file.originalname.lastIndexOf('.');
+
+          const namePart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(0, lastDotIndex)
+              : file.originalname;
+
+          const extPart =
+            lastDotIndex !== -1
+              ? file.originalname.substring(lastDotIndex)
+              : '';
+
+          const newFileName = `${namePart}_${timestamp}${extPart}`;
+
+          const uploadResponse = await this.minioClientService.uploadFile(
+            file,
+            allowedExtensions,
+            newFileName,
+          );
+
+          return {
+            link: uploadResponse.fileName,
+            originalName: uploadResponse.fileName,
+            type: '',
+          };
+        }),
+      );
+    }
+
+    // 2️⃣ Chama repository passando estrutura pronta
+    const updatedExpense = await this.repo.update(
+      id,
+      {
+        ...dto,
+        expenseDate: new Date(dto.expenseDate),
+        filesToKeep: dto.filesToKeep || [],
+      } as any,
+      uploadedFilesData,
+    );
+
+    // 3️⃣ Converter links para URL temporária
+    for (let i = 0; i < updatedExpense.expenseFiles.length; i++) {
+      const tempUrl = await this.minioClientService.getFileUrl(
+        updatedExpense.expenseFiles[i].link,
+      );
+      updatedExpense.expenseFiles[i].link = tempUrl;
+    }
+
+    return updatedExpense;
   }
 
   remove(id: string) {

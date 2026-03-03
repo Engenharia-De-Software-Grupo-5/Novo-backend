@@ -16,9 +16,9 @@ export class GenerateContractService {
         private readonly minioService: MinioClientService,
     ) { }
 
-    async execute(contractId: string, manualContent?: string): Promise<{ url: string }> {
+    async execute(condominiumId: string, contractId: string, manualContent?: string): Promise<{ url: string }> {
 
-        const contract = await this.contractsRepository.getById(contractId);
+        const contract = await this.contractsRepository.getById(condominiumId, contractId);
         if (!contract) {
             throw new NotFoundException('Contrato não encontrado');
         }
@@ -45,7 +45,7 @@ export class GenerateContractService {
 
         const templateData = {
             imovel: {
-                endereco: `${property.address}, ${address.street}, ${address.number} - ${address.city}/${address.uf}`,
+                endereco: `${property.propertyAddress.street}, ${property.propertyAddress.number} - ${address.city}/${address.uf}`,
             },
 
             condominio: {
@@ -57,9 +57,9 @@ export class GenerateContractService {
             propriedade: {
                 numero: property.unityNumber,
                 tipo: property.unityType,
-                bloco: property.block,
-                andar: property.floor,
-                area_total: property.totalArea,
+                bloco: property.propertyAddress.block,
+                andar: property.propertyAddress.floor,
+                area_total: property.propertyAddress.totalArea,
                 situacao: property.propertySituation,
                 observacoes: property.observations,
             },
@@ -108,5 +108,40 @@ export class GenerateContractService {
         );
 
         return { url: url.fileName };
+    }
+
+    private async generatePdfFromData(
+        content: string,
+        templateData: any,
+        fileName: string,
+    ): Promise<{ url: string }> {
+
+        const processedMarkdown = this.templateEngine.parse(
+            content,
+            templateData,
+        );
+
+        const pdfBuffer = await this.pdfGenerator.generate(processedMarkdown);
+
+        const objectPath = `contracts/${fileName}`;
+
+        const upload = await this.minioService.uploadFileBuffer(
+            pdfBuffer,
+            objectPath,
+            'application/pdf'
+        );
+
+        return { url: upload.fileName };
+    }
+
+    async executePreview(
+        content: string,
+        templateData: any,
+        condominiumId: string,
+    ): Promise<{ url: string }> {
+
+        const fileName = `preview_${condominiumId}_${Date.now()}.pdf`;
+
+        return this.generatePdfFromData(content, templateData, fileName);
     }
 }

@@ -3,17 +3,24 @@ import { PrismaClient } from '@prisma/client';
 export async function seedPermissions(prisma: PrismaClient) {
   const permissionAdmin = await prisma.permissions.create({
     data: {
-      name: 'admin',
+      name: 'Admin',
       functionalities: ['ALL'],
     },
   });
 
-  const permissionContractManager = await prisma.permissions.create({
+  const permissionFinanceiro = await prisma.permissions.create({
     data: {
-      name: 'contractManager',
+      name: 'Financeiro',
       functionalities: ['contractsGET', 'contractsPOST'],
     },
   });
 
-  return { permissionAdmin, permissionContractManager };
+  const permissionRH = await prisma.permissions.create({
+    data: {
+      name: 'RH',
+      functionalities: ['employeesGET', 'employeesPOST'],
+    },
+  });
+
+  return { permissionAdmin, permissionFinanceiro, permissionRH };
 }

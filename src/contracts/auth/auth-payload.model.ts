@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsNumber,
   IsOptional,
   IsString,
@@ -31,18 +32,17 @@ export class AuthPayload {
   @IsString()
   @SkipUppercase()
   @ApiProperty({
-    description: 'User cpf',
-    example: '11111111111',
-  })
-  cpf: string;
-
-  @IsString()
-  @SkipUppercase()
-  @ApiProperty({
     description: 'User name',
     example: 'john123',
   })
   name: string;
+
+  @IsBoolean()
+  @ApiProperty({
+    description: 'Define se o usuário é um administrador master',
+    example: false,
+  })
+  isAdminMaster: boolean;
 
   @IsString()
   @SkipUppercase()

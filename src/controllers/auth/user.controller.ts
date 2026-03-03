@@ -14,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -24,6 +25,7 @@ import { UserService } from 'src/services/auth/user.service';
 import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { UserPatchDto } from 'src/contracts/auth/user.patch.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -102,7 +104,7 @@ export class UserController {
     return this.userService.create(dto, condominiumId);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update an existing user',
@@ -110,7 +112,7 @@ export class UserController {
   })
   @ApiBody({
     description: 'Updated user data',
-    type: UserDto,
+    type: UserPatchDto,
   })
   @ApiOkResponse({
     description: 'User successfully updated',
@@ -118,7 +120,7 @@ export class UserController {
   })
   update(
     @Param('id') id: string,
-    @Body() dto: UserDto,
+    @Body() dto: UserPatchDto,
     @Param('condominiumId') condominiumId: string,
   ): Promise<UserResponse> {
     return this.userService.update(id, dto, condominiumId);

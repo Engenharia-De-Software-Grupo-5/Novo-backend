@@ -6,8 +6,9 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
-  Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,18 +18,22 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { TenantDto } from 'src/contracts/tenants/tenant.dto';
 import { TenantResponse } from 'src/contracts/tenants/tenant.response';
+import { TenantPatchDto } from 'src/contracts/tenants/tenantPatch.dto';
 import { TenantService } from 'src/services/tenants/tenant.service';
 
 
-@ApiTags('Tenants')
+@ApiTags('Condominos')
 @ApiBearerAuth('access-token')
-@Controller('tenants')
+@Controller('condominios/:condId/condominos')
 export class TenantController {
   constructor(private readonly tenantService: TenantService) {}
 
-  @Get()
+  @Get('sem-paginacao')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'List all tenants',
@@ -38,23 +43,25 @@ export class TenantController {
     description: 'Successfully retrieved all tenants',
     type: [TenantResponse],
   })
-  getAll(): Promise<TenantResponse[]> {
-    return this.tenantService.getAll();
+  getAll(@Param('condId') condId: string): Promise<TenantResponse[]> {
+    return this.tenantService.getAll(condId);
   }
 
-  @Get(':cpf')
+  @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get tenant by CPF',
-    description:
-      'Retrieve details of a specific tenant identified by its CPF.',
+    summary: 'Get contracts filtered and paginated',
+    description: 'Get contracts filtered and paginated',
   })
   @ApiOkResponse({
-    description: 'Successfully retrieved tenant details by CPF',
-    type: TenantResponse,
+    description: 'Success',
+    schema: PaginatedResponseSchema(TenantResponse),
   })
-  getByCpf(@Param('cpf') cpf: string): Promise<TenantResponse> {
-    return this.tenantService.getByCpf(cpf);
+  getPaginated(
+    @Param('condId') condId: string,
+    @Query() data: PaginationDto,
+  ): Promise<PaginatedResult<TenantResponse>> {
+    return this.tenantService.getPaginated(condId, data);
   }
 
   @Get(':id')
@@ -68,8 +75,8 @@ export class TenantController {
     description: 'Successfully retrieved tenant details',
     type: TenantResponse,
   })
-  getById(@Param('id') tenantId: string): Promise<TenantResponse> {
-    return this.tenantService.getById(tenantId);
+  getById(@Param('condId') condId: string, @Param('id') tenantId: string): Promise<TenantResponse> {
+    return this.tenantService.getById(condId, tenantId);
   }
 
   @Post()
@@ -86,11 +93,11 @@ export class TenantController {
     description: 'Tenant successfully created',
     type: TenantResponse,
   })
-  create(@Body() dto: TenantDto): Promise<TenantResponse> {
-    return this.tenantService.create(dto);
+  create(@Param('condId') condId: string, @Body() dto: TenantDto): Promise<TenantResponse> {
+    return this.tenantService.create(condId, dto);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update an existing tenant',
@@ -99,32 +106,18 @@ export class TenantController {
   })
   @ApiBody({
     description: 'Updated tenant data',
-    type: TenantDto,
+    type: TenantPatchDto,
   })
   @ApiOkResponse({
     description: 'Tenant successfully updated',
     type: TenantResponse,
   })
   update(
+    @Param('condId') condId: string,
     @Param('id') id: string,
-    @Body() dto: TenantDto,
+    @Body() dto: TenantPatchDto,
   ): Promise<TenantResponse> {
-    return this.tenantService.update(id, dto);
-  }
-
-  @Delete(':cpf')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Delete tenant by CPF',
-    description:
-      'Soft delete a specific tenant identified by its CPF.',
-  })
-  @ApiOkResponse({
-    description: 'Successfully deleted tenant by CPF',
-    type: TenantResponse,
-  })
-  deleteByCpf(@Param('cpf') cpf: string): Promise<TenantResponse> {
-    return this.tenantService.deleteByCpf(cpf);
+    return this.tenantService.update(condId, id, dto);
   }
 
   @Delete(':id')
@@ -137,7 +130,7 @@ export class TenantController {
     description: 'Tenant successfully deleted',
     type: TenantResponse,
   })
-  delete(@Param('id') tenantId: string): Promise<TenantResponse> {
-    return this.tenantService.deleteById(tenantId);
+  delete(@Param('condId') condId: string, @Param('id') tenantId: string): Promise<TenantResponse> {
+    return this.tenantService.deleteById(condId, tenantId);
   }
 }

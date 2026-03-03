@@ -42,9 +42,26 @@ export class ContractDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    description: '', // Falta preencher
-    example: '',  // Falta preencher
+    description: 'Content of the contract',
+    example: 'Contrato completo',
   })
   content?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Start date of the contract',
+    example: 'XX/XX/XXXX'
+  })
+  startDate?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Due date of the contract',
+    example: 'XX/XX/XXXX',
+  })
+  dueDate?: string;
+
 
 }

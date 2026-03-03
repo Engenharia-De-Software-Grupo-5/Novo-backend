@@ -1,24 +1,41 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EmployeeDto } from 'src/contracts/employees/employee.dto';
-import { EmployeeResponse } from 'src/contracts/employees/employee.response';
+import { EmployeeContractDto } from 'src/contracts/employees/employeeContract.dto';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { EmployeeRepository } from 'src/repositories/employees/employee.repository';
+import { EmployeeContractsService } from './employee-contracts.service';
+import { EmployeeResponse } from 'src/contracts/employees/employee.response';
 
 @Injectable()
 export class EmployeeService {
-  constructor(private readonly employeeRepository: EmployeeRepository) {}
-  getAll(): Promise<EmployeeResponse[]> {
-    return this.employeeRepository.getAll();
+  constructor(private readonly employeeRepository: EmployeeRepository, private readonly employeeContractsService: EmployeeContractsService) {}
+  
+
+  async getPaginated(condId: string, data: PaginationDto) {
+    const result = await this.employeeRepository.getPaginated(condId, data);
+
+    return {
+      data: EmployeeResponse,
+      meta: {
+        total: result.meta.totalItems,
+        page: result.meta.page,
+        limit: result.meta.limit,
+        totalPages: result.meta.totalPages,
+      },
+    };
   }
-  getById(employeeId: string): Promise<EmployeeResponse> {
-    return this.employeeRepository.getById(employeeId);
+    
+  async getById(condId: string, employeeId: string): Promise<EmployeeResponse> {
+    const employee = await this.employeeRepository.getById(condId, employeeId);
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
+    }
+    return employee;
   }
 
-  getByCpf(cpf: string): Promise<EmployeeResponse> {
-    return this.employeeRepository.getByCpf(cpf);
-  }
-
-  async create(dto: EmployeeDto): Promise<EmployeeResponse> {
+  async create(condId: string, dto: EmployeeDto): Promise<EmployeeResponse> {
     const employeeExistente = await this.employeeRepository.getByCpf(
+      condId,
       dto.cpf,
     );
 
@@ -26,22 +43,38 @@ export class EmployeeService {
       throw new BadRequestException('This CPF already exists in the database.');
     }
 
-    return this.employeeRepository.create(dto);
+    const employee = await this.employeeRepository.create(condId, dto);
+    return employee;
   }
   
-  update(id: string, dto: EmployeeDto): Promise<EmployeeResponse> {
-    return this.employeeRepository.update(id, dto);
+  async update(condId: string, employeeId: string, dto: EmployeeDto, files?: Express.Multer.File[], existingFileIds?: string[]): Promise<EmployeeResponse> {
+    const employee = await this.employeeRepository.update(condId, employeeId, dto);
+
+    const finalContracts = await this.employeeContractsService.updateEmployeeContracts(
+      condId,
+      employeeId,
+      files,
+      existingFileIds,
+    );
+
+    const finalContractsMapped: EmployeeContractDto[] = finalContracts.map(c => ({
+      id: c.id,
+      name: c.originalName,
+      type: c.mimeType,
+      size: c.size,
+      url: `/condominios/contracts/${c.id}`,
+    }));
+
+
+    return {
+      ...employee,
+      contracts: finalContractsMapped,
+      lastContract: finalContractsMapped.at(-1),
+    };
   }
 
-  updateByCpf(cpf: string, dto: EmployeeDto): Promise<EmployeeResponse> {
-    return this.employeeRepository.updateByCpf(cpf, dto);
-  }
-
-  delete(employeeId: string): Promise<EmployeeResponse> {
-    return this.employeeRepository.delete(employeeId);
-  }
-
-  deleteByCpf(cpf: string): Promise<EmployeeResponse> {
-    return this.employeeRepository.deleteByCpf(cpf);
+  async delete(condId: string, employeeId: string): Promise<EmployeeResponse> {
+    const employee = await this.employeeRepository.delete(condId, employeeId);
+    return employee;
   }
 }

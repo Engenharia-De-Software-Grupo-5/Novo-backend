@@ -8,24 +8,35 @@ import {
   Param,
   Post,
   Put,
+  Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
+import { UserResponse } from 'src/contracts/auth/user.response';
 import { PropertyDto } from 'src/contracts/condominiums/property.dto';
 import { PropertyResponse } from 'src/contracts/condominiums/property.response';
+import { PropertyUpdateDto } from 'src/contracts/condominiums/property.update.dto';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
+import { PaginatedResponseSchema } from 'src/contracts/pagination/swagger.paginated.schema';
 import { PropertyService } from 'src/services/condominiums/property.service';
 
 @ApiTags('properties')
 @ApiBearerAuth('access-token')
-@Controller('condominiums/:condominiumId/properties')
+@Controller('condominios/:condId/imoveis')
 export class PropertyController {
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(private readonly propertyService: PropertyService) { }
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -36,9 +47,27 @@ export class PropertyController {
     description: 'Successfully retrieved all properties',
     type: [PropertyResponse],
   })
-  getAll(@Param('condominiumId') condominiumId: string) {
+  getAll(@Param('condId') condominiumId: string) {
     return this.propertyService.getAll(condominiumId);
   }
+
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get properties filtered and paginated',
+    description: 'Get properties filtered and paginated',
+  })
+  @ApiOkResponse({
+    description: 'Success',
+    schema: PaginatedResponseSchema(PropertyResponse),
+  })
+  getPaginated(
+    @Query() data: PaginationDto,
+    @Param('condominiumId') condominiumId: string,
+  ): Promise<PaginatedResult<PropertyResponse>> {
+    return this.propertyService.getPaginated(condominiumId, data);
+  }
+
 
   @Get(':propertyId')
   @HttpCode(HttpStatus.OK)
@@ -50,26 +79,47 @@ export class PropertyController {
     description: 'Successfully retrieved the property',
     type: PropertyResponse,
   })
-  getById(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
+  getById(@Param('condId') condominiumId: string, @Param('id') propertyId: string) {
     return this.propertyService.getById(condominiumId, propertyId);
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create a new property',
-    description: 'Create a new property in the system.',
-  })
-  @ApiBody({ type: PropertyDto })
-  @ApiCreatedResponse({
-    description: 'Successfully created the property',
-    type: PropertyResponse,
-  })
-  create(@Param('condominiumId') condominiumId: string, @Body() dto: PropertyDto) {
-    return this.propertyService.create(condominiumId, dto);
+ @Post()
+   @HttpCode(HttpStatus.OK)
+   @ApiOperation({ summary: 'Create expense' })
+   @ApiConsumes('multipart/form-data')
+   @UseInterceptors(FilesInterceptor('files'))
+   @ApiBody({
+     description: 'Expense data and files',
+     schema: {
+       type: 'object',
+       allOf: [
+         { $ref: getSchemaPath(PropertyDto) },
+         {
+           type: 'object',
+           properties: {
+             files: {
+               type: 'array',
+               items: {
+                 type: 'string',
+                 format: 'binary',
+               },
+             },
+           },
+         },
+       ],
+     },
+   })
+  create(
+    @Param('condId') condominiumId: string,
+    @Body() dto: PropertyDto,
+    @UploadedFile() inspections: Express.Multer.File[],
+    @UploadedFile() documents: Express.Multer.File[]
+  ) {
+
+    return this.propertyService.create(condominiumId, dto, inspections, documents);
   }
 
-  @Put(':propertyId')
+  @Put(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update a property',
@@ -77,14 +127,19 @@ export class PropertyController {
   })
   @ApiBody({ type: PropertyDto })
   @ApiOkResponse({
-    description: 'Successfully updated the property', 
+    description: 'Successfully updated the property',
     type: PropertyResponse,
   })
-  update(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string, @Body() dto: PropertyDto) {
-    return this.propertyService.update(condominiumId, propertyId, dto);
+  update(
+    @Param('condId') condominiumId: string,
+    @Param('id') propertyId: string,
+    @UploadedFile() inspections: Express.Multer.File[],
+    @UploadedFile() documents: Express.Multer.File[],
+    @Body() dto: PropertyUpdateDto) {
+    return this.propertyService.update(condominiumId, propertyId, dto, inspections, documents);
   }
 
-  @Delete(':propertyId')
+  @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a property',
@@ -92,9 +147,9 @@ export class PropertyController {
   })
   @ApiOkResponse({
     description: 'Successfully deleted the property',
-    type: PropertyResponse, 
+    type: PropertyResponse,
   })
-  delete(@Param('condominiumId') condominiumId: string, @Param('propertyId') propertyId: string) {
+  delete(@Param('condId') condominiumId: string, @Param('id') propertyId: string) {
     return this.propertyService.delete(condominiumId, propertyId);
   }
 }

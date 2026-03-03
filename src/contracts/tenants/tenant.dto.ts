@@ -39,13 +39,27 @@ export class TenantDto {
   })
   name: string;
 
-  @Type(() => Date)
-  @IsDate()
+  @IsEmail()
   @ApiProperty({
-    description: 'Tenant birth date',
-    example: '1995-03-15T00:00:00.000Z',
+    description: 'Tenant rg (numbers only)',
+    example: '123456789',
   })
-  birthDate: Date;
+  rg: string;
+
+  @IsEmail()
+  @ApiProperty({
+    description: 'Tenant issuing authority for RG',
+    example: 'SSP/PE',
+  })
+  issuingAuthority: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Tenant birth date in string format',
+    example: '1995-03-15',
+  })
+  birthDate: string;
 
   @IsString()
   @IsNotEmpty()
@@ -85,19 +99,13 @@ export class TenantDto {
   })
   secondaryPhone?: string;
 
-  @IsUUID()
-  @ApiProperty({
-    description: 'UUID reference of the Address entity',
-    example: '6fe3e12a-8fb2-454e-9166-b12396cde907',
-  })
-  addressId: string;
-
   @IsString()
+  @IsNotEmpty()
   @ApiProperty({
-    description: 'UUID reference of the condominium',
-    example: 'cond-uuid-example',
+    description: 'Tenant address',
+    example: '123 Main St, Apt 4B, Cityville',
   })
-  condominiumId: string;
+  address: string;
 
   @IsEnum(TenantStatus)
   @ApiProperty({

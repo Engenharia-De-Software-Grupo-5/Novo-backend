@@ -1,19 +1,31 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CondominiumDto } from 'src/contracts/condominiums/condominium.dto';
 import { CondominiumResponse } from 'src/contracts/condominiums/condominium.response';
+import { PaginatedResult } from 'src/contracts/pagination/paginated.result';
+import { PaginationDto } from 'src/contracts/pagination/pagination.dto';
 import { CondominiumRepository } from 'src/repositories/condominiums/condominium.repository';
+import { UserService } from '../auth/user.service';
+import { AuthPayload, UserDto } from 'src/contracts/auth';
 
 @Injectable()
 export class CondominiumService {
-  constructor(private readonly condominiumRepository: CondominiumRepository) {}
+  constructor(private readonly condominiumRepository: CondominiumRepository,
+              private readonly userService: UserService) {}
   getAll(): Promise<CondominiumResponse[]> {
     return this.condominiumRepository.getAll();
   }
+
+  getPaginated(
+    data: PaginationDto,
+  ): Promise<PaginatedResult<CondominiumResponse>> {
+    return this.condominiumRepository.getPaginated(data);
+  }
+  
   getById(condominiumId: string): Promise<CondominiumResponse> {
     return this.condominiumRepository.getById(condominiumId);
   }
 
-  async create(dto: CondominiumDto): Promise<CondominiumResponse> {
+  async create(dto: CondominiumDto, user: AuthPayload): Promise<CondominiumResponse> {
     const condominioExistente = await this.condominiumRepository.getByName(
       dto.name,
     );
@@ -21,8 +33,17 @@ export class CondominiumService {
     if (condominioExistente) {
       throw new BadRequestException('This condominium name already exists in the database.');
     }
+    
+    const condominio = await this.condominiumRepository.create(dto);
+    const userDto: UserDto = {
+      email: user.email,
+      name: user.name,
+      role: 'Admin',
+    };
 
-    return this.condominiumRepository.create(dto);
+    await this.userService.create(userDto, condominio.id)
+    
+    return condominio
   }
   update(id: string, dto: CondominiumDto): Promise<CondominiumResponse> {
     return this.condominiumRepository.update(id, dto);
